@@ -4,12 +4,10 @@ import os
 from datetime import datetime
 
 # 1. إعدادات الصفحة والجماليات (CSS الاحترافي)
-st.set_page_config(page_title="نظام مسح الأضرار | الاحترافي", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="KhatibAlami Company | System", layout="wide", initial_sidebar_state="collapsed")
 
-# حقن CSS مخصص لتحسين الواجهة بشكل جذري
 st.markdown("""
     <style>
-    /* استيراد خطوط عربية جميلة */
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;500;700&display=swap');
     
     html, body, [class*="css"] {
@@ -18,12 +16,10 @@ st.markdown("""
         text-align: right;
     }
 
-    /* خلفية الصفحة */
     .stApp {
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     }
 
-    /* تصميم البطاقة الرئيسية للمدخلات */
     .main-card {
         background-color: white;
         padding: 40px;
@@ -32,11 +28,20 @@ st.markdown("""
         margin-bottom: 30px;
     }
 
-    /* تحسين العناوين */
-    h1 { color: #1E3A8A; font-weight: 700; font-size: 32px; border-bottom: 2px solid #1E3A8A; padding-bottom: 10px; }
+    /* تنسيق اسم الشركة في الأعلى */
+    .company-header {
+        text-align: center;
+        color: #1E3A8A;
+        font-family: 'Arial', sans-serif;
+        font-size: 36px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
     h3 { color: #334155; font-size: 20px; margin-top: 20px; }
 
-    /* تحسين الأزرار */
     div.stButton > button:first-child {
         background: linear-gradient(90deg, #1E3A8A 0%, #3B82F6 100%);
         color: white;
@@ -52,7 +57,6 @@ st.markdown("""
         box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
     }
 
-    /* تحسين جداول البيانات */
     .stDataFrame {
         border-radius: 15px;
         overflow: hidden;
@@ -74,15 +78,10 @@ if os.path.exists(DATA_FILE):
 else:
     df = pd.DataFrame(columns=["تاريخ الإدخال", "اسم الشركة", "اسم المشروع", "المنطقة", "رقم العقار"])
 
-# 3. محتوى الصفحة
-st.markdown("""
-    <div style='text-align: center; padding: 20px;'>
-        <h1 style='border:none;'>🏢 نظام مسح الأضرار والمتابعة الميدانية</h1>
-        <p style='color: #64748b; font-size: 18px;'>أداة مهنية متطورة لإدارة البيانات بدقة وسرعة</p>
-    </div>
-""", unsafe_allow_html=True)
+# 3. اسم الشركة الجديد في أعلى الواجهة
+st.markdown("<div class='company-header'>KhatibAlami Company</div>", unsafe_allow_html=True)
 
-# استخدام الأعمدة لتنظيم المساحة
+# تنظيم المساحة
 col1, col2, col3 = st.columns([1, 6, 1])
 
 with col2:
@@ -90,7 +89,6 @@ with col2:
     
     st.markdown("### 📋 إدخال بيانات عقار جديد")
     
-    # توزيع المدخلات في أعمدة داخل البطاقة
     c1, c2 = st.columns(2)
     with c1:
         company_name = st.text_input("🏢 اسم الشركة", value="Khatib & Alami")
@@ -114,7 +112,6 @@ with col2:
     # زر الحفظ
     if st.button("🚀 حفظ العقار في قاعدة البيانات"):
         if company_name and project_name and region_input and property_number:
-            # التحقق من التكرار
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
                               (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
             
@@ -143,10 +140,8 @@ st.markdown("---")
 st.markdown("### 📊 قاعدة البيانات المسجلة")
 
 if not df.empty:
-    # عرض الجدول بتنسيق أنيق
     st.dataframe(df, use_container_width=True)
     
-    # لوحة إدارة متطورة في الأسفل
     m1, m2 = st.columns([2, 1])
     
     with m1:
@@ -174,6 +169,6 @@ else:
 
 st.markdown("""
     <div style='text-align: center; margin-top: 50px; padding: 20px; color: #94a3b8; font-size: 14px;'>
-        نظام مسح الأضرار الذكي v2.0 | تم التصميم لأجل التميز والراحة
+        KhatibAlami Company System v2.2 | تم التصميم لأجل التميز والراحة
     </div>
 """, unsafe_allow_html=True)
