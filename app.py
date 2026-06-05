@@ -29,26 +29,15 @@ st.markdown("""
         margin-bottom: 30px;
     }
 
-    /* تنسيق العنوان الرئيسي داخل الخانة البيضاء */
-    .company-header {
+    /* تنسيق العنوان المدمج في سطر واحد داخل الخانة البيضاء */
+    .company-header-combined {
         text-align: center;
         color: #1E3A8A;
         font-family: 'Arial', sans-serif;
-        font-size: 36px;
+        font-size: 28px;
         font-weight: bold;
         letter-spacing: 0.5px;
         margin-top: 10px;
-        margin-bottom: 5px;
-    }
-
-    /* تنسيق العنوان الفرعي داخل الخانة البيضاء */
-    .company-subtitle {
-        text-align: center;
-        color: #475569;
-        font-family: 'Arial', sans-serif;
-        font-size: 20px;
-        font-weight: 500;
-        letter-spacing: 0.5px;
         margin-bottom: 35px;
         border-bottom: 2px solid #e2e8f0;
         padding-bottom: 20px;
@@ -113,9 +102,8 @@ with col2:
     # فتح الخانة (البطاقة) البيضاء
     st.markdown("<div class='main-card'>", unsafe_allow_html=True)
     
-    # وضع العنوان والعنوان الفرعي في المقدمة داخلياً
-    st.markdown("<div class='company-header'>KhatibAlami Company</div>", unsafe_allow_html=True)
-    st.markdown("<div class='company-subtitle'>War Damage Assessment 2006</div>", unsafe_allow_html=True)
+    # وضع العنوانين معاً مدمجين بداخل سطر واحد رسمي وأنيق
+    st.markdown("<div class='company-header-combined'>KhatibAlami Company - War Damage Assessment 2006</div>", unsafe_allow_html=True)
     
     st.markdown("### 📋 إدخال بيانات عقار جديد")
     
@@ -158,7 +146,7 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى إدخال المنطقة ورقم العقار أولاً.")
     
-    # إغلاق الخانة البيضاء
+    # edge الخانة البيضاء
     st.markdown("</div>", unsafe_allow_html=True)
 
 # 4. عرض قاعدة البيانات المرتبة وإدارة السجلات
