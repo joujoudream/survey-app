@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 # 1. إعدادات الصفحة والجماليات العصرية (CSS الاحترافي)
-st.set_page_config(page_title="KhatibAlami Company", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="KhatibAlami Copany", layout="wide", initial_sidebar_state="collapsed")
 
 st.markdown("""
     <style>
@@ -19,7 +19,7 @@ st.markdown("""
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     }
 
-    /* الخانة البيضاء الرئيسية التي تضم كل شيء بداخلها */
+    /* الخانة البيضاء الرئيسية في أول الواجهة */
     .main-card {
         background-color: white;
         padding: 40px;
@@ -41,7 +41,7 @@ st.markdown("""
         margin-bottom: 5px;
     }
 
-    /* تنسيق العنوان الثاني تحت الأول مباشرة وداخل الخانة البيضاء */
+    /* تنسيق العنوان الثاني داخل الخانة البيضاء */
     .company-subtitle {
         text-align: center;
         color: #475569;
@@ -110,32 +110,56 @@ if not df.empty:
 col1, col2, col3 = st.columns([1, 6, 1])
 
 with col2:
-    # فتح الخانة (البطاقة) البيضاء لتشمل العناوين وحقول الإدخال معاً
+    # فتح الخانة البيضاء الرئيسية لتشمل العناوين وحقول الإدخال معاً
     st.markdown("<div class='main-card'>", unsafe_allow_html=True)
     
-    # العنوان الأول داخل الخانة البيضاء
-    st.markdown("<div class='company-header'>KhatibAlami Company</div>", unsafe_allow_html=True)
-    
-    # العنوان الثاني داخل الخانة البيضاء وتحت الأول مباشرة
+    # كتابة العنوان المحدث داخل الخانة البيضاء بالتهجئة المطلوبة
+    st.markdown("<div class='company-header'>KhatibAlami Copany</div>", unsafe_allow_html=True)
     st.markdown("<div class='company-subtitle'>War Damage Assessment 2006</div>", unsafe_allow_html=True)
     
     st.markdown("### 📋 إدخال بيانات عقار جديد")
     
+    # فحص أولي إذا كانت المنطقة موجودة مسبقاً لتفعيل الانتقال التلقائي لرقم العقار
+    if "region_val" not in st.session_state:
+        st.session_state.region_val = ""
+
     c1, c2 = st.columns(2)
     with c1:
-        region_input = st.text_input("📍 اسم المنطقة").strip()
-    with c2:
-        property_number = st.text_input("🔢 رقم العقار").strip()
-
-    # فحص المنطقة فوراً أثناء الكتابة لمنع التكرار
+        region_input = st.text_input("📍 اسم المنطقة", value=st.session_state.region_val, key="region_field").strip()
+    
+    # ميزة الفحص الذكي لمعرفة إن كانت المنطقة موجودة مسبقاً والاحتفاظ بها
+    is_existing_region = False
     if region_input:
         filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
         if not filtered_df.empty:
+            is_existing_region = True
             st.info(f"💡 المنطقة مسجلة مسبقاً وتحتوي على **{len(filtered_df)}** عقارات مسجلة.")
             with st.expander("👁️ مراجعة أرقام العقارات السابقة في هذه المنطقة"):
                 st.write(", ".join(filtered_df["رقم العقار"].unique()))
         else:
             st.success("✨ هذه المنطقة جديدة تماماً ولم تُمسح من قبل.")
+
+    with c2:
+        # إذا كانت المنطقة موجودة مسبقاً، يتم تفعيل خاصية التركيز التلقائي (autofocus) على رقم العقار فوراً
+        if is_existing_region:
+            property_number = st.text_input("🔢 رقم العقار", key="prop_field", autocomplete="on").strip()
+            # كود جافاسكريبت صغير ومخفي لضمان قفز المؤشر فوراً لخانة رقم العقار دون تدخل منك
+            st.components.v1.html(
+                """
+                <script>
+                    var inputs = window.parent.document.getElementsByTagName('input');
+                    for (var i = 0; i < inputs.length; i++) {
+                        if (inputs[i].getAttribute('aria-label') == '🔢 رقم العقار') {
+                            inputs[i].focus();
+                            break;
+                        }
+                    }
+                </script>
+                """,
+                height=0,
+            )
+        else:
+            property_number = st.text_input("🔢 رقم العقار", key="prop_field").strip()
 
     st.markdown("<br>", unsafe_allow_html=True)
     
@@ -156,6 +180,8 @@ with col2:
                 df = df.sort_values(by="المنطقة").reset_index(drop=True)
                 df.to_csv(DATA_FILE, index=False)
                 st.success("✅ تم حفظ البيانات بنجاح وتحديث السحابة!")
+                # تفريغ رقم العقار والاحتفاظ باسم المنطقة لإدخال عقار جديد في نفس المنطقة بسلاسة
+                st.session_state.region_val = region_input
                 st.rerun()
         else:
             st.warning("⚠️ فضلاً، يرجى إدخال المنطقة ورقم العقار أولاً.")
