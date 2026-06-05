@@ -19,14 +19,17 @@ st.markdown("""
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     }
 
+    /* البطاقة البيضاء الرئيسية */
     .main-card {
         background-color: white;
         padding: 40px;
         border-radius: 20px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        margin-top: 30px;
         margin-bottom: 30px;
     }
 
+    /* تنسيق العنوان الرئيسي داخل الخانة البيضاء */
     .company-header {
         text-align: center;
         color: #1E3A8A;
@@ -34,10 +37,11 @@ st.markdown("""
         font-size: 36px;
         font-weight: bold;
         letter-spacing: 0.5px;
-        margin-top: 25px;
+        margin-top: 10px;
         margin-bottom: 5px;
     }
 
+    /* تنسيق العنوان الفرعي داخل الخانة البيضاء */
     .company-subtitle {
         text-align: center;
         color: #475569;
@@ -45,7 +49,9 @@ st.markdown("""
         font-size: 20px;
         font-weight: 500;
         letter-spacing: 0.5px;
-        margin-bottom: 30px;
+        margin-bottom: 35px;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 20px;
     }
 
     h3 { color: #334155; font-size: 20px; margin-top: 20px; }
@@ -86,7 +92,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 2. إدارة البيانات (تم حذف عمود التاريخ والوقت تماماً)
+# 2. إدارة البيانات والتأكد من الترتيب التلقائي
 DATA_FILE = "survey_data.csv"
 
 if os.path.exists(DATA_FILE):
@@ -97,19 +103,19 @@ if os.path.exists(DATA_FILE):
 else:
     df = pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# ترتيب الجدول تلقائياً بحسب اسم المنطقة (أبجدياً) إذا لم يكن فارغاً
 if not df.empty:
     df = df.sort_values(by="المنطقة").reset_index(drop=True)
 
-# 3. الهوية الرسمية في أعلى الواجهة
-st.markdown("<div class='company-header'>KhatibAlami Company</div>", unsafe_allow_html=True)
-st.markdown("<div class='company-subtitle'>War Damage Assessment 2006</div>", unsafe_allow_html=True)
-
-# تنظيم مساحة العمل
+# 3. تنظيم مساحة العمل وسط الصفحة
 col1, col2, col3 = st.columns([1, 6, 1])
 
 with col2:
+    # فتح الخانة (البطاقة) البيضاء
     st.markdown("<div class='main-card'>", unsafe_allow_html=True)
+    
+    # وضع العنوان والعنوان الفرعي في المقدمة داخلياً
+    st.markdown("<div class='company-header'>KhatibAlami Company</div>", unsafe_allow_html=True)
+    st.markdown("<div class='company-subtitle'>War Damage Assessment 2006</div>", unsafe_allow_html=True)
     
     st.markdown("### 📋 إدخال بيانات عقار جديد")
     
@@ -134,7 +140,6 @@ with col2:
     # زر الحفظ والتحقق الذكي
     if st.button("🚀 حفظ العقار في قاعدة البيانات السحابية"):
         if region_input and property_number:
-            # التحقق التام من التكرار
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
                               (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
             
@@ -146,7 +151,6 @@ with col2:
                     "رقم العقار": property_number
                 }
                 df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-                # إعادة الترتيب الأبجدي قبل الحفظ النهائي في الملف
                 df = df.sort_values(by="المنطقة").reset_index(drop=True)
                 df.to_csv(DATA_FILE, index=False)
                 st.success("✅ تم حفظ البيانات بنجاح وتحديث السحابة!")
@@ -154,6 +158,7 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى إدخال المنطقة ورقم العقار أولاً.")
     
+    # إغلاق الخانة البيضاء
     st.markdown("</div>", unsafe_allow_html=True)
 
 # 4. عرض قاعدة البيانات المرتبة وإدارة السجلات
@@ -167,7 +172,7 @@ if not df.empty:
     
     with m1:
         st.markdown("#### 🗑️ لوحة حذف وإدارة البيانات")
-        delete_options = [f"{i} | {row['المنطقة']} - عقار رقم Packs ({row['رقم العقار']})" for i, row in df.iterrows()]
+        delete_options = [f"{i} | {row['المنطقة']} - عقار رقم ({row['رقم العقار']})" for i, row in df.iterrows()]
         to_delete = st.selectbox("اختر السجل الخاطئ لحذفه نهائياً:", options=delete_options)
         if st.button("🗑️ تأكيد الحذف النهائي للسجل المختار"):
             idx = int(to_delete.split(" | ")[0])
