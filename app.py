@@ -19,7 +19,7 @@ st.markdown("""
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     }
 
-    /* البطاقة البيضاء الرئيسية */
+    /* الخانة البيضاء الرئيسية التي تضم كل شيء بداخلها */
     .main-card {
         background-color: white;
         padding: 40px;
@@ -29,15 +29,26 @@ st.markdown("""
         margin-bottom: 30px;
     }
 
-    /* تنسيق العنوان المدمج في سطر واحد داخل الخانة البيضاء */
-    .company-header-combined {
+    /* تنسيق العنوان الأول داخل الخانة البيضاء */
+    .company-header {
         text-align: center;
         color: #1E3A8A;
         font-family: 'Arial', sans-serif;
-        font-size: 28px;
+        font-size: 36px;
         font-weight: bold;
         letter-spacing: 0.5px;
-        margin-top: 10px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+
+    /* تنسيق العنوان الثاني تحت الأول مباشرة وداخل الخانة البيضاء */
+    .company-subtitle {
+        text-align: center;
+        color: #475569;
+        font-family: 'Arial', sans-serif;
+        font-size: 20px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
         margin-bottom: 35px;
         border-bottom: 2px solid #e2e8f0;
         padding-bottom: 20px;
@@ -81,7 +92,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 2. إدارة البيانات والتأكد من الترتيب التلقائي
+# 2. إدارة البيانات والتأكد من الترتيب التلقائي للمناطق
 DATA_FILE = "survey_data.csv"
 
 if os.path.exists(DATA_FILE):
@@ -99,11 +110,14 @@ if not df.empty:
 col1, col2, col3 = st.columns([1, 6, 1])
 
 with col2:
-    # فتح الخانة (البطاقة) البيضاء
+    # فتح الخانة (البطاقة) البيضاء لتشمل العناوين وحقول الإدخال معاً
     st.markdown("<div class='main-card'>", unsafe_allow_html=True)
     
-    # وضع العنوانين معاً مدمجين بداخل سطر واحد رسمي وأنيق
-    st.markdown("<div class='company-header-combined'>KhatibAlami Company - War Damage Assessment 2006</div>", unsafe_allow_html=True)
+    # العنوان الأول داخل الخانة البيضاء
+    st.markdown("<div class='company-header'>KhatibAlami Company</div>", unsafe_allow_html=True)
+    
+    # العنوان الثاني داخل الخانة البيضاء وتحت الأول مباشرة
+    st.markdown("<div class='company-subtitle'>War Damage Assessment 2006</div>", unsafe_allow_html=True)
     
     st.markdown("### 📋 إدخال بيانات عقار جديد")
     
@@ -146,7 +160,7 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى إدخال المنطقة ورقم العقار أولاً.")
     
-    # edge الخانة البيضاء
+    # إغلاق الخانة البيضاء
     st.markdown("</div>", unsafe_allow_html=True)
 
 # 4. عرض قاعدة البيانات المرتبة وإدارة السجلات
