@@ -1,114 +1,179 @@
 import streamlit as st
 import pandas as pd
 import os
+from datetime import datetime
 
-# إعدادات الصفحة والخطوط لتناسب اللغة العربية
-st.set_page_config(page_title="برنامج مسح الأضرار الذكي", layout="centered")
+# 1. إعدادات الصفحة والجماليات (CSS الاحترافي)
+st.set_page_config(page_title="نظام مسح الأضرار | الاحترافي", layout="wide", initial_sidebar_state="collapsed")
+
+# حقن CSS مخصص لتحسين الواجهة بشكل جذري
 st.markdown("""
     <style>
-    body { background-color: #f8f9fa; }
-    h1, h2, h3, p, label, .stMarkdown { text-align: right; direction: rtl; font-family: 'Arial', sans-serif; }
-    .stTextInput input, .stSelectbox div { text-align: right; direction: rtl; }
-    div.stButton > button:first-child { background-color: #1E3A8A; color: white; width: 100%; font-size: 18px; }
-    .stAlert p { text-align: right; direction: rtl; }
+    /* استيراد خطوط عربية جميلة */
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;500;700&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Tajawal', sans-serif;
+        direction: rtl;
+        text-align: right;
+    }
+
+    /* خلفية الصفحة */
+    .stApp {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    /* تصميم البطاقة الرئيسية للمدخلات */
+    .main-card {
+        background-color: white;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+
+    /* تحسين العناوين */
+    h1 { color: #1E3A8A; font-weight: 700; font-size: 32px; border-bottom: 2px solid #1E3A8A; padding-bottom: 10px; }
+    h3 { color: #334155; font-size: 20px; margin-top: 20px; }
+
+    /* تحسين الأزرار */
+    div.stButton > button:first-child {
+        background: linear-gradient(90deg, #1E3A8A 0%, #3B82F6 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    div.stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+    }
+
+    /* تحسين جداول البيانات */
+    .stDataFrame {
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    
+    .stAlert { border-radius: 12px; }
     </style>
 """, unsafe_allow_html=True)
 
-# اسم ملف البيانات السحابي
+# 2. إدارة البيانات
 DATA_FILE = "survey_data.csv"
 
-# تحميل البيانات السابقة أو إنشاء جدول جديد
 if os.path.exists(DATA_FILE):
     try:
         df = pd.read_csv(DATA_FILE, dtype={"رقم العقار": str})
     except:
-        df = pd.DataFrame(columns=["اسم الشركة", "اسم المشروع", "المنطقة", "رقم العقار"])
+        df = pd.DataFrame(columns=["تاريخ الإدخال", "اسم الشركة", "اسم المشروع", "المنطقة", "رقم العقار"])
 else:
-    df = pd.DataFrame(columns=["اسم الشركة", "اسم المشروع", "المنطقة", "رقم العقار"])
+    df = pd.DataFrame(columns=["تاريخ الإدخال", "اسم الشركة", "اسم المشروع", "المنطقة", "رقم العقار"])
 
-# الواجهة الرئيسية
-st.markdown("<h1 style='text-align: center; color: #1E3A8A;'>🏗️ منظومة إدخال بيانات مسح الأضرار المحدثة</h1>", unsafe_allow_html=True)
-st.markdown("<hr>", unsafe_allow_html=True)
+# 3. محتوى الصفحة
+st.markdown("""
+    <div style='text-align: center; padding: 20px;'>
+        <h1 style='border:none;'>🏢 نظام مسح الأضرار والمتابعة الميدانية</h1>
+        <p style='color: #64748b; font-size: 18px;'>أداة مهنية متطورة لإدارة البيانات بدقة وسرعة</p>
+    </div>
+""", unsafe_allow_html=True)
 
-# القسم الأول: معلومات العمل
-st.markdown("### 🏢 معلومات العمل الأساسية")
-company_name = st.text_input("اسم الشركة", value="Khatib & Alami")
-project_name = st.text_input("اسم المشروع")
+# استخدام الأعمدة لتنظيم المساحة
+col1, col2, col3 = st.columns([1, 6, 1])
 
-# القسم الثاني: المنطقة والعقار والبحث الذكي
-st.markdown("### 📍 تفاصيل الموقع والتحقق من التكرار")
-region_input = st.text_input("أدخل اسم المنطقة:").strip()
-
-# منطق البحث التلقائي بمجرد الكتابة
-if region_input != "":
-    filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
-    total_properties = len(filtered_df)
+with col2:
+    st.markdown("<div class='main-card'>", unsafe_allow_html=True)
     
-    if total_properties > 0:
-        st.info(f"📊 **معلومات سابقة للمنطقة ({region_input}):**")
-        st.write(f"🔢 **عدد العقارات المسجلة سابقاً هنا:** {total_properties} عقار")
-        previous_numbers = filtered_df["رقم العقار"].unique()
-        st.write("📋 **أرقام العقارات المسجلة سابقاً في هذه المنطقة:**")
-        st.code(", ".join(map(str, previous_numbers)))
-    else:
-        st.success(f"✨ هذه المنطقة ({region_input}) جديدة تماماً، لا توجد عقارات مسجلة لها مسبقاً.")
+    st.markdown("### 📋 إدخال بيانات عقار جديد")
+    
+    # توزيع المدخلات في أعمدة داخل البطاقة
+    c1, c2 = st.columns(2)
+    with c1:
+        company_name = st.text_input("🏢 اسم الشركة", value="Khatib & Alami")
+        region_input = st.text_input("📍 اسم المنطقة").strip()
+    with c2:
+        project_name = st.text_input("🏗️ اسم المشروع")
+        property_number = st.text_input("🔢 رقم العقار").strip()
 
-property_number = st.text_input("أدخل رقم العقار الجديد المراد تسجيله:").strip()
-
-# زر الحفظ مع ميزة منع التكرار
-st.markdown("<br>", unsafe_allow_html=True)
-if st.button("💾 حفظ البيانات وإضافتها للجدول السحابي"):
-    if company_name and project_name and region_input and property_number:
-        # التحقق إذا كان رقم العقار موجوداً مسبقاً في نفس المنطقة
-        is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
-                          (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
-        
-        if is_duplicate:
-            st.error(f"⚠️ **تنبيه:** رقم العقار ({property_number}) موجود بالفعل في منطقة ({region_input})! تم إلغاء الزيادة لمنع التكرار.")
+    # فحص المنطقة فور الكتابة
+    if region_input:
+        filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
+        if not filtered_df.empty:
+            st.info(f"💡 المنطقة مسجلة مسبقاً وبها **{len(filtered_df)}** عقارات.")
+            with st.expander("👁️ عرض أرقام العقارات الحالية"):
+                st.write(", ".join(filtered_df["رقم العقار"].unique()))
         else:
-            new_row = {
-                "اسم الشركة": company_name,
-                "اسم المشروع": project_name,
-                "المنطقة": region_input,
-                "رقم العقار": property_number
-            }
-            df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-            df.to_csv(DATA_FILE, index=False)
-            st.success("✅ تم حفظ البيانات بنجاح في السحابة!")
-            st.rerun()
-    else:
-        st.error("⚠️ يرجى ملء جميع الحقول أولاً قبل الحفظ.")
+            st.success("✨ منطقة جديدة")
 
-# عرض الجدول الإجمالي مع خاصية الحذف
-st.markdown("<hr>", unsafe_allow_html=True)
-st.markdown("### 🗂️ قاعدة البيانات الإجمالية وإدارة المدخلات")
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # زر الحفظ
+    if st.button("🚀 حفظ العقار في قاعدة البيانات"):
+        if company_name and project_name and region_input and property_number:
+            # التحقق من التكرار
+            is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
+                              (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
+            
+            if is_duplicate:
+                st.error(f"❌ خطأ: العقار رقم ({property_number}) مسجل مسبقاً في منطقة ({region_input})!")
+            else:
+                now = datetime.now().strftime("%Y-%m-%d %H:%M")
+                new_row = {
+                    "تاريخ الإدخال": now,
+                    "اسم الشركة": company_name,
+                    "اسم المشروع": project_name,
+                    "المنطقة": region_input,
+                    "رقم العقار": property_number
+                }
+                df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+                df.to_csv(DATA_FILE, index=False)
+                st.success("✅ تم الحفظ بنجاح!")
+                st.rerun()
+        else:
+            st.warning("⚠️ فضلاً، أكمل جميع البيانات")
+    
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# 4. عرض البيانات وإدارة الحذف
+st.markdown("---")
+st.markdown("### 📊 قاعدة البيانات المسجلة")
 
 if not df.empty:
-    # عرض الجدول للمراجعة
+    # عرض الجدول بتنسيق أنيق
     st.dataframe(df, use_container_width=True)
     
-    # قسم الحذف المخصص
-    st.markdown("### 🗑️ حذف سطر أو عقار خاطئ")
-    # إنشاء قائمة بالأسطر المتاحة للحذف لسهولة الاختيار
-    delete_options = [f"سطر {i}: {row['المنطقة']} - عقار رقم ({row['رقم العقار']})" for i, row in df.iterrows()]
-    selected_to_delete = st.selectbox("اختر العقار الذي تريد حذفه نهائياً:", options=delete_options)
+    # لوحة إدارة متطورة في الأسفل
+    m1, m2 = st.columns([2, 1])
     
-    if st.button("❌ تأكيد حذف العقار المحدد"):
-        # الحصول على رقم السطر (Index) من النص المحدد
-        index_to_delete = int(selected_to_delete.split(":")[0].replace("سطر ", ""))
-        # حذف السطر وإعادة ترتيب الجدول
-        df = df.drop(index_to_delete).reset_index(drop=True)
-        df.to_csv(DATA_FILE, index=False)
-        st.success("🗑️ تم حذف العقار بنجاح وتحديث قاعدة البيانات!")
-        st.rerun()
+    with m1:
+        st.markdown("#### 🗑️ إدارة السجلات")
+        delete_options = [f"{i} | {row['المنطقة']} - عقار {row['رقم العقار']}" for i, row in df.iterrows()]
+        to_delete = st.selectbox("اختر السطر المراد حذفه:", options=delete_options)
+        if st.button("🗑️ حذف السجل المختار نهائياً"):
+            idx = int(to_delete.split(" | ")[0])
+            df = df.drop(idx).reset_index(drop=True)
+            df.to_csv(DATA_FILE, index=False)
+            st.success("تم الحذف بنجاح")
+            st.rerun()
+            
+    with m2:
+        st.markdown("#### 📥 التقارير")
+        csv = df.to_csv(index=False).encode('utf-8-sig')
+        st.download_button(
+            label="💾 تحميل التقرير (Excel/CSV)",
+            data=csv,
+            file_name=f"report_{datetime.now().strftime('%Y%m%d')}.csv",
+            mime="text/csv"
+        )
 else:
-    st.info("📂 قاعدة البيانات فارغة حالياً.")
+    st.info("لا توجد بيانات مسجلة حالياً.")
 
-# زر لتحميل البيانات مباشرة للحاسوب
-csv_buffer = df.to_csv(index=False).encode('utf-8-sig')
-st.download_button(
-    label="📥 تحميل الجدول الإجمالي كـ ملف CSV للعمل",
-    data=csv_buffer,
-    file_name="damage_survey_report.csv",
-    mime="text/csv"
-)
+st.markdown("""
+    <div style='text-align: center; margin-top: 50px; padding: 20px; color: #94a3b8; font-size: 14px;'>
+        نظام مسح الأضرار الذكي v2.0 | تم التصميم لأجل التميز والراحة
+    </div>
+""", unsafe_allow_html=True)
