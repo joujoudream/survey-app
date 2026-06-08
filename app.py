@@ -31,7 +31,6 @@ st.markdown("""
         border: 1px solid #BEE3F8;
     }
 
-    /* تنسيق كلمة الشركة بداخل المربع الأزرق */
     .company-header {
         color: #1E3A8A;
         font-family: 'Arial', sans-serif;
@@ -41,7 +40,6 @@ st.markdown("""
         margin: 0;
     }
 
-    /* تنسيق العبارة الثانية */
     .company-subtitle {
         color: #2D3748;
         font-family: 'Arial', sans-serif;
@@ -50,16 +48,6 @@ st.markdown("""
         letter-spacing: 0.5px;
         margin-top: 8px;
         margin-bottom: 0;
-    }
-
-    /* 2️⃣ المساحة الحرة لبيانات الإدخال */
-    .main-card {
-        background-color: transparent;
-        padding: 10px 0px;
-        border-radius: 0px;
-        box-shadow: none;
-        margin-bottom: 15px;
-        border: none;
     }
 
     /* كروت الإحصائيات الزرقاء */
@@ -75,21 +63,22 @@ st.markdown("""
     .metric-val { font-size: 28px; font-weight: bold; }
     .metric-lbl { font-size: 14px; opacity: 0.9; }
 
-    div.stButton > button:first-child {
-        background: linear-gradient(90deg, #1E3A8A 0%, #3B82F6 100%);
-        color: white;
+    /* تنسيق الأزرار الاحترافي */
+    div.stButton > button {
         border: none;
-        padding: 12px 30px;
-        border-radius: 10px;
+        padding: 10px 20px;
+        border-radius: 8px;
         font-weight: 700;
         transition: all 0.3s ease;
         width: 100%;
     }
-    div.stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+    
+    /* أزرار الحفظ والبحث (أزرق) */
+    .st-emotion-cache-18ni7ap, div.stButton > button:first-child {
+        background: linear-gradient(90deg, #1E3A8A 0%, #3B82F6 100%);
+        color: white;
     }
-
+    
     .stDataFrame {
         border-radius: 15px;
         overflow: hidden;
@@ -98,7 +87,6 @@ st.markdown("""
     
     .stAlert { border-radius: 12px; }
 
-    /* التوقيع السفلي المحدث بدقة وبخط عريض واضح */
     .footer-section {
         text-align: center;
         margin-top: 60px;
@@ -117,7 +105,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 2. إدارة قاعدة البيانات والترتيب التلقائي للمناطق (بدون عمود الوقت)
+# 2. إدارة قاعدة البيانات والترتيب التلقائي (بدون عمود الوقت)
 DATA_FILE = "survey_data.csv"
 
 if os.path.exists(DATA_FILE):
@@ -131,6 +119,12 @@ else:
 if not df.empty:
     df = df.sort_values(by="المنطقة").reset_index(drop=True)
 
+# إدارة الذاكرة المؤقتة للتعديل والمسح الجغرافي
+if "region_val" not in st.session_state: st.session_state.region_val = ""
+if "edit_index" not in st.session_state: st.session_state.edit_index = None
+if "edit_region" not in st.session_state: st.session_state.edit_region = ""
+if "edit_prop" not in st.session_state: st.session_state.edit_prop = ""
+
 # 3. تنظيم مساحة العمل وسط الصفحة
 col1, col2, col3 = st.columns([1, 6, 1])
 
@@ -143,127 +137,67 @@ with col2:
         </div>
     """, unsafe_allow_html=True)
     
-    # ⬜ المساحة المفتوحة لبيانات الإدخال (مفتوحة وسلسة وبدون عناوين تكرارية)
-    st.markdown("<div class='main-card'>", unsafe_allow_html=True)
-    
+    # العدادات الإحصائية الإجمالية
     total_properties_count = len(df)
     
-    if "region_val" not in st.session_state:
-        st.session_state.region_val = ""
-
+    # حقول الإدخال الأساسية للعقار الجديد أو الفحص
     c1, c2 = st.columns(2)
     with c1:
-        region_input = st.text_input("📍 اسم المنطقة", value=st.session_state.region_val, placeholder="مثال: الضاحية الجنوبية، صور، بعلبك...", key="region_field").strip()
-    
-    is_existing_region = False
-    region_properties_count = 0
-    if region_input:
-        filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
-        region_properties_count = len(filtered_df)
-        if region_properties_count > 0:
-            is_existing_region = True
-            st.info(f"💡 المنطقة مسجلة مسبقاً وتحتوي على **{region_properties_count}** عقارات مسجلة.")
-            with st.expander("👁️ مراجعة أرقام العقارات السابقة في هذه المنطقة"):
-                st.write(", ".join(filtered_df["رقم العقار"].unique()))
-        else:
-            st.success("✨ هذه المنطقة جديدة تماماً ولم تُمسح من قبل.")
-
+        region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.region_val, placeholder="مثال: حارة حريك، بنت جبيل، صور...").strip()
     with c2:
-        if is_existing_region:
-            property_number = st.text_input("🔢 رقم العقار الجديد", placeholder="أدخل رقم العقار الحالي للمسح...", key="prop_field", autocomplete="on").strip()
-            st.components.v1.html(
-                """
-                <script>
-                    var inputs = window.parent.document.getElementsByTagName('input');
-                    for (var i = 0; i < inputs.length; i++) {
-                        if (inputs[i].getAttribute('aria-label') == '🔢 رقم العقار الجديد') {
-                            inputs[i].focus();
-                            break;
-                        }
-                    }
-                </script>
-                """,
-                height=0,
-            )
-        else:
-            property_number = st.text_input("🔢 رقم العقار الجديد", placeholder="أدخل رقم العقار الحالي للمسح...", key="prop_field").strip()
+        property_number = st.text_input("🔢 رقم العقار المُراد التعامل معه", placeholder="أدخل رقم العقار...").strip()
 
-    # عرض لوحة الإحصائيات بداخل مساحة البيانات
+    # لوحة أزرار التحكم والعمليات (فحص / حفظ) تحت الحقول مباشرة
+    b1, b2 = st.columns(2)
+    
+    with b1:
+        # زر فحص وجود العقار (البحث المباشر)
+        if st.button("🔍 زر فحص وجود العقار مسبقاً"):
+            if region_input and property_number:
+                check_exist = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
+                                 (df["رقم العقار"].str.strip() == property_number)]
+                if not check_exist.empty:
+                    st.warning(f"⚠️ تنبيه: العقار رقم ({property_number}) موجود ومسجل مسبقاً بالفعل في ({region_input})!")
+                else:
+                    st.success(f"✨ ممتاز: العقار رقم ({property_number}) غير مسجل في ({region_input})، يمكنك حفظه الآن كعقار جديد.")
+            else:
+                st.info("💡 يرجى إدخال اسم المنطقة ورقم العقار معاً لتتمكن من فحص السجل بنجاح.")
+
+    with b2:
+        # زر حفظ العقار الجديد
+        if st.button("🚀 زر حفظ العقار والتحقق من التكرار"):
+            if region_input and property_number:
+                is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
+                                  (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
+                
+                if is_duplicate:
+                    st.error(f"❌ إلغاء: هذا العقار مسجل سابقاً! يرجى التحقق من الرقم أو تعديله.")
+                else:
+                    new_row = {"المنطقة": region_input, "رقم العقار": property_number}
+                    df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+                    df = df.sort_values(by="المنطقة").reset_index(drop=True)
+                    df.to_csv(DATA_FILE, index=False)
+                    st.success("✅ تم حفظ العقار بنجاح وتحديث قاعدة البيانات!")
+                    st.session_state.region_val = region_input
+                    st.rerun()
+            else:
+                st.warning("⚠️ يرجى ملء الخانات أولاً قبل الضغط على زر الحفظ.")
+
+    # عرض لوحة العدادات الإحصائية الفورية
     st.markdown("<br>", unsafe_allow_html=True)
+    region_count = len(df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]) if region_input else 0
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1:
         st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     with stat_col2:
-        st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
-    # زر الحفظ والتحقق من التكرار
-    if st.button("🚀 حفظ العقار والتحقق من التكرار"):
-        if region_input and property_number:
-            is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
-                              (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
-            
-            if is_duplicate:
-                st.error(f"❌ تنبيه: العقار رقم ({property_number}) مسجل مسبقاً بالفعل في منطقة ({region_input})!")
-            else:
-                new_row = {
-                    "المنطقة": region_input,
-                    "رقم العقار": property_number
-                }
-                df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-                df = df.sort_values(by="المنطقة").reset_index(drop=True)
-                df.to_csv(DATA_FILE, index=False)
-                st.success("✅ تم حفظ البيانات بنجاح وتحديث السحابة!")
-                st.session_state.region_val = region_input
-                st.rerun()
-        else:
-            st.warning("⚠️ فضلاً، يرجى إدخال المنطقة ورقم العقار أولاً.")
-            
-    st.markdown("<p style='font-size:13px; color:#64748b; margin-top: 15px;'>بمجرد كتابة اسم المنطقة، سيقوم النظام تلقائياً بفحص العقارات المسجلة مسبقاً لحمايتها من التكرار وعرض إحصاء دقيق لها.</p>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# 4. محرك البحث وقاعدة البيانات المرتبة مباشرة بدون عناوين زائدة
+# 4. قسم محرك البحث الشامل، التعديل، والحذف
 st.markdown("---")
 
 if not df.empty:
-    search_query = st.text_input("🔍 محرك البحث السريع (ابحث باسم المنطقة أو رقم العقار):", placeholder="اكتب اسم المنطقة أو رقم العقار المُراد العثور عليه...").strip()
+    # خانة البحث السريع المفتوحة للجدول
+    search_query = st.text_input("🔍 محرك البحث السريع بالجدول (ابحث باسم المنطقة أو رقم العقار):", placeholder="اكتب للبحث الفوري...").strip()
     
     if search_query:
-        display_df = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | 
-                        df["رقم العقار"].str.contains(search_query, case=False, na=False)]
-        st.caption(f"🔎 تم العثور على {len(display_df)} سجل يطابق بحثك.")
-    else:
         display_df = df
-
-    st.dataframe(display_df, use_container_width=True)
-    
-    m1, m2 = st.columns([2, 1])
-    
-    with m1:
-        delete_options = [f"{i} | {row['المنطقة']} - عقار رقم ({row['رقم العقار']})" for i, row in df.iterrows()]
-        to_delete = st.selectbox("اختر السجل المراد حذفه نهائياً:", options=delete_options)
-        if st.button("🗑️ حذف السجل المختار"):
-            idx = int(to_delete.split(" | ")[0])
-            df = df.drop(idx).reset_index(drop=True)
-            df.to_csv(DATA_FILE, index=False)
-            st.success("🗑️ تم حذف السجل بنجاح وتحديث قاعدة البيانات.")
-            st.rerun()
-            
-    with m2:
-        csv = df.to_csv(index=False).encode('utf-8-sig')
-        st.download_button(
-            label="💾 تحميل التقرير الشامل (CSV / Excel)",
-            data=csv,
-            file_name="War_Damage_Report.csv",
-            mime="text/csv"
-        )
-else:
-    st.info("لا توجد سجلات مسجلة حالياً في النظام.")
-
-# 5. التوقيع والتوثيق الثابت في أسفل الصفحة
-st.markdown("""
-    <div class='footer-section'>
-        <div>Printing & Archiving</div>
-        <div>S.Walid Murad</div>
-        <div class='footer-sub'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v3.0</div>
-    </div>
-""", unsafe_allow_html=True)
