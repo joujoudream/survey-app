@@ -52,13 +52,13 @@ st.markdown("""
         margin-bottom: 0;
     }
 
-    /* 2️⃣ المساحة الحرة لبيانات الإدخال (بدون مربع أبيض بطلبك) */
+    /* 2️⃣ المساحة الحرة لبيانات الإدخال */
     .main-card {
         background-color: transparent;
         padding: 10px 0px;
         border-radius: 0px;
         box-shadow: none;
-        margin-bottom: 30px;
+        margin-bottom: 15px;
         border: none;
     }
 
@@ -74,8 +74,6 @@ st.markdown("""
     }
     .metric-val { font-size: 28px; font-weight: bold; }
     .metric-lbl { font-size: 14px; opacity: 0.9; }
-
-    h3 { color: #334155; font-size: 20px; margin-top: 0px; margin-bottom: 20px; }
 
     div.stButton > button:first-child {
         background: linear-gradient(90deg, #1E3A8A 0%, #3B82F6 100%);
@@ -145,10 +143,8 @@ with col2:
         </div>
     """, unsafe_allow_html=True)
     
-    # ⬜ المساحة المفتوحة لبيانات الإدخال (مفتوحة وسلسة)
+    # ⬜ المساحة المفتوحة لبيانات الإدخال (مفتوحة وسلسة وبدون عناوين تكرارية)
     st.markdown("<div class='main-card'>", unsafe_allow_html=True)
-    
-    st.markdown("### 📋 تفاصيل الموقع والتحقق الذكي")
     
     total_properties_count = len(df)
     
@@ -225,9 +221,8 @@ with col2:
     st.markdown("<p style='font-size:13px; color:#64748b; margin-top: 15px;'>بمجرد كتابة اسم المنطقة، سيقوم النظام تلقائياً بفحص العقارات المسجلة مسبقاً لحمايتها من التكرار وعرض إحصاء دقيق لها.</p>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# 4. محرك البحث وقاعدة البيانات المرتبة
+# 4. محرك البحث وقاعدة البيانات المرتبة مباشرة بدون عناوين زائدة
 st.markdown("---")
-st.markdown("### 📊 قاعدة البيانات المسجلة والتقارير")
 
 if not df.empty:
     search_query = st.text_input("🔍 محرك البحث السريع (ابحث باسم المنطقة أو رقم العقار):", placeholder="اكتب اسم المنطقة أو رقم العقار المُراد العثور عليه...").strip()
@@ -244,7 +239,6 @@ if not df.empty:
     m1, m2 = st.columns([2, 1])
     
     with m1:
-        st.markdown("#### 🗑️ إجراءات إدارة السجلات")
         delete_options = [f"{i} | {row['المنطقة']} - عقار رقم ({row['رقم العقار']})" for i, row in df.iterrows()]
         to_delete = st.selectbox("اختر السجل المراد حذفه نهائياً:", options=delete_options)
         if st.button("🗑️ حذف السجل المختار"):
@@ -255,7 +249,6 @@ if not df.empty:
             st.rerun()
             
     with m2:
-        st.markdown("#### 📥 التصدير")
         csv = df.to_csv(index=False).encode('utf-8-sig')
         st.download_button(
             label="💾 تحميل التقرير الشامل (CSV / Excel)",
@@ -266,7 +259,7 @@ if not df.empty:
 else:
     st.info("لا توجد سجلات مسجلة حالياً في النظام.")
 
-# 5. التوقيع والتوثيق الثابت الجديد والمصحح بالكامل في أسفل الصفحة
+# 5. التوقيع والتوثيق الثابت في أسفل الصفحة
 st.markdown("""
     <div class='footer-section'>
         <div>Printing & Archiving</div>
