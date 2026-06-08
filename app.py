@@ -50,7 +50,7 @@ st.markdown("""
         margin-bottom: 0;
     }
 
-    /* كروت الإحصائيات الزرقاء */
+    /* كروت الإحصائيات الزرقاء العصرية */
     .metric-box {
         background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
         color: white;
@@ -63,7 +63,7 @@ st.markdown("""
     .metric-val { font-size: 28px; font-weight: bold; }
     .metric-lbl { font-size: 14px; opacity: 0.9; }
 
-    /* تنسيق الأزرار الاحترافي */
+    /* تنسيق الأزرار */
     div.stButton > button {
         border: none;
         padding: 12px 25px;
@@ -107,7 +107,7 @@ else:
 if not df.empty:
     df = df.sort_values(by="المنطقة").reset_index(drop=True)
 
-# الذاكرة المؤقتة لاسم المنطقة لتسهيل العمل المتتالي
+# حفظ اسم المنطقة لتسهيل الإدخال المتتابع
 if "last_region" not in st.session_state:
     st.session_state.last_region = ""
 
@@ -125,59 +125,79 @@ with col2:
     
     total_properties_count = len(df)
     
-    # حقول الإدخال الأساسية في الواجهة المفتوحة
+    # [1] خانات إدخال البيانات الرئيسية في الواجهة المفتوحة
     c1, c2 = st.columns(2)
     with c1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="مثال: حارة حريك، بنت جبيل، صور...").strip()
     with c2:
         property_number = st.text_input("🔢 رقم العقار الجديد", placeholder="أدخل رقم العقار الحالي للمسح...").strip()
 
-    # لوحة أزرار الفحص والحفظ تحت الحقول مباشرة
+    # [2] لوحة أزرار التحكم والعمليات مباشرة تحت الخانات
     b1, b2 = st.columns(2)
     
     with b1:
-        # 🔍 زر فحص وجود العقار (طلبك الأول)
-        if st.button("🔍 زر فحص وجود العقار مسبقاً", type="secondary"):
-            if region_input and property_number:
-                # فحص دقيق بداخل ملف الـ CSV
-                match = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
-                           (df["رقم العقار"].str.strip() == property_number)]
-                if not match.empty:
-                    st.warning(f"⚠️ تنبيه: العقار رقم ({property_number}) موجود ومسجل مسبقاً بالفعل في منطقة ({region_input})!")
-                else:
-                    st.success(f"✨ ممتاز: العقار رقم ({property_number}) جديد كلياً وغير مسجل في منطقة ({region_input}). يمكنك حفظه الآن.")
-            else:
-                st.info("💡 يرجى كتابة اسم المنطقة ورقم العقار في الأعلى أولاً لتتمكن من فحص وجوده.")
-
+        # 🔍 زر فحص وجود العقار مسبقاً
+        btn_check = st.button("🔍 زر فحص وجود العقار مسبقاً", type="secondary")
     with b2:
-        # 🚀 زر الحفظ والتحقق التقليدي
-        if st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary"):
-            if region_input and property_number:
-                is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
-                                  (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
-                if is_duplicate:
-                    st.error(f"❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
-                else:
-                    new_row = {"المنطقة": region_input, "رقم العقار": property_number}
-                    df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-                    df = df.sort_values(by="المنطقة").reset_index(drop=True)
-                    df.to_csv(DATA_FILE, index=False)
-                    st.success("✅ تم حفظ العقار بنجاح وتحديث السحابة!")
-                    st.session_state.last_region = region_input
-                    st.rerun()
-            else:
-                st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
+        # 🚀 زر حفظ العقار والتحقق من التكرار
+        btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
 
-    # لوحة العدادات الإحصائية الفورية
+    # معالجة منطق الحفظ أولاً عند الضغط
+    if btn_save:
+        if region_input and property_number:
+            is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
+                              (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
+            if is_duplicate:
+                st.error(f"❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
+            else:
+                new_row = {"المنطقة": region_input, "رقم العقار": property_number}
+                df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+                df = df.sort_values(by="المنطقة").reset_index(drop=True)
+                df.to_csv(DATA_FILE, index=False)
+                st.success("✅ تم حفظ العقار بنجاح وتحديث السحابة!")
+                st.session_state.last_region = region_input
+                st.rerun()
+        else:
+            st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
+
+    # [3] التحقق الذكي والمراجعة والعدادات الإحصائية أصبحت هنا (تحت زر الحفظ بطلبك تماماً) 👇
     st.markdown("<br>", unsafe_allow_html=True)
-    region_count = len(df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]) if region_input else 0
+    
+    is_existing_region = False
+    region_properties_count = 0
+    
+    if region_input:
+        filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
+        region_properties_count = len(filtered_df)
+        
+        # عرض رسالة فحص الوجود المستقلة إذا ضغط المستخدم على زر الفحص
+        if btn_check and property_number:
+            match = filtered_df[filtered_df["رقم العقار"].str.strip() == property_number]
+            if not match.empty:
+                st.warning(f"⚠️ تنبيه: العقار رقم ({property_number}) موجود ومسجل مسبقاً بالفعل في منطقة ({region_input})!")
+            else:
+                st.success(f"✨ ممتاز: العقار رقم ({property_number}) جديد كلياً وغير مسجل في منطقة ({region_input}). يمكنك حفظه الآن.")
+
+        # التنبيه الذكي للمنطقة المسجلة وقائمة المراجعة للعقارات السابقة
+        if region_properties_count > 0:
+            is_existing_region = True
+            st.info(f"💡 المنطقة مسجلة مسبقاً وتحتوي على **{region_properties_count}** عقارات مسجلة.")
+            with st.expander("👁️ مراجعة أرقام العقارات السابقة في هذه المنطقة"):
+                st.write(", ".join(filtered_df["رقم العقار"].unique()))
+        else:
+            if region_input:
+                st.success("✨ هذه المنطقة جديدة تماماً ولم تُمسح من قبل.")
+
+    # عرض كروت العدادات الزرقاء في الأسفل تحت المراجعة وزر الحفظ
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1:
         st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     with stat_col2:
-        st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
-# 4. محرك البحث والجدول التفاعلي المطور للتعديل والحذف (طلبك الثاني)
+    st.markdown("<p style='font-size:13px; color:#64748b;'>بمجرد كتابة اسم المنطقة، سيقوم النظام تلقائياً بفحص العقارات المسجلة مسبقاً لحمايتها من التكرار وعرض إحصاء دقيق لها.</p>", unsafe_allow_html=True)
+
+# 4. محرك البحث والجدول التفاعلي للتعديل والحذف السريع
 st.markdown("---")
 
 if not df.empty:
@@ -190,31 +210,29 @@ if not df.empty:
         display_df = df
 
     st.markdown("### ✏️ جدول البيانات التفاعلي الذكي (تعديل مباشر بنقرتين / حذف)")
-    st.caption("💡 للتعديل: انقر مرتين داخل أي خانة في الجدول وعدّلها بيدك فوراً! للحذف: اضغط على زر سلة المهملات بجانب السطر.")
+    st.caption("💡 للتعديل: انقر مرتين داخل أي خانة في الجدول وعدّلها بيدك فوراً! للحذف: حدد السطر واضغط على زر Delete في لوحة المفاتيح أو استخدم سلة المهملات بجانبه.")
     
-    # المحرك السحري st.data_editor الذي يسمح بالتعديل والحذف المباشر بداخل الجدول كالإكسل
+    # محرّر الجدول التفاعلي كالإكسل
     edited_df = st.data_editor(
         display_df, 
         use_container_width=True, 
-        num_rows="dynamic", # يتيح ميزة حذف الأسطر مباشرة بضغط زر
+        num_rows="dynamic",
         key="data_editor_key"
     )
     
-    # زر حفظ التعديلات التي تمت داخل الجدول
+    # زر حفظ التعديلات المباشرة في الجدول
     if st.button("💾 حفظ التعديلات الميدانية على السحابة", type="primary"):
-        # إعادة ترتيب وتحديث البيانات الأصلية بالبيانات المعدلة
         if search_query:
-            # دمج التعديلات في حال كان هناك فحص وبحث
             df.update(edited_df)
         else:
             df = edited_df
             
         df = df.sort_values(by="المنطقة").reset_index(drop=True)
         df.to_csv(DATA_FILE, index=False)
-        st.success("💾 تم حفظ كافة التعديلات وعمليات الحذف بملف البيانات السحابي بنجاح!")
+        st.success("💾 تم حفظ كافة التعديلات وعمليات الحذف بنجاح!")
         st.rerun()
 
-    # زر تحميل التقرير النهائي للمكتب
+    # زر تحميل التقارير للمكتب
     st.markdown("<br>", unsafe_allow_html=True)
     csv = df.to_csv(index=False).encode('utf-8-sig')
     st.download_button(
@@ -224,9 +242,9 @@ if not df.empty:
         mime="text/csv"
     )
 else:
-    st.info("لا توجد سجلات مسجلة حالياً في النظام السحابي.")
+    st.info("لا توجد سجلات مسجلة حالياً.")
 
-# 5. التوقيع والتوثيق الثابت والمحسّن بطلبك في أسفل الصفحة
+# 5. التوقيع والتوثيق الثابت والمحسّن في أسفل الصفحة
 st.markdown("""
     <div class='footer-section'>
         <div>Printing & Archiving</div>
