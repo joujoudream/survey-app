@@ -107,7 +107,7 @@ else:
 if not df.empty:
     df = df.sort_values(by="المنطقة").reset_index(drop=True)
 
-# حفظ اسم المنطقة لتسهيل الإدخال المتتابع
+# حفظ اسم المنطقة لتسهيل الإدخال المتتابع للميدان
 if "last_region" not in st.session_state:
     st.session_state.last_region = ""
 
@@ -128,9 +128,55 @@ with col2:
     # [1] خانات إدخال البيانات الرئيسية في الواجهة المفتوحة
     c1, c2 = st.columns(2)
     with c1:
-        region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="مثال: حارة حريك، بنت جبيل، صور...").strip()
+        # أضفنا لها placeholder واضح ومعرّف للتحكم به عبر الجافا سكريبت
+        region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="اكتب اسم المنطقة ثم اضغط Enter...").strip()
     with c2:
+        # أضفنا لها placeholder واضح ومعرّف للتحكم به عبر الجافا سكريبت
         property_number = st.text_input("🔢 رقم العقار الجديد", placeholder="أدخل رقم العقار الحالي للمسح...").strip()
+
+    # 🔑 سحر الجافا سكريبت للانتقال الفوري عند ضغط ENTER
+    st.components.v1.html(
+        """
+        <script>
+        // دالة لمراقبة الخانة الأولى ونقل التركيز للخانة الثانية عند ضغط Enter
+        var monitorEnter = function() {
+            var mainDoc = window.parent.document;
+            var inputs = mainDoc.getElementsByTagName('input');
+            var firstInput = null;
+            var secondInput = null;
+            
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].getAttribute('placeholder') === 'اكتب اسم المنطقة ثم اضغط Enter...') {
+                    firstInput = inputs[i];
+                }
+                if (inputs[i].getAttribute('placeholder') === 'أدخل رقم العقار الحالي للمسح...') {
+                    secondInput = inputs[i];
+                }
+            }
+            
+            if (firstInput && secondInput) {
+                // إزالة أي مراقب قديم لمنع التكرار
+                firstInput.removeEventListener('keydown', window.enterHandler);
+                
+                window.enterHandler = function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        secondInput.focus(); // قفز مباشر للخانة الثانية!
+                    }
+                };
+                
+                firstInput.addEventListener('keydown', window.enterHandler);
+            }
+        };
+        
+        // تشغيل الفحص والتأكد من ربط العناصر بشكل متكرر لضمان استقرار العمل
+        setTimeout(monitorEnter, 500);
+        setInterval(monitorEnter, 1500);
+        </script>
+        """,
+        height=0,
+    )
 
     # [2] لوحة أزرار التحكم والعمليات مباشرة تحت الخانات
     b1, b2 = st.columns(2)
@@ -142,7 +188,7 @@ with col2:
         # 🚀 زر حفظ العقار والتحقق من التكرار
         btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
 
-    # معالجة منطق الحفظ أولاً عند الضغط
+    # معالجة منطق الحفظ عند الضغط
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
@@ -160,17 +206,15 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    # [3] التحقق الذكي والمراجعة والعدادات الإحصائية أصبحت هنا (تحت زر الحفظ بطلبك تماماً) 👇
+    # [3] العدادات الإحصائية الفورية تحت الأزرار
     st.markdown("<br>", unsafe_allow_html=True)
     
-    is_existing_region = False
     region_properties_count = 0
-    
     if region_input:
         filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
         region_properties_count = len(filtered_df)
         
-        # عرض رسالة فحص الوجود المستقلة إذا ضغط المستخدم على زر الفحص
+        # عرض رسالة الفحص المباشر فقط في حال ضغط زر الفحص 🔍
         if btn_check and property_number:
             match = filtered_df[filtered_df["رقم العقار"].str.strip() == property_number]
             if not match.empty:
@@ -178,24 +222,14 @@ with col2:
             else:
                 st.success(f"✨ ممتاز: العقار رقم ({property_number}) جديد كلياً وغير مسجل في منطقة ({region_input}). يمكنك حفظه الآن.")
 
-        # التنبيه الذكي للمنطقة المسجلة وقائمة المراجعة للعقارات السابقة
-        if region_properties_count > 0:
-            is_existing_region = True
-            st.info(f"💡 المنطقة مسجلة مسبقاً وتحتوي على **{region_properties_count}** عقارات مسجلة.")
-            with st.expander("👁️ مراجعة أرقام العقارات السابقة في هذه المنطقة"):
-                st.write(", ".join(filtered_df["رقم العقار"].unique()))
-        else:
-            if region_input:
-                st.success("✨ هذه المنطقة جديدة تماماً ولم تُمسح من قبل.")
-
-    # عرض كروت العدادات الزرقاء في الأسفل تحت المراجعة وزر الحفظ
+    # عرض كروت العدادات الزرقاء تحت الأزرار مباشرة ودون أي زحام
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1:
         st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     with stat_col2:
         st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
-    st.markdown("<p style='font-size:13px; color:#64748b;'>بمجرد كتابة اسم المنطقة، سيقوم النظام تلقائياً بفحص العقارات المسجلة مسبقاً لحمايتها من التكرار وعرض إحصاء دقيق لها.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:13px; color:#64748b;'>بمجرد كتابة اسم المنطقة، سيقوم النظام تلقائياً بتحديث إحصاء العقارات المسجلة لحمايتها من التكرار.</p>", unsafe_allow_html=True)
 
 # 4. محرك البحث والجدول التفاعلي للتعديل والحذف السريع
 st.markdown("---")
@@ -210,9 +244,9 @@ if not df.empty:
         display_df = df
 
     st.markdown("### ✏️ جدول البيانات التفاعلي الذكي (تعديل مباشر بنقرتين / حذف)")
-    st.caption("💡 للتعديل: انقر مرتين داخل أي خانة في الجدول وعدّلها بيدك فوراً! للحذف: حدد السطر واضغط على زر Delete في لوحة المفاتيح أو استخدم سلة المهملات بجانبه.")
+    st.caption("💡 للتعديل: انقر مرتين داخل أي خانة في الجدول وعدّلها بيدك فوراً! للحذف: استخدم سلة المهملات بجانب السطر أو حدد السطر واضغط Delete.")
     
-    # محرّر الجدول التفاعلي كالإكسل
+    # محرّر الجدول التفاعلي الكلي
     edited_df = st.data_editor(
         display_df, 
         use_container_width=True, 
@@ -244,7 +278,7 @@ if not df.empty:
 else:
     st.info("لا توجد سجلات مسجلة حالياً.")
 
-# 5. التوقيع والتوثيق الثابت والمحسّن في أسفل الصفحة
+# 5. التوقيع والتوثيق الثابت المحسن في أسفل الصفحة
 st.markdown("""
     <div class='footer-section'>
         <div>Printing & Archiving</div>
