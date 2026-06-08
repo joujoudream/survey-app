@@ -22,11 +22,11 @@ st.markdown("""
     /* المربع النافر للعناوين */
     .header-card {
         background-color: #EBF8FF;
-        padding: 25px;
+        padding: 20px;
         border-radius: 15px;
         box-shadow: 0 10px 20px rgba(30, 58, 138, 0.1);
-        margin-top: 20px;
-        margin-bottom: 10px;
+        margin-top: 15px;
+        margin-bottom: 5px;
         text-align: center;
         border: 1px solid #BEE3F8;
     }
@@ -34,7 +34,7 @@ st.markdown("""
     .company-header {
         color: #1E3A8A;
         font-family: 'Arial', sans-serif;
-        font-size: 36px;
+        font-size: 32px;
         font-weight: bold;
         margin: 0;
     }
@@ -42,37 +42,41 @@ st.markdown("""
     .company-subtitle {
         color: #2D3748;
         font-family: 'Arial', sans-serif;
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 500;
-        margin-top: 8px;
+        margin-top: 5px;
     }
 
-    /* قسم التوقيع والتوثيق المعتمد بالواجهة الأساسية */
+    /* ✨ تعديل وتصغير حجم المربع الأبيض المدمج لراحة العين */
     .main-signature-card {
         background-color: #ffffff;
-        padding: 12px 20px;
-        border-radius: 10px;
+        padding: 6px 15px; /* تصغير الحشوة الداخلية */
+        border-radius: 8px; /* تنعيم الحواف */
         text-align: center;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-        margin-bottom: 25px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        margin-top: 5px;
+        margin-bottom: 15px; /* تقليص المساحة الخارجية */
         border: 1px solid #e2e8f0;
+        max-width: 450px; /* تحديد حد أقصى للعرض ليظل ملموماً */
+        margin-left: auto;  /* سنترته في المنتصف */
+        margin-right: auto; /* سنترته في المنتصف */
     }
     .sig-title {
         font-family: 'Arial', sans-serif;
-        font-size: 18px;
+        font-size: 15px; /* تصغير الخط */
         font-weight: bold;
         color: #1E3A8A;
         margin: 0;
     }
     .sig-name {
         font-family: 'Arial', sans-serif;
-        font-size: 16px;
+        font-size: 14px; /* تصغير الخط */
         font-weight: bold;
         color: #475569;
-        margin: 2px 0;
+        margin: 1px 0;
     }
     .sig-note {
-        font-size: 13px;
+        font-size: 11px; /* تصغير الخط */
         color: #3b82f6;
         font-weight: 500;
         margin: 0;
@@ -135,7 +139,7 @@ with col2:
         </div>
     """, unsafe_allow_html=True)
     
-    # ✍️ التوقيع والتوثيق الثابت في قمة الصفحة الأساسية
+    # ✍️ التوقيع والتوثيق بعد تعديله ليصبح صغير الحجم وملموم
     st.markdown("""
         <div class='main-signature-card'>
             <div class='sig-title'>Printing & Archiving</div>
@@ -238,7 +242,7 @@ with col2:
         height=0,
     )
 
-    # معالجة منطق الحفظ عند التفعيل (من خلال الضغط بالـ Enter أو النقر اليدوي)
+    # معالجة منطق الحفظ عند التفعيل
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
@@ -273,7 +277,7 @@ with col2:
     with stat_col2:
         st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
-    # 🔍 الحجم الجديد المضاف: محرك البحث السريع وحذف الملفات المحددة في أسفل الصفحة
+    # 🔍 محرك البحث السريع وحذف السجلات في أسفل الصفحة
     st.markdown("---")
     st.markdown("### 🔍 ابحث عن أي عقار أو منطقة وقم بحذفه فوراً")
     
@@ -281,20 +285,17 @@ with col2:
         search_query = st.text_input("🔍 اكتب هنا للبحث الفوري عن السجل (المنطقة أو رقم العقار):", placeholder="اكتب للبحث الفوري...").strip()
         
         if search_query:
-            # تصفية البيانات بناءً على مدخلات البحث
             filtered_search_df = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | 
                                     df["رقم العقار"].str.contains(search_query, case=False, na=False)]
             
             if not filtered_search_df.empty:
                 st.write(f"📋 السجلات المكتشفة المطابقة لـ ({search_query}):")
                 
-                # عرض السجلات المكتشفة مع زر حذف مخصص لكل سجل على حدة لراحة تامة
                 for idx, row in filtered_search_df.iterrows():
                     row_col1, row_col2 = st.columns([5, 2])
                     with row_col1:
                         st.info(f"📍 المنطقة: {row['المنطقة']} | 🔢 رقم العقار: {row['رقم العقار']}")
                     with row_col2:
-                        # زر الحذف النهائي الذكي والآمن للسجل المكتشف
                         if st.button(f"🗑️ حذف السجل نهائياً", key=f"delete_{idx}"):
                             df = df.drop(idx).reset_index(drop=True)
                             df.to_csv(DATA_FILE, index=False)
