@@ -106,7 +106,7 @@ with col2:
     
     total_properties_count = len(df)
     
-    # [1] خانات إدخال البيانات الرئيسية (مع تصحيح ثغرة التصفير المسببة للخطأ)
+    # [1] خانات إدخال البيانات الرئيسية في الواجهة المفتوحة
     c1, c2 = st.columns(2)
     with c1:
         region_input = st.text_input(
@@ -116,7 +116,7 @@ with col2:
             key="region_field"
         ).strip()
     with c2:
-        # قمنا بتغيير الـ None إلى نص فارغ نقي "" لتجنب أي Attribute error نهائياً
+        # هنا نضمن بقاء الخانة نصية نقية ومستقرة لتفادي الأخطاء السابقة
         prop_val = "" if st.session_state.clear_trigger else ""
         property_number = st.text_input(
             "🔢 رقم العقار الجديد", 
@@ -128,10 +128,10 @@ with col2:
     # إعادة تعيين مفتاح التصفير للاستخدام القادم
     st.session_state.clear_trigger = False
 
-    # [2] زر حفظ العقار الفعلي الذي سيتم نقره برمجياً وبسرعة فائقة بالخلفية
+    # [2] زر حفظ العقار الفعلي الذي يتم نقره برمجياً أوتوماتيكياً بالخلفية
     btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
 
-    # 🔑 سحر التنسيق الهجين المطور: جافا سكريبت فوري يتحكم بمؤشر المتصفح بمرونة مطلقة
+    # 🔑 سحر التظليل الكلي والتوجيه التلقائي: كود جافا سكريبت يضمن التظليل الفوري عند ضغط ENTER
     st.components.v1.html(
         """
         <script>
@@ -144,7 +144,7 @@ with col2:
             var propInput = null;
             var saveBtn = null;
             
-            // مطابقة الحقول بدقة من خلال الـ placeholder الثابت
+            // مطابقة الحقول بدقة من خلال الـ placeholder الثابت لضمان الاستقرار
             for (var i = 0; i < inputs.length; i++) {
                 if (inputs[i].getAttribute('placeholder') === 'ادخل اسم المنطقة الحالية...') {
                     regInput = inputs[i];
@@ -160,7 +160,7 @@ with col2:
                 }
             }
             
-            // 1. عند ضغط Enter في خانة المنطقة -> اقفز فوراً لخانة الرقم
+            // 1. عند ضغط Enter في خانة المنطقة -> اقفز فوراً لخانة الرقم وتحديد محتواها
             if (regInput && propInput) {
                 regInput.removeEventListener('keydown', window.regMidanHandler);
                 window.regMidanHandler = function(e) {
@@ -173,7 +173,7 @@ with col2:
                 regInput.addEventListener('keydown', window.regMidanHandler);
             }
             
-            // 2. عند ضغط Enter في خانة الرقم -> احفظ واجعل مؤشر الماوس يعود للمنطقة ويظللها للتعديل التلقائي
+            // 2. عند ضغط Enter في خانة الرقم -> احفظ واجعل مؤشر الماوس يعود للمنطقة ويظلل النص القديم بالكامل تلقائياً
             if (propInput && saveBtn && regInput) {
                 propInput.removeEventListener('keydown', window.propMidanHandler);
                 window.propMidanHandler = function(e) {
@@ -182,11 +182,11 @@ with col2:
                             e.preventDefault();
                             saveBtn.click(); // تفعيل الحفظ الفوري لبايثون
                             
-                            // إرجاع المؤشر وتظليل النص فوراً في نفس اللحظة للسرعة القصوى
+                            // إرجاع المؤشر وتظليل النص القديم بالكامل فوراً للسرعة القصوى
                             setTimeout(function() {
                                 regInput.focus();
-                                regInput.select(); // يظلل اسم آخر منطقة لتتمكن من التعديل التلقائي فوقها مباشرة
-                            }, 50);
+                                regInput.select(); // هنا السحر: يظلل النص القديم لتكتب فوقه مباشرة دون مسح بالماوس!
+                            }, 80);
                         }
                     }
                 };
@@ -194,7 +194,7 @@ with col2:
             }
         };
         
-        // تشغيل بروتوكول المراقبة المستمرة للحفاظ على استقرار حركة المؤشر
+        // تشغيل بروتوكول المراقبة المستمرة للحفاظ على استقرار وثبات حركة التظليل والمؤشر
         setTimeout(attachMidanEvents, 200);
         setInterval(attachMidanEvents, 1000);
         </script>
@@ -215,7 +215,7 @@ with col2:
                 df = df.sort_values(by="المنطقة").reset_index(drop=True)
                 df.to_csv(DATA_FILE, index=False)
                 
-                # تحديث متغيرات الجلسة بأمان: تثبيت المنطقة الحالية وتجهيز حقل الرقم للتفريغ
+                # تحديث الجلسة بأمان: تثبيت المنطقة القديمة وتجهيز حقل الرقم للتفريغ
                 st.session_state.last_region = region_input
                 st.session_state.clear_trigger = True
                 st.success(f"✅ تم حفظ العقار رقم ({property_number}) بنجاح!")
