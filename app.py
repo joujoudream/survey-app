@@ -82,28 +82,29 @@ st.markdown("""
         margin: 0;
     }
 
-    /* ✨ تعديل كروت الإحصائيات لرفعها للأعلى وتقليل المساحات السفلية */
+    /* كروت الإحصائيات لرفعها للأعلى وتقليل المساحات السفلية */
     .metric-box {
         background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
         color: white;
-        padding: 12px 20px; /* تقليص الحشوة لرفع النص داخلياً */
+        padding: 12px 20px;
         border-radius: 12px;
         text-align: center;
         box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
-        margin-top: 5px;   /* تقريبها من الزر العلوي */
-        margin-bottom: 5px; /* تقليل الفراغ السفلي لرفعها */
+        margin-top: 5px;
+        margin-bottom: 5px;
     }
     .metric-val { font-size: 26px; font-weight: bold; }
     .metric-lbl { font-size: 13px; opacity: 0.9; }
 
-    /* تنسيق أزرار الواجهة الميدانية */
+    /* تنسيق أزرار الواجهة الميدانية لتبدو متناسقة على نفس السطر */
     div.stButton > button {
         border: none;
-        padding: 12px 25px;
+        padding: 11px 25px;
         border-radius: 10px;
         font-weight: 700;
         transition: all 0.3s ease;
         width: 100%;
+        margin-top: 24px; /* ضبط المحاذاة مع خانة البحث المجاورة لها */
     }
     </style>
 """, unsafe_allow_html=True)
@@ -172,8 +173,18 @@ with col2:
     # إعادة تعيين مفتاح التصفير للاستخدام القادم
     st.session_state.clear_trigger = False
 
-    # زر حفظ العقار والتحقق من التكرار
-    btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
+    # ✨ رفع البحث إلى جانب زر الحفظ في نفس السطر تماماً
+    action_col1, action_col2 = st.columns(2)
+    
+    with action_col1:
+        btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
+        
+    with action_col2:
+        search_query = st.text_input(
+            "🔍 البحث الفوري عن السجل (المنطقة أو رقم العقار):", 
+            placeholder="اكتب للبحث السريع...",
+            key="search_field"
+        ).strip()
 
     # 🔑 كود التظليل الكلي والتوجيه التلقائي الفوري للمؤشر عند ضغط ENTER لسرعة العمل الإدخالي
     st.components.v1.html(
@@ -249,7 +260,7 @@ with col2:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
                               (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
             if is_duplicate:
-                st.error(f"❌ إلغاء: هذا العقار مسجل سابقاً in هذه المنطقة!")
+                st.error(f"❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
             else:
                 new_row = {"المنطقة": region_input, "رقم العقار": property_number}
                 df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
@@ -264,7 +275,7 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    # 📊 كروت العدادات الرقمية الفورية (تم تقريبها للأعلى وتقليص الفراغ)
+    # 📊 كروت العدادات الرقمية الفورية
     region_properties_count = 0
     if region_input:
         filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
@@ -276,32 +287,24 @@ with col2:
     with stat_col2:
         st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
-    # 🔍 محرك البحث السريع وحذف السجلات (تم دفعه للأسفل لإعطاء مساحة للعدادات المرفوعة)
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    st.markdown("---")
-    st.markdown("### 🔍 ابحث عن أي عقار أو منطقة وقم بحذفه فوراً")
-    
-    if not df.empty:
-        search_query = st.text_input("🔍 اكتب هنا للبحث الفوري عن السجل (المنطقة أو رقم العقار):", placeholder="اكتب للبحث الفوري...").strip()
+    # 📋 عرض نتائج البحث الفوري والحذف (تظهر ديناميكياً عند الكتابة في خانة البحث العلوية)
+    if search_query and not df.empty:
+        st.markdown("---")
+        filtered_search_df = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | 
+                                df["رقم العقار"].str.contains(search_query, case=False, na=False)]
         
-        if search_query:
-            filtered_search_df = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | 
-                                    df["رقم العقار"].str.contains(search_query, case=False, na=False)]
+        if not filtered_search_df.empty:
+            st.write(f"📋 السجلات المكتشفة المطابقة لـ ({search_query}):")
             
-            if not filtered_search_df.empty:
-                st.write(f"📋 السجلات المكتشفة المطابقة لـ ({search_query}):")
-                
-                for idx, row in filtered_search_df.iterrows():
-                    row_col1, row_col2 = st.columns([5, 2])
-                    with row_col1:
-                        st.info(f"📍 المنطقة: {row['المنطقة']} | 🔢 رقم العقار: {row['رقم العقار']}")
-                    with row_col2:
-                        if st.button(f"🗑️ حذف السجل نهائياً", key=f"delete_{idx}"):
-                            df = df.drop(idx).reset_index(drop=True)
-                            df.to_csv(DATA_FILE, index=False)
-                            st.success("✅ تم حذف السجل بنجاح من قاعدة البيانات!")
-                            st.rerun()
-            else:
-                st.info("⚠️ لم يتم العثور على أي سجلات مطابقة للبحث الحالي.")
-    else:
-        st.info("لا توجد سجلات مسجلة حالياً للبحث أو الحذف.")
+            for idx, row in filtered_search_df.iterrows():
+                row_col1, row_col2 = st.columns([5, 2])
+                with row_col1:
+                    st.info(f"📍 المنطقة: {row['المنطقة']} | 🔢 رقم العقار: {row['رقم العقار']}")
+                with row_col2:
+                    if st.button(f"🗑️ حذف السجل نهائياً", key=f"delete_{idx}"):
+                        df = df.drop(idx).reset_index(drop=True)
+                        df.to_csv(DATA_FILE, index=False)
+                        st.success("✅ تم حذف السجل بنجاح!")
+                        st.rerun()
+        else:
+            st.info("⚠️ لم يتم العثور على أي سجلات مطابقة.")
