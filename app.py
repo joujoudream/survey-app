@@ -47,53 +47,54 @@ st.markdown("""
         margin-top: 5px;
     }
 
-    /* ✨ تعديل وتصغير حجم المربع الأبيض المدمج لراحة العين */
+    /* المربع الأبيض المدمج لراحة العين */
     .main-signature-card {
         background-color: #ffffff;
-        padding: 6px 15px; /* تصغير الحشوة الداخلية */
-        border-radius: 8px; /* تنعيم الحواف */
+        padding: 6px 15px;
+        border-radius: 8px;
         text-align: center;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
         margin-top: 5px;
-        margin-bottom: 15px; /* تقليص المساحة الخارجية */
+        margin-bottom: 15px;
         border: 1px solid #e2e8f0;
-        max-width: 450px; /* تحديد حد أقصى للعرض ليظل ملموماً */
-        margin-left: auto;  /* سنترته في المنتصف */
-        margin-right: auto; /* سنترته في المنتصف */
+        max-width: 450px;
+        margin-left: auto;
+        margin-right: auto;
     }
     .sig-title {
         font-family: 'Arial', sans-serif;
-        font-size: 15px; /* تصغير الخط */
+        font-size: 15px;
         font-weight: bold;
         color: #1E3A8A;
         margin: 0;
     }
     .sig-name {
         font-family: 'Arial', sans-serif;
-        font-size: 14px; /* تصغير الخط */
+        font-size: 14px;
         font-weight: bold;
         color: #475569;
         margin: 1px 0;
     }
     .sig-note {
-        font-size: 11px; /* تصغير الخط */
+        font-size: 11px;
         color: #3b82f6;
         font-weight: 500;
         margin: 0;
     }
 
-    /* كروت الإحصائيات الزرقاء النظيفة */
+    /* ✨ تعديل كروت الإحصائيات لرفعها للأعلى وتقليل المساحات السفلية */
     .metric-box {
         background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
         color: white;
-        padding: 15px 25px;
+        padding: 12px 20px; /* تقليص الحشوة لرفع النص داخلياً */
         border-radius: 12px;
         text-align: center;
         box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
-        margin-bottom: 20px;
+        margin-top: 5px;   /* تقريبها من الزر العلوي */
+        margin-bottom: 5px; /* تقليل الفراغ السفلي لرفعها */
     }
-    .metric-val { font-size: 28px; font-weight: bold; }
-    .metric-lbl { font-size: 14px; opacity: 0.9; }
+    .metric-val { font-size: 26px; font-weight: bold; }
+    .metric-lbl { font-size: 13px; opacity: 0.9; }
 
     /* تنسيق أزرار الواجهة الميدانية */
     div.stButton > button {
@@ -248,7 +249,7 @@ with col2:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
                               (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
             if is_duplicate:
-                st.error(f"❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
+                st.error(f"❌ إلغاء: هذا العقار مسجل سابقاً in هذه المنطقة!")
             else:
                 new_row = {"المنطقة": region_input, "رقم العقار": property_number}
                 df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
@@ -263,9 +264,7 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    # 📊 كروت العدادات الرقمية الفورية
-    st.markdown("<br>", unsafe_allow_html=True)
-    
+    # 📊 كروت العدادات الرقمية الفورية (تم تقريبها للأعلى وتقليص الفراغ)
     region_properties_count = 0
     if region_input:
         filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
@@ -277,7 +276,8 @@ with col2:
     with stat_col2:
         st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
-    # 🔍 محرك البحث السريع وحذف السجلات في أسفل الصفحة
+    # 🔍 محرك البحث السريع وحذف السجلات (تم دفعه للأسفل لإعطاء مساحة للعدادات المرفوعة)
+    st.markdown("<br><br>", unsafe_allow_html=True)
     st.markdown("---")
     st.markdown("### 🔍 ابحث عن أي عقار أو منطقة وقم بحذفه فوراً")
     
