@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 # 1. إعدادات الصفحة والجماليات العصرية (CSS الاحترافي المخصص)
-st.set_page_config(page_title="KhatibAlami Copany", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="KhatibAlami Company", layout="wide", initial_sidebar_state="collapsed")
 
 st.markdown("""
     <style>
@@ -19,17 +19,50 @@ st.markdown("""
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     }
 
-    /* الخانة البيضاء الرئيسية بداخلها العنوان */
+    /* 1️⃣ المربع النافر الخاص بالعناوين فقط في أعلى الواجهة */
+    .header-card {
+        background-color: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+        margin-top: 20px;
+        margin-bottom: 25px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* تنسيق كلمة الشركة بداخل المربع النافر الأعلى */
+    .company-header {
+        color: #1E3A8A;
+        font-family: 'Arial', sans-serif;
+        font-size: 36px;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+        margin: 0;
+    }
+
+    /* تنسيق العبارة الثانية تحتها مباشرة وبداخل نفس المربع النافر */
+    .company-subtitle {
+        color: #475569;
+        font-family: 'Arial', sans-serif;
+        font-size: 20px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        margin-top: 8px;
+        margin-bottom: 0;
+    }
+
+    /* 2️⃣ المربع الأبيض الثاني المنفصل الخاص ببيانات الإدخال */
     .main-card {
         background-color: white;
         padding: 40px;
         border-radius: 20px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        margin-top: 30px;
         margin-bottom: 30px;
+        border: 1px solid #e2e8f0;
     }
 
-    /* كروت الإحصائيات الأنيقة */
+    /* كروت الإحصائيات الزرقاء */
     .metric-box {
         background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
         color: white;
@@ -42,31 +75,7 @@ st.markdown("""
     .metric-val { font-size: 28px; font-weight: bold; }
     .metric-lbl { font-size: 14px; opacity: 0.9; }
 
-    /* تنسيق العناوين الرئيسية داخل الخانة البيضاء */
-    .company-header {
-        text-align: center;
-        color: #1E3A8A;
-        font-family: 'Arial', sans-serif;
-        font-size: 36px;
-        font-weight: bold;
-        letter-spacing: 0.5px;
-        margin-top: 5px;
-        margin-bottom: 5px;
-    }
-
-    .company-subtitle {
-        text-align: center;
-        color: #475569;
-        font-family: 'Arial', sans-serif;
-        font-size: 20px;
-        font-weight: 500;
-        letter-spacing: 0.5px;
-        margin-bottom: 35px;
-        border-bottom: 2px solid #e2e8f0;
-        padding-bottom: 20px;
-    }
-
-    h3 { color: #334155; font-size: 20px; margin-top: 20px; }
+    h3 { color: #334155; font-size: 20px; margin-top: 0px; margin-bottom: 20px; }
 
     div.stButton > button:first-child {
         background: linear-gradient(90deg, #1E3A8A 0%, #3B82F6 100%);
@@ -109,7 +118,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 2. إدارة قاعدة البيانات والترتيب التلقائي أبجدياً (دون عمود الوقت)
+# 2. إدارة قاعدة البيانات والترتيب التلقائي للمناطق (بدون عمود الوقت)
 DATA_FILE = "survey_data.csv"
 
 if os.path.exists(DATA_FILE):
@@ -127,19 +136,21 @@ if not df.empty:
 col1, col2, col3 = st.columns([1, 6, 1])
 
 with col2:
-    # فتح الخانة البيضاء
-    st.markdown("<div class='main-card'>", unsafe_allow_html=True)
+    # 🟦 المربع الأول: مربع العنوان النافر المستقل
+    st.markdown("""
+        <div class='header-card'>
+            <div class='company-header'>KhatibAlami Company</div>
+            <div class='company-subtitle'>War Damage Assessment 2006</div>
+        </div>
+    """, unsafe_allow_html=True)
     
-    # عنوان الشركة والمسح بداخل الخانة البيضاء
-    st.markdown("<div class='company-header'>KhatibAlami Copany</div>", unsafe_allow_html=True)
-    st.markdown("<div class='company-subtitle'>War Damage Assessment 2006</div>", unsafe_allow_html=True)
+    # ⬜ المربع الثاني: مربع إدخال البيانات المنفصل تماماً
+    st.markdown("<div class='main-card'>", unsafe_allow_html=True)
     
     st.markdown("### 📋 تفاصيل الموقع والتحقق الذكي")
     
-    # إحصائية المجموع الكلي للعقارات المسجلة بالكامل
     total_properties_count = len(df)
     
-    # حقول الإدخال والذاكرة المؤقتة
     if "region_val" not in st.session_state:
         st.session_state.region_val = ""
 
@@ -147,7 +158,6 @@ with col2:
     with c1:
         region_input = st.text_input("📍 اسم المنطقة", value=st.session_state.region_val, placeholder="مثال: الضاحية الجنوبية، صور، بعلبك...", key="region_field").strip()
     
-    # فحص وحساب عدد العقارات في نفس المنطقة حال كتابتها
     is_existing_region = False
     region_properties_count = 0
     if region_input:
@@ -162,7 +172,6 @@ with col2:
             st.success("✨ هذه المنطقة جديدة تماماً ولم تُمسح من قبل.")
 
     with c2:
-        # قفز المؤشر تلقائياً لخانة العقار عند التعرف على المنطقة
         if is_existing_region:
             property_number = st.text_input("🔢 رقم العقار الجديد", placeholder="أدخل رقم العقار الحالي للمسح...", key="prop_field", autocomplete="on").strip()
             st.components.v1.html(
@@ -182,7 +191,7 @@ with col2:
         else:
             property_number = st.text_input("🔢 رقم العقار الجديد", placeholder="أدخل رقم العقار الحالي للمسح...", key="prop_field").strip()
 
-    # عرض لوحة الإحصائيات (المجموع العام ومجموع المنطقة الحالية)
+    # عرض لوحة الإحصائيات بداخل مربع البيانات
     st.markdown("<br>", unsafe_allow_html=True)
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1:
@@ -197,7 +206,7 @@ with col2:
                               (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
             
             if is_duplicate:
-                st.error(f"❌ تنبيه: العقار رقم ({property_number}) مسجل مسبقاً بالفعل في منطقة ({region_input})! تم إلغاء الإضافة لمنع التكرار.")
+                st.error(f"❌ تنبيه: العقار رقم ({property_number}) مسجل مسبقاً بالفعل في منطقة ({region_input})!")
             else:
                 new_row = {
                     "المنطقة": region_input,
@@ -212,7 +221,7 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى إدخال المنطقة ورقم العقار أولاً.")
             
-    st.markdown("<p style='font-size:13px; color:#64748b;'>بمجرد كتابة اسم المنطقة، سيقوم النظام تلقائياً بفحص العقارات المسجلة مسبقاً لحمايتها من التكرار وعرض إحصاء دقيق لها.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:13px; color:#64748b; margin-top: 15px;'>بمجرد كتابة اسم المنطقة، سيقوم النظام تلقائياً بفحص العقارات المسجلة مسبقاً لحمايتها من التكرار وعرض إحصاء دقيق لها.</p>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
 # 4. محرك البحث وقاعدة البيانات المرتبة
@@ -220,10 +229,8 @@ st.markdown("---")
 st.markdown("### 📊 قاعدة البيانات المسجلة والتقارير")
 
 if not df.empty:
-    # إضافة خانة البحث الذكية
     search_query = st.text_input("🔍 محرك البحث السريع (ابحث باسم المنطقة أو رقم العقار):", placeholder="اكتب اسم المنطقة أو رقم العقار المُراد العثور عليه...").strip()
     
-    # تصفية الجدول بناءً على البحث
     if search_query:
         display_df = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | 
                         df["رقم العقار"].str.contains(search_query, case=False, na=False)]
@@ -231,7 +238,6 @@ if not df.empty:
     else:
         display_df = df
 
-    # عرض الجدول المصفى والمُرتب بدون عمود التوقيت
     st.dataframe(display_df, use_container_width=True)
     
     m1, m2 = st.columns([2, 1])
