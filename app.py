@@ -130,7 +130,7 @@ with col2:
     with c1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="اكتب اسم المنطقة ثم اضغط Enter...").strip()
     with c2:
-        property_number = st.text_input("🔢 رقم العقار الجديد", placeholder="أدخل رقم العقار ثم اضغط Enter للحفظ...").strip()
+        property_number = st.text_input("🔢 رقم العقار الجديد", placeholder="أدخل رقم العقار ثم اضغط Enter للحفظ التلقائي...").strip()
 
     # [2] لوحة أزرار التحكم والعمليات مباشرة تحت الخانات
     b1, b2 = st.columns(2)
@@ -139,14 +139,14 @@ with col2:
         # 🔍 زر فحص وجود العقار مسبقاً
         btn_check = st.button("🔍 زر فحص وجود العقار مسبقاً", type="secondary")
     with b2:
-        # 🚀 زر حفظ العقار والتحقق من التكرار (أضفنا له لافتة نصية ليتعرف عليه الجافا سكريبت ويضغط عليه تلقائياً)
-        btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary", help="save_trigger_btn")
+        # 🚀 زر حفظ العقار والتحقق من التكرار
+        btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
 
-    # 🔑 سحر الجافا سكريبت المزدوج: قفز من الأولى للثانية + حفظ تلقائي عند ضغط ENTER في الثانية
+    # 🔑 سحر الجافا سكريبت المطور: القفز والحفظ التلقائي وإعادة المؤشر إلى خانة المنطقة فوراً!
     st.components.v1.html(
         """
         <script>
-        var setupEnterLogic = function() {
+        var setupAdvancedEnterLogic = function() {
             var mainDoc = window.parent.document;
             var inputs = mainDoc.getElementsByTagName('input');
             var buttons = mainDoc.getElementsByTagName('button');
@@ -155,24 +155,24 @@ with col2:
             var secondInput = null;
             var saveButton = null;
             
-            // تحديد الحقول بناءً على الـ placeholder
+            // تحديد الحقول بناءً على الـ placeholder الثابت
             for (var i = 0; i < inputs.length; i++) {
                 if (inputs[i].getAttribute('placeholder') === 'اكتب اسم المنطقة ثم اضغط Enter...') {
                     firstInput = inputs[i];
                 }
-                if (inputs[i].getAttribute('placeholder') === 'أدخل رقم العقار ثم اضغط Enter للحفظ...') {
+                if (inputs[i].getAttribute('placeholder') === 'أدخل رقم العقار ثم اضغط Enter للحفظ التلقائي...') {
                     secondInput = inputs[i];
                 }
             }
             
-            // تحديد زر الحفظ
+            // تحديد زر الحفظ بدقة
             for (var j = 0; j < buttons.length; j++) {
                 if (buttons[j].textContent.includes('🚀 زر حفظ العقار والتحقق من التكرار')) {
                     saveButton = buttons[j];
                 }
             }
             
-            // 1. منطق الخانة الأولى: الانتقال للخانة الثانية
+            // 1. عند ضغط Enter في خانة المنطقة ➡️ الانتقال لخانة الرقم
             if (firstInput && secondInput) {
                 firstInput.removeEventListener('keydown', window.firstHandler);
                 window.firstHandler = function(e) {
@@ -185,15 +185,21 @@ with col2:
                 firstInput.addEventListener('keydown', window.firstHandler);
             }
             
-            // 2. منطق الخانة الثانية: تفعيل زر الحفظ تلقائياً عند ضغط Enter
-            if (secondInput && saveButton) {
+            // 2. عند ضغط Enter في خانة الرقم ➡️ حفظ تلقائي + إعادة التركيز لخانة المنطقة فوراً!
+            if (secondInput && saveButton && firstInput) {
                 secondInput.removeEventListener('keydown', window.secondHandler);
                 window.secondHandler = function(e) {
                     if (e.key === 'Enter') {
                         if (secondInput.value.trim() !== "") {
                             e.preventDefault();
                             e.stopPropagation();
-                            saveButton.click(); // ضغط زر الحفظ تلقائياً!
+                            saveButton.click(); // الضغط والحفظ تلقائياً
+                            
+                            // إرجاع المؤشر فوراً لخانة المنطقة لبدء السجل الجديد دون تأخير
+                            setTimeout(function() {
+                                firstInput.focus();
+                                firstInput.select();
+                            }, 100);
                         }
                     }
                 };
@@ -201,15 +207,15 @@ with col2:
             }
         };
         
-        // تشغيل الفحص والتأكد من ربط العناصر بشكل دوري ومستقر
-        setTimeout(setupEnterLogic, 500);
-        setInterval(setupEnterLogic, 1500);
+        // تشغيل الربط ومراقبته باستمرار لضمان الجاهزية المطلقة أثناء التحديث السحابي
+        setTimeout(setupAdvancedEnterLogic, 400);
+        setInterval(setupAdvancedEnterLogic, 1200);
         </script>
         """,
         height=0,
     )
 
-    # معالجة منطق الحفظ عند الضغط (أو عند إطلاق الحفظ التلقائي)
+    # معالجة منطق الحفظ عند الضغط (أو عند إطلاق الحفظ التلقائي عبر الـ Enter)
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
@@ -217,8 +223,6 @@ with col2:
             if is_duplicate:
                 st.error(f"❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
             else:
-                new_row = {"المنطقة": region_input, "رقم QR / العقار": property_number} # توافقاً مع الهيكلية الحالية للملف
-                # تعديل طفيف ليتطابق مع مسميات الأعمدة الأصلية
                 new_row = {"المنطقة": region_input, "رقم العقار": property_number}
                 df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
                 df = df.sort_values(by="المنطقة").reset_index(drop=True)
@@ -229,7 +233,7 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    # [3] العدادات الإحصائية الفورية تحت الأزرار
+    # [3] العدادات الإحصائية الفورية تحت الأزرار مباشرة
     st.markdown("<br>", unsafe_allow_html=True)
     
     region_properties_count = 0
