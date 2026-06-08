@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 
-# 1. إعدادات الصفحة والجماليات العصرية (CSS الاحترافي المخصص)
+# 1. إعدادات الصفحة والجماليات العصرية الفاخرة المعتمدة
 st.set_page_config(page_title="KhatibAlami Company", layout="wide", initial_sidebar_state="collapsed")
 
 st.markdown("""
@@ -47,7 +47,7 @@ st.markdown("""
         margin-top: 8px;
     }
 
-    /* قسم التوقيع والتوثيق في الواجهة الأساسية بالأعلى */
+    /* قسم التوقيع والتوثيق المعتمد بالواجهة الأساسية */
     .main-signature-card {
         background-color: #ffffff;
         padding: 12px 20px;
@@ -78,7 +78,7 @@ st.markdown("""
         margin: 0;
     }
 
-    /* كروت الإحصائيات الزرقاء */
+    /* كروت الإحصائيات الزرقاء النظيفة */
     .metric-box {
         background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
         color: white;
@@ -91,7 +91,7 @@ st.markdown("""
     .metric-val { font-size: 28px; font-weight: bold; }
     .metric-lbl { font-size: 14px; opacity: 0.9; }
 
-    /* تنسيق أزرار الواجهة */
+    /* تنسيق أزرار الواجهة الميدانية */
     div.stButton > button {
         border: none;
         padding: 12px 25px;
@@ -117,17 +117,17 @@ else:
 if not df.empty:
     df = df.sort_values(by="المنطقة").reset_index(drop=True)
 
-# الذاكرة الداخلية للحفاظ على المنطقة وتصفير حقل الرقم بأمان
+# الذاكرة الداخلية للحفاظ على استقرار العمل الميداني السريع
 if "last_region" not in st.session_state:
     st.session_state.last_region = ""
 if "clear_trigger" not in st.session_state:
     st.session_state.clear_trigger = False
 
-# 3. تنظيم مساحة العمل وسط الصفحة
+# 3. تنظيم مساحة العمل وسط الصفحة تماماً
 col1, col2, col3 = st.columns([1, 6, 1])
 
 with col2:
-    # 🟦 [أولاً] مربع العنوان النافر المستقل بالأزرق الفاتح
+    # 🟦 مربع العنوان النافر المستقل بالأزرق الفاتح
     st.markdown("""
         <div class='header-card'>
             <div class='company-header'>KhatibAlami Company</div>
@@ -135,7 +135,7 @@ with col2:
         </div>
     """, unsafe_allow_html=True)
     
-    # ✍️ [ثانياً] التوقيع والتوثيق الثابت في قمة الصفحة
+    # ✍️ التوقيع والتوثيق الثابت في قمة الصفحة الأساسية
     st.markdown("""
         <div class='main-signature-card'>
             <div class='sig-title'>Printing & Archiving</div>
@@ -146,13 +146,13 @@ with col2:
     
     total_properties_count = len(df)
     
-    # [ثالثاً] خانات إدخال البيانات الرئيسية في الواجهة المفتوحة
+    # 📥 خانات إدخال البيانات الرئيسية حسب ورقة التصميم تماماً
     c1, c2 = st.columns(2)
     with c1:
         region_input = st.text_input(
             "📍 اسم المنطقة الجغرافية", 
             value=st.session_state.last_region, 
-            placeholder="ادخل اسم المنطقة الحالية...",
+            placeholder="ادخل اسم المنطقة الحالية ....",
             key="region_field"
         ).strip()
     with c2:
@@ -160,17 +160,17 @@ with col2:
         property_number = st.text_input(
             "🔢 رقم العقار الجديد", 
             value=prop_val,
-            placeholder="ادخل رقم العقار الحالي...",
+            placeholder="ادخل رقم العقار الحالي....",
             key="property_field"
         ).strip()
 
     # إعادة تعيين مفتاح التصفير للاستخدام القادم
     st.session_state.clear_trigger = False
 
-    # زر حفظ العقار الفعلي بالخلفية عند ضغط Enter
+    # زر حفظ العقار والتحقق من التكرار
     btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
 
-    # 🔑 كود التظليل الكلي والتوجيه التلقائي للمؤشر عند ضغط ENTER
+    # 🔑 كود التظليل الكلي والتوجيه التلقائي الفوري للمؤشر عند ضغط ENTER لسرعة العمل الإدخالي
     st.components.v1.html(
         """
         <script>
@@ -184,10 +184,10 @@ with col2:
             var saveBtn = null;
             
             for (var i = 0; i < inputs.length; i++) {
-                if (inputs[i].getAttribute('placeholder') === 'ادخل اسم المنطقة الحالية...') {
+                if (inputs[i].getAttribute('placeholder') === 'ادخل اسم المنطقة الحالية ....') {
                     regInput = inputs[i];
                 }
-                if (inputs[i].getAttribute('placeholder') === 'ادخل رقم العقار الحالي...') {
+                if (inputs[i].getAttribute('placeholder') === 'ادخل رقم العقار الحالي....') {
                     propInput = inputs[i];
                 }
             }
@@ -218,9 +218,8 @@ with col2:
                     if (e.key === 'Enter') {
                         if (propInput.value.trim() !== "") {
                             e.preventDefault();
-                            saveBtn.click(); // تفعيل الحفظ الفوري لبايثون
+                            saveBtn.click(); // تفعيل الحفظ الفوري
                             
-                            // إرجاع المؤشر وتظليل النص القديم بالكامل فوراً للسرعة القصوى
                             setTimeout(function() {
                                 regInput.focus();
                                 regInput.select(); // تظليل النص القديم لتكتب فوقه مباشرة دون مسح بالماوس
@@ -260,7 +259,7 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    # [رابعاً] العدادات الإحصائية الفورية تحت الأزرار مباشرة
+    # 📊 كروت العدادات الرقمية الفورية
     st.markdown("<br>", unsafe_allow_html=True)
     
     region_properties_count = 0
@@ -268,44 +267,40 @@ with col2:
         filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
         region_properties_count = len(filtered_df)
 
-    # عرض كروت العدادات الزرقاء
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1:
         st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     with stat_col2:
         st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
-    # 🛑 [خامساً وأخيراً] نقل جدول البيانات التفاعلي الذكي إلى آخر الصفحة تماماً مع إخفاء أزرار التحميل
+    # 🔍 الحجم الجديد المضاف: محرك البحث السريع وحذف الملفات المحددة في أسفل الصفحة
     st.markdown("---")
+    st.markdown("### 🔍 ابحث عن أي عقار أو منطقة وقم بحذفه فوراً")
     
     if not df.empty:
-        search_query = st.text_input("🔍 محرك البحث السريع بالجدول (اكتب المنطقة أو رقم العقار للتصفية الفورية):", placeholder="اكتب للبحث الفوري بداخل السجلات...").strip()
+        search_query = st.text_input("🔍 اكتب هنا للبحث الفوري عن السجل (المنطقة أو رقم العقار):", placeholder="اكتب للبحث الفوري...").strip()
         
         if search_query:
-            display_df = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | 
-                            df["رقم العقار"].str.contains(search_query, case=False, na=False)]
-        else:
-            display_df = df
-
-        st.markdown("### ✏️ جدول البيانات التفاعلي الذكي (تعديل مباشر بنقرتين / حذف)")
-        
-        # تم وضع الجدول هنا، مع تصفية وعرض نظيف بدون خيار تحميل
-        edited_df = st.data_editor(
-            display_df, 
-            use_container_width=True, 
-            num_rows="dynamic",
-            key="data_editor_key"
-        )
-        
-        if st.button("💾 حفظ التعديلات الميدانية على السحابة", type="primary"):
-            if search_query:
-                df.update(edited_df)
-            else:
-                df = edited_df
+            # تصفية البيانات بناءً على مدخلات البحث
+            filtered_search_df = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | 
+                                    df["رقم العقار"].str.contains(search_query, case=False, na=False)]
+            
+            if not filtered_search_df.empty:
+                st.write(f"📋 السجلات المكتشفة المطابقة لـ ({search_query}):")
                 
-            df = df.sort_values(by="المنطقة").reset_index(drop=True)
-            df.to_csv(DATA_FILE, index=False)
-            st.success("💾 تم حفظ كافة التعديلات وعمليات الحذف بنجاح!")
-            st.rerun()
+                # عرض السجلات المكتشفة مع زر حذف مخصص لكل سجل على حدة لراحة تامة
+                for idx, row in filtered_search_df.iterrows():
+                    row_col1, row_col2 = st.columns([5, 2])
+                    with row_col1:
+                        st.info(f"📍 المنطقة: {row['المنطقة']} | 🔢 رقم العقار: {row['رقم العقار']}")
+                    with row_col2:
+                        # زر الحذف النهائي الذكي والآمن للسجل المكتشف
+                        if st.button(f"🗑️ حذف السجل نهائياً", key=f"delete_{idx}"):
+                            df = df.drop(idx).reset_index(drop=True)
+                            df.to_csv(DATA_FILE, index=False)
+                            st.success("✅ تم حذف السجل بنجاح من قاعدة البيانات!")
+                            st.rerun()
+            else:
+                st.info("⚠️ لم يتم العثور على أي سجلات مطابقة للبحث الحالي.")
     else:
-        st.info("لا توجد سجلات مسجلة حالياً.")
+        st.info("لا توجد سجلات مسجلة حالياً للبحث أو الحذف.")
