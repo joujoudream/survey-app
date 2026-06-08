@@ -47,7 +47,7 @@ st.markdown("""
         margin-top: 8px;
     }
 
-    /* قسم التوقيع والتوثيق الجديد في الواجهة الأساسية بالأعلى */
+    /* قسم التوقيع والتوثيق في الواجهة الأساسية بالأعلى */
     .main-signature-card {
         background-color: #ffffff;
         padding: 12px 20px;
@@ -135,7 +135,7 @@ with col2:
         </div>
     """, unsafe_allow_html=True)
     
-    # ✍️ [ثانياً] نقل التوقيع والتوثيق المطلوب إلى الواجهة الأساسية مباشرة تحت العنوان
+    # ✍️ [ثانياً] التوقيع والتوثيق الثابت في قمة الصفحة
     st.markdown("""
         <div class='main-signature-card'>
             <div class='sig-title'>Printing & Archiving</div>
@@ -167,7 +167,7 @@ with col2:
     # إعادة تعيين مفتاح التصفير للاستخدام القادم
     st.session_state.clear_trigger = False
 
-    # زر حفظ العقار الفعلي الذي يتم نقره برمجياً أوتوماتيكياً بالخلفية عند ضغط Enter
+    # زر حفظ العقار الفعلي بالخلفية عند ضغط Enter
     btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
 
     # 🔑 كود التظليل الكلي والتوجيه التلقائي للمؤشر عند ضغط ENTER
@@ -260,7 +260,7 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    # [4] العدادات الإحصائية الفورية تحت الأزرار مباشرة
+    # [رابعاً] العدادات الإحصائية الفورية تحت الأزرار مباشرة
     st.markdown("<br>", unsafe_allow_html=True)
     
     region_properties_count = 0
@@ -268,53 +268,44 @@ with col2:
         filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
         region_properties_count = len(filtered_df)
 
-    # عرض كروت العدادات الزرقاء المريحة للنظر
+    # عرض كروت العدادات الزرقاء
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1:
         st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     with stat_col2:
         st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
-# 4. محرك البحث والجدول التفاعلي للتعديل والحذف السريع
-st.markdown("---")
-
-if not df.empty:
-    search_query = st.text_input("🔍 محرك البحث السريع بالجدول (اكتب المنطقة أو رقم العقار للتصفية الفورية):", placeholder="اكتب للبحث الفوري بداخل السجلات...").strip()
+    # 🛑 [خامساً وأخيراً] نقل جدول البيانات التفاعلي الذكي إلى آخر الصفحة تماماً مع إخفاء أزرار التحميل
+    st.markdown("---")
     
-    if search_query:
-        display_df = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | 
-                        df["رقم العقار"].str.contains(search_query, case=False, na=False)]
-    else:
-        display_df = df
-
-    st.markdown("### ✏️ جدول البيانات التفاعلي الذكي (تعديل مباشر بنقرتين / حذف)")
-    
-    edited_df = st.data_editor(
-        display_df, 
-        use_container_width=True, 
-        num_rows="dynamic",
-        key="data_editor_key"
-    )
-    
-    if st.button("💾 حفظ التعديلات الميدانية على السحابة", type="primary"):
+    if not df.empty:
+        search_query = st.text_input("🔍 محرك البحث السريع بالجدول (اكتب المنطقة أو رقم العقار للتصفية الفورية):", placeholder="اكتب للبحث الفوري بداخل السجلات...").strip()
+        
         if search_query:
-            df.update(edited_df)
+            display_df = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | 
+                            df["رقم العقار"].str.contains(search_query, case=False, na=False)]
         else:
-            df = edited_df
-            
-        df = df.sort_values(by="المنطقة").reset_index(drop=True)
-        df.to_csv(DATA_FILE, index=False)
-        st.success("💾 تم حفظ كافة التعديلات وعمليات الحذف بنجاح!")
-        st.rerun()
+            display_df = df
 
-    # زر تحميل التقارير للمكتب
-    st.markdown("<br>", unsafe_allow_html=True)
-    csv = df.to_csv(index=False).encode('utf-8-sig')
-    st.download_button(
-        label="📥 تحميل التقرير الشامل بصيغة (Excel / CSV)",
-        data=csv,
-        file_name="War_Damage_Report.csv",
-        mime="text/csv"
-    )
-else:
-    st.info("لا توجد سجلات مسجلة حالياً.")
+        st.markdown("### ✏️ جدول البيانات التفاعلي الذكي (تعديل مباشر بنقرتين / حذف)")
+        
+        # تم وضع الجدول هنا، مع تصفية وعرض نظيف بدون خيار تحميل
+        edited_df = st.data_editor(
+            display_df, 
+            use_container_width=True, 
+            num_rows="dynamic",
+            key="data_editor_key"
+        )
+        
+        if st.button("💾 حفظ التعديلات الميدانية على السحابة", type="primary"):
+            if search_query:
+                df.update(edited_df)
+            else:
+                df = edited_df
+                
+            df = df.sort_values(by="المنطقة").reset_index(drop=True)
+            df.to_csv(DATA_FILE, index=False)
+            st.success("💾 تم حفظ كافة التعديلات وعمليات الحذف بنجاح!")
+            st.rerun()
+    else:
+        st.info("لا توجد سجلات مسجلة حالياً.")
