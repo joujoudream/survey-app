@@ -19,19 +19,19 @@ st.markdown("""
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     }
 
-    /* 1️⃣ المربع النافر الخاص بالعناوين فقط في أعلى الواجهة */
+    /* 1️⃣ المربع النافر الملون بالأزرق الفاتح الهادئ للعناوين فقط */
     .header-card {
-        background-color: white;
+        background-color: #EBF8FF; /* تلوين المساحة بالأزرق الفاتح المريح */
         padding: 25px;
         border-radius: 15px;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+        box-shadow: 0 10px 20px rgba(30, 58, 138, 0.1);
         margin-top: 20px;
         margin-bottom: 25px;
         text-align: center;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #BEE3F8; /* إطار أزرق متناسق لإبراز النفور */
     }
 
-    /* تنسيق كلمة الشركة بداخل المربع النافر الأعلى */
+    /* تنسيق كلمة الشركة بداخل المربع الأزرق الفاتح */
     .company-header {
         color: #1E3A8A;
         font-family: 'Arial', sans-serif;
@@ -41,9 +41,9 @@ st.markdown("""
         margin: 0;
     }
 
-    /* تنسيق العبارة الثانية تحتها مباشرة وبداخل نفس المربع النافر */
+    /* تنسيق العبارة الثانية تحتها مباشرة */
     .company-subtitle {
-        color: #475569;
+        color: #2D3748;
         font-family: 'Arial', sans-serif;
         font-size: 20px;
         font-weight: 500;
@@ -136,7 +136,7 @@ if not df.empty:
 col1, col2, col3 = st.columns([1, 6, 1])
 
 with col2:
-    # 🟦 المربع الأول: مربع العنوان النافر المستقل
+    # 🟦 المربع الأول: مربع العنوان النافر المستقل والمعدل بالأزرق الفاتح
     st.markdown("""
         <div class='header-card'>
             <div class='company-header'>KhatibAlami Company</div>
