@@ -26,7 +26,7 @@ st.markdown("""
         border-radius: 15px;
         box-shadow: 0 10px 20px rgba(30, 58, 138, 0.1);
         margin-top: 20px;
-        margin-bottom: 25px;
+        margin-bottom: 10px;
         text-align: center;
         border: 1px solid #BEE3F8;
     }
@@ -45,6 +45,37 @@ st.markdown("""
         font-size: 20px;
         font-weight: 500;
         margin-top: 8px;
+    }
+
+    /* قسم التوقيع والتوثيق الجديد في الواجهة الأساسية بالأعلى */
+    .main-signature-card {
+        background-color: #ffffff;
+        padding: 12px 20px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
+        border: 1px solid #e2e8f0;
+    }
+    .sig-title {
+        font-family: 'Arial', sans-serif;
+        font-size: 18px;
+        font-weight: bold;
+        color: #1E3A8A;
+        margin: 0;
+    }
+    .sig-name {
+        font-family: 'Arial', sans-serif;
+        font-size: 16px;
+        font-weight: bold;
+        color: #475569;
+        margin: 2px 0;
+    }
+    .sig-note {
+        font-size: 13px;
+        color: #3b82f6;
+        font-weight: 500;
+        margin: 0;
     }
 
     /* كروت الإحصائيات الزرقاء */
@@ -96,7 +127,7 @@ if "clear_trigger" not in st.session_state:
 col1, col2, col3 = st.columns([1, 6, 1])
 
 with col2:
-    # 🟦 مربع العنوان النافر المستقل بالأزرق الفاتح
+    # 🟦 [أولاً] مربع العنوان النافر المستقل بالأزرق الفاتح
     st.markdown("""
         <div class='header-card'>
             <div class='company-header'>KhatibAlami Company</div>
@@ -104,9 +135,18 @@ with col2:
         </div>
     """, unsafe_allow_html=True)
     
+    # ✍️ [ثانياً] نقل التوقيع والتوثيق المطلوب إلى الواجهة الأساسية مباشرة تحت العنوان
+    st.markdown("""
+        <div class='main-signature-card'>
+            <div class='sig-title'>Printing & Archiving</div>
+            <div class='sig-name'>S,Walid Mrad</div>
+            <div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v3.0</div>
+        </div>
+    """, unsafe_allow_html=True)
+    
     total_properties_count = len(df)
     
-    # [1] خانات إدخال البيانات الرئيسية في الواجهة المفتوحة
+    # [ثالثاً] خانات إدخال البيانات الرئيسية في الواجهة المفتوحة
     c1, c2 = st.columns(2)
     with c1:
         region_input = st.text_input(
@@ -116,7 +156,6 @@ with col2:
             key="region_field"
         ).strip()
     with c2:
-        # هنا نضمن بقاء الخانة نصية نقية ومستقرة لتفادي الأخطاء السابقة
         prop_val = "" if st.session_state.clear_trigger else ""
         property_number = st.text_input(
             "🔢 رقم العقار الجديد", 
@@ -128,10 +167,10 @@ with col2:
     # إعادة تعيين مفتاح التصفير للاستخدام القادم
     st.session_state.clear_trigger = False
 
-    # [2] زر حفظ العقار الفعلي الذي يتم نقره برمجياً أوتوماتيكياً بالخلفية
+    # زر حفظ العقار الفعلي الذي يتم نقره برمجياً أوتوماتيكياً بالخلفية عند ضغط Enter
     btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
 
-    # 🔑 سحر التظليل الكلي والتوجيه التلقائي: كود جافا سكريبت يضمن التظليل الفوري عند ضغط ENTER
+    # 🔑 كود التظليل الكلي والتوجيه التلقائي للمؤشر عند ضغط ENTER
     st.components.v1.html(
         """
         <script>
@@ -144,7 +183,6 @@ with col2:
             var propInput = null;
             var saveBtn = null;
             
-            // مطابقة الحقول بدقة من خلال الـ placeholder الثابت لضمان الاستقرار
             for (var i = 0; i < inputs.length; i++) {
                 if (inputs[i].getAttribute('placeholder') === 'ادخل اسم المنطقة الحالية...') {
                     regInput = inputs[i];
@@ -185,7 +223,7 @@ with col2:
                             // إرجاع المؤشر وتظليل النص القديم بالكامل فوراً للسرعة القصوى
                             setTimeout(function() {
                                 regInput.focus();
-                                regInput.select(); // هنا السحر: يظلل النص القديم لتكتب فوقه مباشرة دون مسح بالماوس!
+                                regInput.select(); // تظليل النص القديم لتكتب فوقه مباشرة دون مسح بالماوس
                             }, 80);
                         }
                     }
@@ -194,7 +232,6 @@ with col2:
             }
         };
         
-        // تشغيل بروتوكول المراقبة المستمرة للحفاظ على استقرار وثبات حركة التظليل والمؤشر
         setTimeout(attachMidanEvents, 200);
         setInterval(attachMidanEvents, 1000);
         </script>
@@ -215,7 +252,7 @@ with col2:
                 df = df.sort_values(by="المنطقة").reset_index(drop=True)
                 df.to_csv(DATA_FILE, index=False)
                 
-                # تحديث الجلسة بأمان: تثبيت المنطقة القديمة وتجهيز حقل الرقم للتفريغ
+                # تثبيت المنطقة القديمة وتجهيز حقل الرقم للتفريغ
                 st.session_state.last_region = region_input
                 st.session_state.clear_trigger = True
                 st.success(f"✅ تم حفظ العقار رقم ({property_number}) بنجاح!")
@@ -223,7 +260,7 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    # [3] العدادات الإحصائية الفورية تحت الأزرار مباشرة
+    # [4] العدادات الإحصائية الفورية تحت الأزرار مباشرة
     st.markdown("<br>", unsafe_allow_html=True)
     
     region_properties_count = 0
@@ -281,12 +318,3 @@ if not df.empty:
     )
 else:
     st.info("لا توجد سجلات مسجلة حالياً.")
-
-# 5. التوقيع والتوثيق الثابت المحسن في أسفل الصفحة
-st.markdown("""
-    <div class='footer-section'>
-        <div>Printing & Archiving</div>
-        <div>S,Walid Mrad</div>
-        <div class='footer-sub'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v3.0</div>
-    </div>
-""", unsafe_allow_html=True)
