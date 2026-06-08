@@ -7,7 +7,7 @@ st.set_page_config(page_title="KhatibAlami Company", layout="wide", initial_side
 
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
     
     html, body, [class*="css"] {
         font-family: 'Tajawal', sans-serif;
@@ -63,8 +63,8 @@ st.markdown("""
     .metric-val { font-size: 28px; font-weight: bold; }
     .metric-lbl { font-size: 14px; opacity: 0.9; }
 
-    /* تنسيق أزرار الاستمارات */
-    div.stButton > button, div.stFormSubmitButton > button {
+    /* تنسيق الأزرار */
+    div.stButton > button {
         border: none;
         padding: 12px 25px;
         border-radius: 10px;
@@ -107,9 +107,9 @@ else:
 if not df.empty:
     df = df.sort_values(by="المنطقة").reset_index(drop=True)
 
-# الذاكرة المؤقتة للرسائل
-if "status_msg" not in st.session_state:
-    st.session_state.status_msg = {"type": None, "text": ""}
+# تذكر آخر منطقة تم إدخالها للحفاظ عليها في الخانة لراحتك
+if "last_region" not in st.session_state:
+    st.session_state.last_region = ""
 
 # 3. تنظيم مساحة العمل وسط الصفحة
 col1, col2, col3 = st.columns([1, 6, 1])
@@ -125,66 +125,110 @@ with col2:
     
     total_properties_count = len(df)
     
-    # 📦 [الاستمارة الذكية] - تضمن التقاط ضغطة ENTER واحدة للحفظ والتصفير والتركيز التلقائي
-    with st.form("input_data_form", clear_on_submit=True):
-        c1, c2 = st.columns(2)
-        with c1:
-            region_input = st.text_input("📍 اسم المنطقة الجغرافية", placeholder="اكتب اسم المنطقة الحالية...").strip()
-        with c2:
-            property_number = st.text_input("🔢 رقم العقار الجديد", placeholder="أدخل رقم العقار ثم اضغط Enter للحفظ فوراً...").strip()
-            
-        # زر الحفظ الرسمي داخل الاستمارة
-        submit_save = st.form_submit_button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
+    # [1] خانات إدخال البيانات الرئيسية في الواجهة المفتوحة
+    c1, c2 = st.columns(2)
+    with c1:
+        region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="اكتب اسم المنطقة الحالية...").strip()
+    with c2:
+        property_number = st.text_input("🔢 رقم العقار الجديد", placeholder="أدخل رقم العقار الحالي...").strip()
 
-    # معالجة بيانات الحفظ الفوري عند ضغط ENTER داخل الاستمارة
-    if submit_save:
-        if region_input and property_number:
-            is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
-                              (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
-            if is_duplicate:
-                st.session_state.status_msg = {"type": "error", "text": f"❌ إلغاء: هذا العقار مسجل سابقاً في منطقة {region_input}!"}
-            else:
-                new_row = {"المنطقة": region_input, "رقم العقار": property_number}
-                df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-                df = df.sort_values(by="المنطقة").reset_index(drop=True)
-                df.to_csv(DATA_FILE, index=False)
-                st.session_state.status_msg = {"type": "success", "text": f"✅ تم حفظ العقار رقم ({property_number}) في منطقة ({region_input}) بنجاح!"}
-                st.rerun()
-        else:
-            st.session_state.status_msg = {"type": "warning", "text": "⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ."}
+    # [2] زر الحفظ المخفي/الظاهري للتحكم التلقائي
+    btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
 
-    # 🔑 كود جافا سكريبت متطور ومضمون لإرجاع التركيز (Focus) تلقائياً وبقوة لخانة المنطقة بعد تفريغ الحقول بالـ Enter
+    # 🔑 سحر الجافا سكريبت المطور لالتقاط الـ Tab والـ Enter معاً وإرجاع التركيز لآخر منطقة!
     st.components.v1.html(
         """
         <script>
-        var forceFocusOnRegion = function() {
+        var setupMidanLogic = function() {
             var mainDoc = window.parent.document;
             var inputs = mainDoc.getElementsByTagName('input');
+            var buttons = mainDoc.getElementsByTagName('button');
             
-            // البحث عن خانة المنطقة وإعطائها التركيز الكامل
+            var regInput = null;
+            var propInput = null;
+            var saveBtn = null;
+            
+            // ربط الحقول بالـ placeholders الثابتة لضمان الدقة
             for (var i = 0; i < inputs.length; i++) {
                 if (inputs[i].getAttribute('placeholder') === 'اكتب اسم المنطقة الحالية...') {
-                    inputs[i].focus();
-                    break;
+                    regInput = inputs[i];
+                }
+                if (inputs[i].getAttribute('placeholder') === 'أدخل رقم العقار الحالي...') {
+                    propInput = inputs[i];
                 }
             }
+            
+            for (var j = 0; j < buttons.length; j++) {
+                if (buttons[j].textContent.includes('🚀 زر حفظ العقار والتحقق من التكرار')) {
+                    saveBtn = buttons[j];
+                }
+            }
+            
+            // 1. منطق خانة المنطقة: عند ضغط Enter أو Tab ينتقل فوراً لخانة الرقم
+            if (regInput && propInput) {
+                regInput.removeEventListener('keydown', window.regHandler);
+                window.regHandler = function(e) {
+                    if (e.key === 'Enter' || e.key === 'Tab') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        propInput.focus();
+                        propInput.select();
+                    }
+                };
+                regInput.addEventListener('keydown', window.regHandler);
+            }
+            
+            // 2. منطق خانة الرقم: عند ضغط Enter أو Tab يحفظ تلقائياً ويعود لخانة المنطقة
+            if (propInput && saveBtn && regInput) {
+                propInput.removeEventListener('keydown', window.propHandler);
+                window.propHandler = function(e) {
+                    if (e.key === 'Enter' || e.key === 'Tab') {
+                        if (propInput.value.trim() !== "") {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            saveBtn.click(); // يضغط حفظ أوتوماتيكياً
+                            
+                            // إرجاع مؤشر الكتابة تلقائياً لخانة المنطقة التي تحتوي على النص الأخير
+                            setTimeout(function() {
+                                regInput.focus();
+                                regInput.select(); // يحدد النص ليكون جاهزاً للتعديل أو الإبقاء عليه
+                            }, 150);
+                        }
+                    }
+                };
+                propInput.addEventListener('keydown', window.propHandler);
+            }
         };
-        // التنفيذ الفوري عند التحديث
-        setTimeout(forceFocusOnRegion, 300);
+        
+        // تشغيل ومراقبة الربط بشكل مستمر لمنع ضياع التركيز بعد الـ Rerun السحابي
+        setTimeout(setupMidanLogic, 300);
+        setInterval(setupMidanLogic, 1000);
         </script>
         """,
         height=0,
     )
 
-    # عرض التنبيهات الفورية تحت حقل الإدخال
-    if st.session_state.status_msg["type"] == "error":
-        st.error(st.session_state.status_msg["text"])
-    elif st.session_state.status_msg["type"] == "success":
-        st.success(st.session_state.status_msg["text"])
-    elif st.session_state.status_msg["type"] == "warning":
-        st.warning(st.session_state.status_msg["text"])
+    # معالجة منطق الحفظ عند التفعيل (سواء بالضغط بالماوس أو بالـ Enter/Tab التلقائي)
+    if btn_save:
+        if region_input and property_number:
+            is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
+                              (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
+            if is_duplicate:
+                st.error(f"❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
+            else:
+                new_row = {"المنطقة": region_input, "رقم العقار": property_number}
+                df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+                df = df.sort_values(by="المنطقة").reset_index(drop=True)
+                df.to_csv(DATA_FILE, index=False)
+                
+                # تثبيت المنطقة الحالية في الـ session_state وتصفير الرقم
+                st.session_state.last_region = region_input
+                st.success(f"✅ تم حفظ العقار رقم ({property_number}) بنجاح!")
+                st.rerun()
+        else:
+            st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    # [3] العدادات الإحصائية الفورية تحت الاستمارة مباشرة
+    # [3] العدادات الإحصائية الفورية تحت الأزرار مباشرة
     st.markdown("<br>", unsafe_allow_html=True)
     
     region_properties_count = 0
@@ -192,14 +236,12 @@ with col2:
         filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
         region_properties_count = len(filtered_df)
 
-    # عرض كروت العدادات الزرقاء المريحة للنظر
+    # عرض كروت العدادات الزرقاء المريحة للنظر لحساب الإنتاجية اليومية
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1:
         st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     with stat_col2:
         st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
-
-    st.markdown("<p style='font-size:13px; color:#64748b;'>بمجرد ضغط Enter في خانة الرقم، سيحفظ السجل وينتقل المؤشر للمنطقة التالية أوتوماتيكياً.</p>", unsafe_allow_html=True)
 
 # 4. محرك البحث والجدول التفاعلي للتعديل والحذف السريع
 st.markdown("---")
@@ -214,7 +256,6 @@ if not df.empty:
         display_df = df
 
     st.markdown("### ✏️ جدول البيانات التفاعلي الذكي (تعديل مباشر بنقرتين / حذف)")
-    st.caption("💡 للتعديل: انقر مرتين داخل أي خانة في الجدول وعدّلها بيدك فوراً! للحذف: استخدم سلة المهملات بجانب السطر.")
     
     edited_df = st.data_editor(
         display_df, 
