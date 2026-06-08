@@ -19,19 +19,19 @@ st.markdown("""
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     }
 
-    /* 1️⃣ المربع النافر الملون بالأزرق الفاتح الهادئ للعناوين فقط */
+    /* 1️⃣ المربع النافر الملون بالأزرق الفاتح للعناوين فقط في الأعلى */
     .header-card {
-        background-color: #EBF8FF; /* تلوين المساحة بالأزرق الفاتح المريح */
+        background-color: #EBF8FF;
         padding: 25px;
         border-radius: 15px;
         box-shadow: 0 10px 20px rgba(30, 58, 138, 0.1);
         margin-top: 20px;
         margin-bottom: 25px;
         text-align: center;
-        border: 1px solid #BEE3F8; /* إطار أزرق متناسق لإبراز النفور */
+        border: 1px solid #BEE3F8;
     }
 
-    /* تنسيق كلمة الشركة بداخل المربع الأزرق الفاتح */
+    /* تنسيق كلمة الشركة بداخل المربع الأزرق */
     .company-header {
         color: #1E3A8A;
         font-family: 'Arial', sans-serif;
@@ -41,7 +41,7 @@ st.markdown("""
         margin: 0;
     }
 
-    /* تنسيق العبارة الثانية تحتها مباشرة */
+    /* تنسيق العبارة الثانية */
     .company-subtitle {
         color: #2D3748;
         font-family: 'Arial', sans-serif;
@@ -52,14 +52,14 @@ st.markdown("""
         margin-bottom: 0;
     }
 
-    /* 2️⃣ المربع الأبيض الثاني المنفصل الخاص ببيانات الإدخال */
+    /* 2️⃣ إلغاء المربع الأبيض وجعل المساحة مفتوحة وسلسة */
     .main-card {
-        background-color: white;
-        padding: 40px;
-        border-radius: 20px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        background-color: transparent; /* مساحة شفافة */
+        padding: 10px 0px;
+        border-radius: 0px;
+        box-shadow: none; /* إلغاء الظل */
         margin-bottom: 30px;
-        border: 1px solid #e2e8f0;
+        border: none; /* إلغاء الحدود */
     }
 
     /* كروت الإحصائيات الزرقاء */
@@ -136,7 +136,7 @@ if not df.empty:
 col1, col2, col3 = st.columns([1, 6, 1])
 
 with col2:
-    # 🟦 المربع الأول: مربع العنوان النافر المستقل والمعدل بالأزرق الفاتح
+    # 🟦 المربع الأول: مربع العنوان النافر المستقل بالأزرق الفاتح
     st.markdown("""
         <div class='header-card'>
             <div class='company-header'>KhatibAlami Company</div>
@@ -144,7 +144,7 @@ with col2:
         </div>
     """, unsafe_allow_html=True)
     
-    # ⬜ المربع الثاني: مربع إدخال البيانات المنفصل تماماً
+    # ⬜ المساحة المفتوحة لبيانات الإدخال (تم إلغاء بياضها وحدودها بطلبك)
     st.markdown("<div class='main-card'>", unsafe_allow_html=True)
     
     st.markdown("### 📋 تفاصيل الموقع والتحقق الذكي")
@@ -191,7 +191,7 @@ with col2:
         else:
             property_number = st.text_input("🔢 رقم العقار الجديد", placeholder="أدخل رقم العقار الحالي للمسح...", key="prop_field").strip()
 
-    # عرض لوحة الإحصائيات بداخل مربع البيانات
+    # عرض لوحة الإحصائيات
     st.markdown("<br>", unsafe_allow_html=True)
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1:
