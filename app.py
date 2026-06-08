@@ -52,14 +52,14 @@ st.markdown("""
         margin-bottom: 0;
     }
 
-    /* 2️⃣ إلغاء المربع الأبيض وجعل المساحة مفتوحة وسلسة */
+    /* 2️⃣ المساحة الحرة لبيانات الإدخال (بدون مربع أبيض بطلبك) */
     .main-card {
-        background-color: transparent; /* مساحة شفافة */
+        background-color: transparent;
         padding: 10px 0px;
         border-radius: 0px;
-        box-shadow: none; /* إلغاء الظل */
+        box-shadow: none;
         margin-bottom: 30px;
-        border: none; /* إلغاء الحدود */
+        border: none;
     }
 
     /* كروت الإحصائيات الزرقاء */
@@ -100,6 +100,7 @@ st.markdown("""
     
     .stAlert { border-radius: 12px; }
 
+    /* التوقيع السفلي المحدث بدقة وبخط عريض واضح */
     .footer-section {
         text-align: center;
         margin-top: 60px;
@@ -144,7 +145,7 @@ with col2:
         </div>
     """, unsafe_allow_html=True)
     
-    # ⬜ المساحة المفتوحة لبيانات الإدخال (تم إلغاء بياضها وحدودها بطلبك)
+    # ⬜ المساحة المفتوحة لبيانات الإدخال (مفتوحة وسلسة)
     st.markdown("<div class='main-card'>", unsafe_allow_html=True)
     
     st.markdown("### 📋 تفاصيل الموقع والتحقق الذكي")
@@ -191,7 +192,7 @@ with col2:
         else:
             property_number = st.text_input("🔢 رقم العقار الجديد", placeholder="أدخل رقم العقار الحالي للمسح...", key="prop_field").strip()
 
-    # عرض لوحة الإحصائيات
+    # عرض لوحة الإحصائيات بداخل مساحة البيانات
     st.markdown("<br>", unsafe_allow_html=True)
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1:
@@ -265,11 +266,11 @@ if not df.empty:
 else:
     st.info("لا توجد سجلات مسجلة حالياً في النظام.")
 
-# 5. التوقيع والتوثيق الثابت في آخر الواجهة كما في الـ PDF
+# 5. التوقيع والتوثيق الثابت الجديد والمصحح بالكامل في أسفل الصفحة
 st.markdown("""
     <div class='footer-section'>
-        <div>PArchiving</div>
-        <div>S,Walid Mrad</div>
+        <div>Printing & Archiving</div>
+        <div>S.Walid Murad</div>
         <div class='footer-sub'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v3.0</div>
     </div>
 """, unsafe_allow_html=True)
