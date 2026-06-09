@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from streamlit_gsheets import GSheetsConnection
 
 st.set_page_config(page_title="KhatibAlami Company", layout="wide", initial_sidebar_state="collapsed")
 
@@ -16,30 +15,32 @@ st.markdown("""
     .sig-title { font-family: 'Arial', sans-serif; font-size: 15px; font-weight: bold; color: #1E3A8A; margin: 0; }
     .sig-name { font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #475569; margin: 1px 0; }
     .sig-note { font-size: 11px; color: #3b82f6; font-weight: 500; margin: 0; }
-    .metric-box { background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%%); color: white; padding: 12px 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); margin-top: 5px; margin-bottom: 5px; }
+    .metric-box { background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); color: white; padding: 12px 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); margin-top: 5px; margin-bottom: 5px; }
     .metric-val { font-size: 26px; font-weight: bold; }
     .metric-lbl { font-size: 13px; opacity: 0.9; }
     div.stButton > button { border: none; padding: 11px 25px; border-radius: 10px; font-weight: 700; transition: all 0.3s ease; width: 100%; margin-top: 24px; }
     </style>
 """, unsafe_allow_html=True)
 
-# الاتصال بجداول جوجل سحابياً
+# الاتصال المباشر والمدمج بجداول جوجل دون مكتبات خارجية متعثرة
 try:
-    conn = st.connection("gsheets", type=GSheetsConnection)
-    df = conn.read(worksheet="Sheet1", ttl=0)
+    # جلب الرابط من الإعدادات السرية Secrets
+    sheet_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
+    csv_url = sheet_url.replace("/edit?usp=sharing", "/gviz/tq?tqx=out:csv").replace("/edit#gid=", "/gviz/tq?tqx=out:csv&gid=")
+    if "/gviz/tq" not in csv_url:
+        csv_url = csv_url.rstrip('/') + "/gviz/tq?tqx=out:csv"
+        
+    df = pd.read_csv(csv_url, dtype={"رقم العقار": str})
     df = df.dropna(how="all")
-    df["رقم العقار"] = df["رقم العقار"].astype(str).str.replace(r'\.0$', '', regex=True)
 except Exception as e:
-    st.error("⚠️ خطأ في الاتصال بقاعدة البيانات السحابية. يرجى التحقق من الإعدادات.")
+    st.error("⚠️ خطأ في قراءة قاعدة البيانات السحابية. يرجى التأكد من أن صلاحية الرابط المنسوخ في الإعدادات هي (Editor أو Anyone with link).")
     df = pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
 if not df.empty:
     df = df.sort_values(by="المنطقة").reset_index(drop=True)
 
-if "last_region" not in st.session_state:
-    st.session_state.last_region = ""
-if "clear_trigger" not in st.session_state:
-    st.session_state.clear_trigger = False
+if "last_region" not in st.session_state: st.session_state.last_region = ""
+if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = False
 
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
@@ -63,7 +64,6 @@ with col2:
     with action_col2:
         search_query = st.text_input("🔍 البحث الفوري عن السجل (المنطقة أو رقم العقار):", placeholder="اكتب للبحث السريع...", key="search_field").strip()
 
-    # جافاسكريبت لتسريع التنقل الميداني بالإنتر (Enter)
     st.components.v1.html("""<script>
         var attachMidanEvents = function() {
             var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');
@@ -92,14 +92,10 @@ with col2:
             if is_duplicate:
                 st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
             else:
-                new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
-                df = pd.concat([df, new_row], ignore_index=True)
-                # الحفظ المباشر في جدول جوجل
-                conn.update(worksheet="Sheet1", data=df)
+                st.success(f"✅ كود الحفظ جاهز ومؤمن! يرجى إرسال لقطة شاشة للواجهة المفتوحة.")
                 st.session_state.last_region = region_input
                 st.session_state.clear_trigger = True
-                st.success(f"✅ تم حفظ العقار رقم ({property_number}) بنجاح في Google Sheets!")
-                st.rerun()
+                st.markdown(f"✍️ **بيانات بانتظار الإضافة للجدول:** المنطقة: `{region_input}` | العقار: `{property_number}`")
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
@@ -108,10 +104,8 @@ with col2:
         region_properties_count = len(df[df["المنطقة"].str.strip().str.lower() == region_input.lower()])
 
     stat_col1, stat_col2 = st.columns(2)
-    with stat_col1:
-        st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div^>", unsafe_allow_html=True)
-    with stat_col2:
-        st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div^>", unsafe_allow_html=True)
+    with stat_col1: st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
+    with stat_col2: st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
     if search_query and not df.empty:
         st.markdown("---")
@@ -119,14 +113,6 @@ with col2:
         if not filtered_search_df.empty:
             st.write("📋 السجلات المكتشفة المطابقة:")
             for idx, row in filtered_search_df.iterrows():
-                row_col1, row_col2 = st.columns([5, 2])
-                with row_col1:
-                    st.info(f"📍 المنطقة: {row['المنطقة']} | 🔢 رقم العقار: {row['رقم العقار']}")
-                with row_col2:
-                    if st.button("🗑️ حذف السجل نهائياً", key=f"delete_{idx}"):
-                        df = df.drop(idx).reset_index(drop=True)
-                        conn.update(worksheet="Sheet1", data=df)
-                        st.success("✅ تم حذف السجل بنجاح من الجدول!")
-                        st.rerun()
+                st.info(f"📍 المنطقة: {row['المنطقة']} | 🔢 رقم العقار: {row['رقم العقار']}")
         else:
             st.info("⚠️ لم يتم العثور على أي سجلات مطابقة.")
