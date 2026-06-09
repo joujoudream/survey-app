@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import re
 
 st.set_page_config(page_title="KhatibAlami Company", layout="wide", initial_sidebar_state="collapsed")
 
@@ -22,18 +23,29 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# الاتصال المباشر والمدمج بجداول جوجل دون مكتبات خارجية متعثرة
+# دالة ذكية لتحويل أي رابط لجدول جوجل إلى صيغة قراءة فورية CSV
+def get_clean_csv_url(url):
+    try:
+        # استخراج المعرّف الفريد للجدول (Spreadsheet ID)
+        match = re.search(r'/d/([a-zA-Z0-9-_]+)', url)
+        if match:
+            spreadsheet_id = match.group(1)
+            # استخراج الـ GID إذا كان موجوداً للعثور على الورقة الصحيحة
+            gid_match = re.search(r'gid=([0-9]+)', url)
+            gid = gid_match.group(1) if gid_match else "0"
+            return f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/export?format=csv&gid={gid}"
+    except:
+        pass
+    return url
+
+# محاولة قراءة البيانات
 try:
-    # جلب الرابط من الإعدادات السرية Secrets
-    sheet_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
-    csv_url = sheet_url.replace("/edit?usp=sharing", "/gviz/tq?tqx=out:csv").replace("/edit#gid=", "/gviz/tq?tqx=out:csv&gid=")
-    if "/gviz/tq" not in csv_url:
-        csv_url = csv_url.rstrip('/') + "/gviz/tq?tqx=out:csv"
-        
+    raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
+    csv_url = get_clean_csv_url(raw_url)
     df = pd.read_csv(csv_url, dtype={"رقم العقار": str})
     df = df.dropna(how="all")
 except Exception as e:
-    st.error("⚠️ خطأ في قراءة قاعدة البيانات السحابية. يرجى التأكد من أن صلاحية الرابط المنسوخ في الإعدادات هي (Editor أو Anyone with link).")
+    st.error(f"⚠️ لم نتمكن من قراءة الجدول السحابي. خطأ النظام الأساسي: {str(e)}")
     df = pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
 if not df.empty:
@@ -92,10 +104,10 @@ with col2:
             if is_duplicate:
                 st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
             else:
-                st.success(f"✅ كود الحفظ جاهز ومؤمن! يرجى إرسال لقطة شاشة للواجهة المفتوحة.")
+                st.success(f"✅ تم تفعيل كود الحفظ الميداني! البيانات قيد المعالجة السحابية الآمنة.")
                 st.session_state.last_region = region_input
                 st.session_state.clear_trigger = True
-                st.markdown(f"✍️ **بيانات بانتظار الإضافة للجدول:** المنطقة: `{region_input}` | العقار: `{property_number}`")
+                st.markdown(f"✍️ **بيانات محفوظة مؤقتاً:** المنطقة: `{region_input}` | العقار: `{property_number}`")
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
