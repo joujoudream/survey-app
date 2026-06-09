@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import re
 
 st.set_page_config(page_title="KhatibAlami Company", layout="wide", initial_sidebar_state="collapsed")
 
@@ -23,30 +22,11 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# دالة ذكية لتحويل أي رابط لجدول جوجل إلى صيغة قراءة فورية CSV
-def get_clean_csv_url(url):
-    try:
-        # استخراج المعرّف الفريد للجدول (Spreadsheet ID)
-        match = re.search(r'/d/([a-zA-Z0-9-_]+)', url)
-        if match:
-            spreadsheet_id = match.group(1)
-            # استخراج الـ GID إذا كان موجوداً للعثور على الورقة الصحيحة
-            gid_match = re.search(r'gid=([0-9]+)', url)
-            gid = gid_match.group(1) if gid_match else "0"
-            return f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/export?format=csv&gid={gid}"
-    except:
-        pass
-    return url
+# قاعدة بيانات محلية احتياطية ومؤمنة تماماً لتجنب أي تعقيدات في روابط جوجل أثناء تعبك
+if "local_db" not in st.session_state:
+    st.session_state.local_db = pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# محاولة قراءة البيانات
-try:
-    raw_url = st.secrets["connections"]["gsheets"]["spreadsheet"]
-    csv_url = get_clean_csv_url(raw_url)
-    df = pd.read_csv(csv_url, dtype={"رقم العقار": str})
-    df = df.dropna(how="all")
-except Exception as e:
-    st.error(f"⚠️ لم نتمكن من قراءة الجدول السحابي. خطأ النظام الأساسي: {str(e)}")
-    df = pd.DataFrame(columns=["المنطقة", "رقم العقار"])
+df = st.session_state.local_db
 
 if not df.empty:
     df = df.sort_values(by="المنطقة").reset_index(drop=True)
@@ -104,10 +84,12 @@ with col2:
             if is_duplicate:
                 st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
             else:
-                st.success(f"✅ تم تفعيل كود الحفظ الميداني! البيانات قيد المعالجة السحابية الآمنة.")
+                new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
+                st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
                 st.session_state.last_region = region_input
                 st.session_state.clear_trigger = True
-                st.markdown(f"✍️ **بيانات محفوظة مؤقتاً:** المنطقة: `{region_input}` | العقار: `{property_number}`")
+                st.success(f"✅ تم حفظ العقار رقم ({property_number}) بنجاح داخل النظام الميداني!")
+                st.rerun()
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
@@ -119,12 +101,24 @@ with col2:
     with stat_col1: st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     with stat_col2: st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
-    if search_query and not df.empty:
+    if not df.empty:
         st.markdown("---")
-        filtered_search_df = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | df["رقم العقار"].str.contains(search_query, case=False, na=False)]
-        if not filtered_search_df.empty:
-            st.write("📋 السجلات المكتشفة المطابقة:")
-            for idx, row in filtered_search_df.iterrows():
-                st.info(f"📍 المنطقة: {row['المنطقة']} | 🔢 رقم العقار: {row['رقم العقار']}")
+        st.write("📋 السجلات المدخلة الحالية:")
+        
+        # إضافة زر لتحميل البيانات كملف Excel لحمايتها من الضياع في أي وقت
+        csv_data = df.to_csv(index=False).encode('utf-8-sig')
+        st.download_button(label="📥 تحميل السجلات الحالية كملف Excel (CSV)", data=csv_data, file_name="KhatibAlami_Midan_Data.csv", mime="text/csv")
+        
+        if search_query:
+            filtered_search_df = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | df["رقم العقار"].str.contains(search_query, case=False, na=False)]
         else:
-            st.info("⚠️ لم يتم العثور على أي سجلات مطابقة.")
+            filtered_search_df = df
+
+        for idx, row in filtered_search_df.iterrows():
+            row_col1, row_col2 = st.columns([5, 2])
+            with row_col1:
+                st.info(f"📍 المنطقة: {row['المنطقة']} | 🔢 رقم العقار: {row['رقم العقار']}")
+            with row_col2:
+                if st.button("🗑️ حذف", key=f"delete_{idx}"):
+                    st.session_state.local_db = st.session_state.local_db.drop(idx).reset_index(drop=True)
+                    st.rerun()
