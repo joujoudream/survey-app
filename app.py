@@ -19,7 +19,9 @@ st.markdown("""
     .metric-box { background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); color: white; padding: 12px 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); margin-top: 5px; margin-bottom: 5px; }
     .metric-val { font-size: 26px; font-weight: bold; }
     .metric-lbl { font-size: 13px; opacity: 0.9; }
-    div.stButton > button { border: none; padding: 11px 25px; border-radius: 10px; font-weight: 700; transition: all 0.3s ease; width: 100%; margin-top: 24px; }
+    
+    /* تنسيق موحد للأزرار لتصبح على نفس محاذاة خانة البحث الجانبية */
+    div.stButton > button, div.stDownloadButton > button { border: none; padding: 11px 15px; border-radius: 10px; font-weight: 700; transition: all 0.3s ease; width: 100%; margin-top: 0px; height: 45px; }
     
     /* حذف وإخفاء جملة Press Enter to Apply تماماً من الواجهة */
     [data-testid="stInputInstructions"] {
@@ -41,9 +43,9 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>KhatibAlami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v4.5</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v4.6</div></div>""", unsafe_allow_html=True)
     
-    # خانة الرفع تظهر وتختفي ذكياً عند النجاح
+    # خانة الرفع الموقتة
     if not st.session_state.file_uploaded:
         st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
         uploaded_file = st.file_uploader("اختر ملف الإكسيل (CSV) الذي قمت بتنزيله سابقاً لاستعادة الأعداد والمتابعة:", type=["csv"])
@@ -72,7 +74,24 @@ with col2:
     
     st.session_state.clear_trigger = False
     
-    btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
+    st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
+
+    # التوزيع السحري الجديد: الحفظ والبحث والتنزيل جنباً إلى جنب في سطر واحد متناسق
+    action_col1, action_col2, action_col3 = st.columns([1.2, 1.5, 1.3])
+    
+    with action_col1:
+        btn_save = st.button("🚀 حفظ العقار والتحقق", type="primary", use_container_width=True)
+        
+    with action_col2:
+        search_query = st.text_input("", placeholder="البحث الفوري عن عقار وتعديله...", key="search_modify_field").strip()
+        
+    with action_col3:
+        if not df.empty:
+            sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
+            csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
+            st.download_button(label="🟢 تنزيل سجل CSV النهائي", data=csv_data, file_name="KhatibAlami_Midan_Data.csv", mime="text/csv", use_container_width=True)
+        else:
+            st.button("🟢 سجل CSV فارغ حالياً", disabled=True, use_container_width=True)
 
     # كود الجافا سكريبت الذكي لحماية حقول البحث والتعديل من خطف الماوس
     st.components.v1.html("""<script>
@@ -85,7 +104,7 @@ with col2:
                 if (inputs[i].getAttribute('placeholder') === 'ادخل رقم العقار الحالي....') propInput = inputs[i];
                 if (inputs[i].getAttribute('placeholder') === 'البحث الفوري عن عقار وتعديله...') searchInput = inputs[i];
             }
-            for (var j = 0; j < buttons.length; j++) { if (buttons[j].textContent.includes('🚀 زر حفظ العقار والتحقق من التكرار')) saveBtn = buttons[j]; }
+            for (var j = 0; j < buttons.length; j++) { if (buttons[j].textContent.includes('🚀 حفظ العقار والتحقق')) saveBtn = buttons[j]; }
             
             var activeInput = mainDoc.activeElement;
             
@@ -114,12 +133,12 @@ with col2:
         }; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);
     </script>""", height=0)
 
-    # معالجة وحفظ البيانات الجديدة
+    # معالجة وحفظ البيانات الجديدة عند الضغط على زر الحفظ الجانبي
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
             if is_duplicate:
-                st.error("❌ إلغاء: هذا العقار مسجل سابقاً in هذه المنطقة!")
+                st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
@@ -130,7 +149,9 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    # حساب العدادات بدقة
+    st.markdown("---")
+
+    # حساب العدادات بدقة وعرضها
     total_properties_count = len(df)
     region_properties_count = 0
     if region_input:
@@ -140,11 +161,7 @@ with col2:
     with stat_col1: st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     with stat_col2: st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
-    # قسم البحث والتعديل الفوري الذكي
-    st.markdown("---")
-    
-    search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", placeholder="البحث الفوري عن عقار وتعديله...", key="search_modify_field").strip()
-    
+    # تشغيل منطق التعديل الفوري تحت السطر مباشرة في حال وجود نص داخل خانة البحث الجانبية
     if search_query:
         matched_records = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | df["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
         
@@ -169,13 +186,4 @@ with col2:
                         else:
                             st.error("⚠️ لا يمكن ترك الحقول فارغة أثناء التعديل.")
         else:
-            st.warning("ℹ️ لم يتم العثور على أي عقار مطابق للرقم المكتوب.")
-
-    # زر تحميل وتنزيل الملف النهائي مباشرة (تم حذف العنوان بطلبك)
-    if not df.empty:
-        st.markdown("---")
-        
-        sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-        csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
-        
-        st.download_button(label="🟢 تحميل وتنزيل سجلات الإكسيل الكاملة المحدثة والمنظمة (CSV)", data=csv_data, file_name="KhatibAlami_Midan_Data.csv", mime="text/csv")
+            st.warning("ℹ️ لم يتم العثور على أي عقار مطابق.")
