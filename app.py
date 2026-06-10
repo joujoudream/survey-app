@@ -41,7 +41,7 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>KhatibAlami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v4.4</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v4.5</div></div>""", unsafe_allow_html=True)
     
     # خانة الرفع تظهر وتختفي ذكياً عند النجاح
     if not st.session_state.file_uploaded:
@@ -74,7 +74,7 @@ with col2:
     
     btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
 
-    # كود الجافا سكريبت الذكي المصلح والمطابق تماماً لنصوص الواجهة الجديدة
+    # كود الجافا سكريبت الذكي لحماية حقول البحث والتعديل من خطف الماوس
     st.components.v1.html("""<script>
         var attachMidanEvents = function() {
             var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');
@@ -119,7 +119,7 @@ with col2:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
             if is_duplicate:
-                st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
+                st.error("❌ إلغاء: هذا العقار مسجل سابقاً in هذه المنطقة!")
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
@@ -140,9 +140,9 @@ with col2:
     with stat_col1: st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     with stat_col2: st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
+    # قسم البحث والتعديل الفوري الذكي
     st.markdown("---")
     
-    # حقل البحث مع ربط الـ placeholder بالـ JavaScript لمنع الأخطاء تماماً
     search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", placeholder="البحث الفوري عن عقار وتعديله...", key="search_modify_field").strip()
     
     if search_query:
@@ -171,10 +171,9 @@ with col2:
         else:
             st.warning("ℹ️ لم يتم العثور على أي عقار مطابق للرقم المكتوب.")
 
-    # زر تحميل وتنزيل الملف النهائي المرتب تلقائياً (Sorting)
+    # زر تحميل وتنزيل الملف النهائي مباشرة (تم حذف العنوان بطلبك)
     if not df.empty:
         st.markdown("---")
-        st.subheader("📥 استخراج وتحميل الملف النهائي")
         
         sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
         csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
