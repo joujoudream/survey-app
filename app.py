@@ -41,7 +41,7 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>KhatibAlami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v3.8</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v3.9</div></div>""", unsafe_allow_html=True)
     
     # الـشرط الذكي: خانة الرفع تظهر فقط إذا لم يتم رفع ملف بعد
     if not st.session_state.file_uploaded:
@@ -58,12 +58,12 @@ with col2:
             except Exception as e:
                 st.error("❌ حدث خطأ أثناء قراءة الملف.")
     
-    # هنا تبدأ واجهة البرنامج النظيفة بالظهور بعد الرفع مباشرة
+    # جلب قاعدة البيانات الحالية
     df = st.session_state.local_db
 
     st.markdown("---")
-    st.subheader("📝 إدخال عقار جديد")
     
+    # حقول إدخال البيانات مباشرة (تم حذف عنوان "ادخال عقار جديد")
     c1, c2 = st.columns(2)
     with c1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="ادخل اسم المنطقة الحالية ....", key="region_field").strip()
@@ -133,7 +133,7 @@ with col2:
         st.markdown("---")
         st.subheader("📥 استخراج وتحميل الملف النهائي")
         
-        # الترتيب التلقائي للبيانات (Sorting)
+        # الترتيب التلقائي للبيانات (Sorting) بناء على المنطقة ثم رقم العقار
         sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
         csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
         
