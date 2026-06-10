@@ -41,7 +41,7 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>KhatibAlami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v4.1</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v4.2</div></div>""", unsafe_allow_html=True)
     
     # خانة الرفع تظهر وتختفي ذكياً عند النجاح
     if not st.session_state.file_uploaded:
@@ -74,7 +74,7 @@ with col2:
     
     btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
 
-    # كود الجافا سكريبت المطور: يمنع خطف المؤشر إذا كنت تكتب داخل حقل البحث أو حقول التعديل!
+    # كود الجافا سكريبت الذكي المطور جداً: يمنع خطف الماوس نهائياً إذا تم فتح قسم البحث والتعديل
     st.components.v1.html("""<script>
         var attachMidanEvents = function() {
             var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');
@@ -87,11 +87,19 @@ with col2:
             }
             for (var j = 0; j < buttons.length; j++) { if (buttons[j].textContent.includes('🚀 زر حفظ العقار والتحقق من التكرار')) saveBtn = buttons[j]; }
             
-            // شرط ذكي جداً: لا تقم بالتركيز التلقائي على المنطقة إذا كان ريس وليد يكتب حالياً في البحث أو التعديل
             var activeInput = mainDoc.activeElement;
-            var isEditingOrSearching = (activeInput && (activeInput === searchInput || activeInput.id.includes('edit_')));
             
-            if (regInput && !isEditingOrSearching && activeInput !== regInput && activeInput !== propInput) {
+            // شرط الحماية الحديدي: إذا كان هناك نص مكتوب في البحث، أو الماوس داخل البحث، أو داخل خانات التعديل السفلى -> لا تلمس الماوس أبداً!
+            var isUserInSearchOrEdit = false;
+            if (searchInput && (searchInput.value.trim() !== "" || activeInput === searchInput)) {
+                isUserInSearchOrEdit = true;
+            }
+            if (activeInput && (activeInput.id.includes('edit_reg_') || activeInput.id.includes('edit_prop_'))) {
+                isUserInSearchOrEdit = true;
+            }
+            
+            // التركيز التلقائي يعمل فقط إذا كان المستخدم في الأعلى ولا يقوم بعملية بحث أو تعديل في الأسفل
+            if (regInput && !isUserInSearchOrEdit && activeInput !== regInput && activeInput !== propInput) {
                 regInput.focus();
             }
             
@@ -134,7 +142,7 @@ with col2:
     with stat_col1: st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     with stat_col2: st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
-    # قسم البحث والتعديل الفوري الذكي المصلح بالكامل
+    # قسم البحث والتعديل الفوري الذكي
     st.markdown("---")
     st.subheader("🔍 البحث الفوري والتعديل الذكي على العقارات")
     
@@ -150,6 +158,7 @@ with col2:
                 with st.expander(f"⚙️ تعديل العقار رقم: {row['رقم العقار']} في منطقة: {row['المنطقة']}", expanded=True):
                     edit_c1, edit_c2 = st.columns(2)
                     with edit_c1:
+                        # تم إعطاء مفاتيح فريدة ومعرفة برمجياً لمنع خطف المؤشر
                         new_edit_region = st.text_input("تعديل اسم المنطقة", value=row['المنطقة'], key=f"edit_reg_{idx}").strip()
                     with edit_c2:
                         new_edit_prop = st.text_input("تعديل رقم العقار", value=row['رقم العقار'], key=f"edit_prop_{idx}").strip()
