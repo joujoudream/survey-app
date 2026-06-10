@@ -21,16 +21,19 @@ st.markdown("""
     .metric-lbl { font-size: 13px; opacity: 0.9; }
     div.stButton > button { border: none; padding: 11px 25px; border-radius: 10px; font-weight: 700; transition: all 0.3s ease; width: 100%; margin-top: 24px; }
     
-    /* الكود السحري لحذف وإخفاء جملة Press Enter to Apply تماماً من الواجهة */
+    /* حذف وإخفاء جملة Press Enter to Apply تماماً من الواجهة */
     [data-testid="stInputInstructions"] {
         display: none !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# إدارة قاعدة البيانات في الذاكرة
+# إدارة قاعدة البيانات وحالة الرفع في الـ Session State
 if "local_db" not in st.session_state:
     st.session_state.local_db = pd.DataFrame(columns=["المنطقة", "رقم العقار"])
+
+if "file_uploaded" not in st.session_state:
+    st.session_state.file_uploaded = False
 
 if "last_region" not in st.session_state: st.session_state.last_region = ""
 if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = False
@@ -38,19 +41,24 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>KhatibAlami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v3.7</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v3.8</div></div>""", unsafe_allow_html=True)
     
-    st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
-    uploaded_file = st.file_uploader("اختر ملف الإكسيل (CSV) الذي قمت بتنزيله سابقاً لاستعادة الأعداد والمتابعة:", type=["csv"])
+    # الـشرط الذكي: خانة الرفع تظهر فقط إذا لم يتم رفع ملف بعد
+    if not st.session_state.file_uploaded:
+        st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
+        uploaded_file = st.file_uploader("اختر ملف الإكسيل (CSV) الذي قمت بتنزيله سابقاً لاستعادة الأعداد والمتابعة:", type=["csv"])
+        
+        if uploaded_file is not None:
+            try:
+                uploaded_df = pd.read_csv(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
+                st.session_state.local_db = uploaded_df
+                st.session_state.file_uploaded = True  # تغيير الحالة ليتم إخفاء الخانة فوراً
+                st.success("✅ تم تحميل الملف بنجاح واستعادة كافة البيانات!")
+                st.rerun()  # إعادة تشغيل الشاشة لتطبيق الاختفاء دغري
+            except Exception as e:
+                st.error("❌ حدث خطأ أثناء قراءة الملف.")
     
-    if uploaded_file is not None:
-        try:
-            uploaded_df = pd.read_csv(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
-            st.session_state.local_db = uploaded_df
-            st.success("✅ تم تحميل الملف بنجاح واستعادة كافة البيانات!")
-        except Exception as e:
-            st.error("❌ حدث خطأ أثناء قراءة الملف.")
-
+    # هنا تبدأ واجهة البرنامج النظيفة بالظهور بعد الرفع مباشرة
     df = st.session_state.local_db
 
     st.markdown("---")
@@ -67,7 +75,7 @@ with col2:
     
     btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
 
-    # كود الجافا سكريبت الذكي لتوجه المتصفح تلقائياً وخطف التركيز لخانة اسم المنطقة
+    # كود الجافا سكريبت الذكي لنقل التركيز تلقائياً لخانة اسم المنطقة ومنع أي تشتيت
     st.components.v1.html("""<script>
         var attachMidanEvents = function() {
             var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');
@@ -78,7 +86,7 @@ with col2:
             }
             for (var j = 0; j < buttons.length; j++) { if (buttons[j].textContent.includes('🚀 زر حفظ العقار والتحقق من التكرار')) saveBtn = buttons[j]; }
             
-            // التركيز التلقائي عند فتح البرنامج أو الرفع
+            // تركيز تلقائي على خانة اسم المنطقة عند اختفاء خانة الرفع
             if (regInput && mainDoc.activeElement !== regInput && mainDoc.activeElement !== propInput) {
                 regInput.focus();
             }
@@ -111,7 +119,7 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    # حساب العدادات
+    # حساب العدادات بدقة
     total_properties_count = len(df)
     region_properties_count = 0
     if region_input:
@@ -125,8 +133,8 @@ with col2:
         st.markdown("---")
         st.subheader("📥 استخراج وتحميل الملف النهائي")
         
-        # الترتيب التلقائي للبيانات
+        # الترتيب التلقائي للبيانات (Sorting)
         sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
         csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
         
-        st.download_button(label="🟢 تحميل وتنزيل سجلات الإكسيل الكاملة (CSV)", data=csv_data, file_name="KhatibAlami_Midan_Data.csv", mime="text/csv")
+        st.download_button(label="🟢 تحميل وتنزيل سجلات الإكسيل الكاملة المحدثة (CSV)", data=csv_data, file_name="KhatibAlami_Midan_Data.csv", mime="text/csv")
