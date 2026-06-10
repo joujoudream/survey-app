@@ -3,33 +3,46 @@ import pandas as pd
 
 st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# كود التنسيق الجمالي المدمج مع حل مشكلة قص الحروف العلوية نهائياً
+# كود التنسيق وتوسيع المربع الأبيض ليكمل المربع العلوي بشكل متناسق ومريح للعين
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
     html, body, [class*="css"] { font-family: 'Tajawal', sans-serif; direction: rtl; text-align: right; }
     .stApp { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
     
-    /* إصلاح كارت الهيدر بإعطاء مساحة علوية (Padding) كافية لمنع تآكل الاسم */
+    /* ضبط الهيدر العلوي الأساسي */
     .header-card { 
         background-color: #EBF8FF; 
-        padding: 24px 12px 16px 12px; /* زيادة البطانة العلوية لمنع الاقتصاص */
+        padding: 24px 12px 16px 12px; 
         border-radius: 12px; 
         box-shadow: 0 6px 12px rgba(30, 58, 138, 0.08); 
         margin-top: 5px; 
         margin-bottom: 2px; 
         text-align: center; 
         border: 1px solid #BEE3F8; 
-        overflow: visible !important; /* السماح للنص بالظهور بالكامل دون قص */
+        overflow: visible !important; 
     }
     .company-header { color: #1E3A8A; font-family: 'Arial', sans-serif; font-size: 30px; font-weight: bold; margin: 0; line-height: 1.2; }
     .company-subtitle { color: #2D3748; font-family: 'Arial', sans-serif; font-size: 16px; font-weight: 500; margin-top: 6px; }
     
-    /* كارت التوقيع المدمج */
-    .main-signature-card { background-color: #ffffff; padding: 4px 12px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); margin-top: 2px; margin-bottom: 8px; border: 1px solid #e2e8f0; max-width: 420px; margin-left: auto; margin-right: auto; }
-    .sig-title { font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #1E3A8A; margin: 0; }
-    .sig-name { font-family: 'Arial', sans-serif; font-size: 13px; font-weight: bold; color: #475569; margin: 1px 0; }
-    .sig-note { font-size: 10px; color: #3b82f6; font-weight: 500; margin: 0; }
+    /* توسيع كارت التوقيع ليطابق عرض العناصر الأساسية ويكمل التصميم بشكل فخم */
+    .main-signature-card { 
+        background-color: #ffffff; 
+        padding: 8px 16px; 
+        border-radius: 10px; 
+        text-align: center; 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04); 
+        margin-top: 4px; 
+        margin-bottom: 12px; 
+        border: 1px solid #e2e8f0; 
+        width: 100%; /* جعل المربع يمتد بالكامل ليتناسق بصرياً */
+        max-width: 550px; /* توازن الحجم العام للمربع تحت الهيدر */
+        margin-left: auto; 
+        margin-right: auto; 
+    }
+    .sig-title { font-family: 'Arial', sans-serif; font-size: 15px; font-weight: bold; color: #1E3A8A; margin: 0; }
+    .sig-name { font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #475569; margin: 2px 0; }
+    .sig-note { font-size: 11px; color: #3b82f6; font-weight: 500; margin: 0; }
     
     /* تنسيق وضغط العدادات الزرقاء */
     .metric-box { background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); color: white; padding: 8px 15px; border-radius: 10px; text-align: center; box-shadow: 0 3px 6px rgba(59, 130, 246, 0.15); margin-top: 2px; margin-bottom: 2px; }
@@ -39,7 +52,7 @@ st.markdown("""
     /* ضبط أحجام الأزرار وتقريبها */
     div.stButton > button, div.stDownloadButton > button { border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; transition: all 0.3s ease; width: 100%; height: 40px; margin-top: 2px; margin-bottom: 2px; }
     
-    /* تقليص الفراغات العامة السفل والعلوية */
+    /* تقليص الفراغات العامة */
     .block-container { padding-top: 0.8rem !important; padding-bottom: 1rem !important; }
     div[data-testid="stVerticalBlock"] > div { depth: 0 !important; margin-bottom: -0.3rem !important; }
     hr { margin-top: 0.4rem !important; margin-bottom: 0.4rem !important; }
@@ -61,9 +74,8 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
-    # كارت الشركة مع الاسم الكامل الواضح بدون اقتصاص
     st.markdown("""<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v5.2</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v5.3</div></div>""", unsafe_allow_html=True)
     
     # خانة الرفع الاحتياطية
     if not st.session_state.file_uploaded:
@@ -113,17 +125,17 @@ with col2:
     if region_input:
         region_properties_count = len(df[df["المنطقة"].str.strip().str.lower() == region_input.lower()])
 
-    # عرض العدادات مدمجة
+    # عرض العدادات مدمجة تحت الأزرار مباشرة
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1: st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     with stat_col2: st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
     st.markdown("---")
 
-    # خانة البحث الفوري
+    # خانة البحث الفوري متراصة تحت العدادات
     search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", placeholder="البحث الفوري عن عقار وتعديله...", key="search_modify_field").strip()
 
-    # كود الجافا سكريبت الذكي لحماية حقول الإدخال ومنع خطف الماوس
+    # كود الجافا سكريبت الذكي لحماية حقول الإدخال
     st.components.v1.html("""<script>
         var attachMidanEvents = function() {
             var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');
