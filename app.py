@@ -210,4 +210,16 @@ with col2:
                     save_edit_btn = st.button("💾 حفظ التعديلات", key=f"save_edit_{idx}")
                     if save_edit_btn:
                         if new_edit_region and new_edit_prop:
-                            # عند التعد
+                            # عند التعديل، التأكد أيضاً أن الرقم الجديد لا يسبب تكراراً مع سجل آخر
+                            check_dup = df[(df["رقم العقار"].str.strip() == new_edit_prop) & (df.index != idx)]
+                            if not check_dup.empty:
+                                st.error(f"❌ خطأ: الرقم الجديد مسجل بالفعل في منطقة [{check_dup.iloc[0]['المنطقة']}]!")
+                            else:
+                                st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
+                                st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
+                                st.success("✅ تم التحديث بنجاح!")
+                                st.rerun()
+                        else:
+                            st.error("⚠️ لا يمكن ترك الحقول فارغة.")
+        else:
+            st.warning("ℹ️ لم يتم العثور على أي عقار مطابق للبحث.")
