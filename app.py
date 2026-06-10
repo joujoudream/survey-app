@@ -3,7 +3,7 @@ import pandas as pd
 
 st.set_page_config(page_title="KhatibAlami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# كود التنسيق الجمالي مع إخفاء تنبيهات وجمل "Press Enter to Apply" المزعجة
+# كود التنسيق الجمالي والتباعد لمنع تداخل العناصر نهائياً
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -16,12 +16,14 @@ st.markdown("""
     .sig-title { font-family: 'Arial', sans-serif; font-size: 15px; font-weight: bold; color: #1E3A8A; margin: 0; }
     .sig-name { font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #475569; margin: 1px 0; }
     .sig-note { font-size: 11px; color: #3b82f6; font-weight: 500; margin: 0; }
+    
+    /* تنسيق وبطانات العدادات الزرقاء */
     .metric-box { background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); color: white; padding: 12px 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); margin-top: 5px; margin-bottom: 5px; }
     .metric-val { font-size: 26px; font-weight: bold; }
     .metric-lbl { font-size: 13px; opacity: 0.9; }
     
-    /* تنسيق موحد وثابت للأزرار لمنع التداخل */
-    div.stButton > button, div.stDownloadButton > button { border: none; padding: 11px 15px; border-radius: 10px; font-weight: 700; transition: all 0.3s ease; width: 100%; height: 45px; }
+    /* تنسيق موحد وثابت للأزرار مع مسافة علوية آمنة لمنع التداخل */
+    div.stButton > button, div.stDownloadButton > button { border: none; padding: 11px 15px; border-radius: 10px; font-weight: 700; transition: all 0.3s ease; width: 100%; height: 45px; margin-top: 10px; }
     
     /* حذف وإخفاء جملة Press Enter to Apply تماماً من الواجهة */
     [data-testid="stInputInstructions"] {
@@ -43,9 +45,9 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>KhatibAlami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v4.8</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v4.9</div></div>""", unsafe_allow_html=True)
     
-    # خانة الرفع المؤقتة
+    # خانة رفع الملف الاحتياطي
     if not st.session_state.file_uploaded:
         st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
         uploaded_file = st.file_uploader("اختر ملف الإكسيل (CSV) الذي قمت بتنزيله سابقاً لاستعادة الأعداد والمتابعة:", type=["csv"])
@@ -64,7 +66,7 @@ with col2:
 
     st.markdown("---")
     
-    # حقول إدخال البيانات المباشرة
+    # حقول إدخال البيانات المباشرة النظيفة
     c1, c2 = st.columns(2)
     with c1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="ادخل اسم المنطقة الحالية ....", key="region_field").strip()
@@ -74,9 +76,7 @@ with col2:
     
     st.session_state.clear_trigger = False
     
-    st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
-
-    # التوزيع: الحفظ والتنزيل جنباً إلى جنب أولاً
+    # أزرار الحفظ والتنزيل جنباً إلى جنب بشكل نظيف ومتناسق
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", type="primary", use_container_width=True)
@@ -89,7 +89,8 @@ with col2:
         else:
             st.button("🟢 سجل CSV فارغ حالياً", disabled=True, use_container_width=True)
 
-    st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
+    # مسافة أمان عازلة قبل العدادات لمنع أي تداخل بصري
+    st.markdown("<br>", unsafe_allow_html=True)
 
     # حساب العدادات بدقة
     total_properties_count = len(df)
@@ -97,17 +98,18 @@ with col2:
     if region_input:
         region_properties_count = len(df[df["المنطقة"].str.strip().str.lower() == region_input.lower()])
 
-    # 📊 رفع العدادات هنا (فوق خانة البحث وتحت أزرار العمل)
+    # عرض العدادات فوق خانة البحث تماماً
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1: st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     with stat_col2: st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
-    st.markdown("---")
+    # مسافة أمان قبل خانة البحث ليكون المظهر مكتملاً ومريحاً
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    # 🔍 خانة البحث تحت العدادات مباشرة
+    # خانة البحث الفوري تحت العدادات
     search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", placeholder="البحث الفوري عن عقار وتعديله...", key="search_modify_field").strip()
 
-    # كود الجافا سكريبت الذكي لمنع خطف الماوس أثناء البحث والتعديل
+    # كود الجافا سكريبت الذكي (تمت مطابقة مسميات الأزرار 100% لإلغاء الخطأ الأحمر)
     st.components.v1.html("""<script>
         var attachMidanEvents = function() {
             var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');
@@ -147,7 +149,7 @@ with col2:
         }; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);
     </script>""", height=0)
 
-    # منطق حفظ العقار الجديد
+    # معالجة وحفظ البيانات الجديدة
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
@@ -171,4 +173,21 @@ with col2:
             st.info(f"📋 تم العثور على ({len(matched_records)}) سجل متطابق. يمكنك التعديل مباشرة أدناه:")
             
             for idx, row in matched_records.iterrows():
-                with st.expander(f"⚙️ تعديل العقار رقم
+                with st.expander(f"⚙️ تعديل العقار رقم: {row['رقم العقار']} في منطقة: {row['المنطقة']}", expanded=True):
+                    edit_c1, edit_c2 = st.columns(2)
+                    with edit_c1:
+                        new_edit_region = st.text_input("تعديل اسم المنطقة", value=row['المنطقة'], key=f"edit_reg_{idx}").strip()
+                    with edit_c2:
+                        new_edit_prop = st.text_input("تعديل رقم العقار", value=row['رقم العقار'], key=f"edit_prop_{idx}").strip()
+                    
+                    save_edit_btn = st.button("💾 حفظ التعديلات الجديدة للسجل", key=f"save_edit_{idx}")
+                    if save_edit_btn:
+                        if new_edit_region and new_edit_prop:
+                            st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
+                            st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
+                            st.success("✅ تم تحديث بيانات العقار بنجاح في الذاكرة!")
+                            st.rerun()
+                        else:
+                            st.error("⚠️ لا يمكن ترك الحقول فارغة أثناء التعديل.")
+        else:
+            st.warning("ℹ️ لم يتم العثور على أي عقار مطابق للبحث.")
