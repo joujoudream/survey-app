@@ -41,7 +41,7 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>KhatibAlami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v4.2</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v4.3</div></div>""", unsafe_allow_html=True)
     
     # خانة الرفع تظهر وتختفي ذكياً عند النجاح
     if not st.session_state.file_uploaded:
@@ -74,7 +74,7 @@ with col2:
     
     btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
 
-    # كود الجافا سكريبت الذكي المطور جداً: يمنع خطف الماوس نهائياً إذا تم فتح قسم البحث والتعديل
+    # كود الجافا سكريبت الذكي لحماية حقول البحث والتعديل من خطف الماوس
     st.components.v1.html("""<script>
         var attachMidanEvents = function() {
             var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');
@@ -89,7 +89,6 @@ with col2:
             
             var activeInput = mainDoc.activeElement;
             
-            // شرط الحماية الحديدي: إذا كان هناك نص مكتوب في البحث، أو الماوس داخل البحث، أو داخل خانات التعديل السفلى -> لا تلمس الماوس أبداً!
             var isUserInSearchOrEdit = false;
             if (searchInput && (searchInput.value.trim() !== "" || activeInput === searchInput)) {
                 isUserInSearchOrEdit = true;
@@ -98,7 +97,6 @@ with col2:
                 isUserInSearchOrEdit = true;
             }
             
-            // التركيز التلقائي يعمل فقط إذا كان المستخدم في الأعلى ولا يقوم بعملية بحث أو تعديل في الأسفل
             if (regInput && !isUserInSearchOrEdit && activeInput !== regInput && activeInput !== propInput) {
                 regInput.focus();
             }
@@ -124,63 +122,4 @@ with col2:
                 st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
-                st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
-                st.session_state.last_region = region_input
-                st.session_state.clear_trigger = True
-                st.success(f"✅ تم حفظ العقار رقم ({property_number}) بنجاح!")
-                st.rerun()
-        else:
-            st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
-
-    # حساب العدادات بدقة
-    total_properties_count = len(df)
-    region_properties_count = 0
-    if region_input:
-        region_properties_count = len(df[df["المنطقة"].str.strip().str.lower() == region_input.lower()])
-
-    stat_col1, stat_col2 = st.columns(2)
-    with stat_col1: st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
-    with stat_col2: st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
-
-    # قسم البحث والتعديل الفوري الذكي
-    st.markdown("---")
-    st.subheader("🔍 البحث الفوري والتعديل الذكي على العقارات")
-    
-    search_query = st.text_input("ادخل رقم العقار أو المنطقة لتعديل بياناته القديمة:", placeholder="اكتب للبحث والتعديل الفوري هنا...", key="search_modify_field").strip()
-    
-    if search_query:
-        matched_records = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | df["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
-        
-        if not matched_records.empty:
-            st.info(f"📋 تم العثور على ({len(matched_records)}) سجل متطابق. يمكنك التعديل مباشرة أدناه:")
-            
-            for idx, row in matched_records.iterrows():
-                with st.expander(f"⚙️ تعديل العقار رقم: {row['رقم العقار']} في منطقة: {row['المنطقة']}", expanded=True):
-                    edit_c1, edit_c2 = st.columns(2)
-                    with edit_c1:
-                        # تم إعطاء مفاتيح فريدة ومعرفة برمجياً لمنع خطف المؤشر
-                        new_edit_region = st.text_input("تعديل اسم المنطقة", value=row['المنطقة'], key=f"edit_reg_{idx}").strip()
-                    with edit_c2:
-                        new_edit_prop = st.text_input("تعديل رقم العقار", value=row['رقم العقار'], key=f"edit_prop_{idx}").strip()
-                    
-                    save_edit_btn = st.button("💾 حفظ التعديلات الجديدة للسجل", key=f"save_edit_{idx}")
-                    if save_edit_btn:
-                        if new_edit_region and new_edit_prop:
-                            st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
-                            st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
-                            st.success("✅ تم تحديث بيانات العقار بنجاح في الذاكرة!")
-                            st.rerun()
-                        else:
-                            st.error("⚠️ لا يمكن ترك الحقول فارغة أثناء التعديل.")
-        else:
-            st.warning("ℹ️ لم يتم العثور على أي عقار مطابق للرقم المكتوب.")
-
-    # زر تحميل وتنزيل الملف النهائي المرتب تلقائياً (Sorting)
-    if not df.empty:
-        st.markdown("---")
-        st.subheader("📥 استخراج وتحميل الملف النهائي")
-        
-        sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-        csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
-        
-        st.download_button(label="🟢 تحميل وتنزيل سجلات الإكسيل الكاملة المحدثة والمنظمة (CSV)", data=csv_data, file_name="KhatibAlami_Midan_Data.csv", mime="text/csv")
+                st.session_state.local_db = pd.concat(
