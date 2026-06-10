@@ -41,9 +41,9 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>KhatibAlami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v4.0</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v4.1</div></div>""", unsafe_allow_html=True)
     
-    # خانة الرفع تظهر فقط إذا لم يتم رفع ملف بعد، وتختفي فوراً عند النجاح
+    # خانة الرفع تظهر وتختفي ذكياً عند النجاح
     if not st.session_state.file_uploaded:
         st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
         uploaded_file = st.file_uploader("اختر ملف الإكسيل (CSV) الذي قمت بتنزيله سابقاً لاستعادة الأعداد والمتابعة:", type=["csv"])
@@ -58,7 +58,6 @@ with col2:
             except Exception as e:
                 st.error("❌ حدث خطأ أثناء قراءة الملف.")
     
-    # جلب البيانات الحالية
     df = st.session_state.local_db
 
     st.markdown("---")
@@ -75,18 +74,24 @@ with col2:
     
     btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
 
-    # كود الجافا سكريبت الذكي للتركيز التلقائي والتنقل السريع بالإنتر
+    # كود الجافا سكريبت المطور: يمنع خطف المؤشر إذا كنت تكتب داخل حقل البحث أو حقول التعديل!
     st.components.v1.html("""<script>
         var attachMidanEvents = function() {
             var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');
-            var regInput = null; var propInput = null; var saveBtn = null;
+            var regInput = null; var propInput = null; var saveBtn = null; var searchInput = null;
+            
             for (var i = 0; i < inputs.length; i++) {
                 if (inputs[i].getAttribute('placeholder') === 'ادخل اسم المنطقة الحالية ....') regInput = inputs[i];
                 if (inputs[i].getAttribute('placeholder') === 'ادخل رقم العقار الحالي....') propInput = inputs[i];
+                if (inputs[i].getAttribute('placeholder') === 'اكتب للبحث والتعديل الفوري هنا...') searchInput = inputs[i];
             }
             for (var j = 0; j < buttons.length; j++) { if (buttons[j].textContent.includes('🚀 زر حفظ العقار والتحقق من التكرار')) saveBtn = buttons[j]; }
             
-            if (regInput && mainDoc.activeElement !== regInput && mainDoc.activeElement !== propInput) {
+            // شرط ذكي جداً: لا تقم بالتركيز التلقائي على المنطقة إذا كان ريس وليد يكتب حالياً في البحث أو التعديل
+            var activeInput = mainDoc.activeElement;
+            var isEditingOrSearching = (activeInput && (activeInput === searchInput || activeInput.id.includes('edit_')));
+            
+            if (regInput && !isEditingOrSearching && activeInput !== regInput && activeInput !== propInput) {
                 regInput.focus();
             }
             
@@ -129,21 +134,19 @@ with col2:
     with stat_col1: st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     with stat_col2: st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
-    # إضافة الميزة الجديدة: قسم البحث والتعديل الفوري الذكي
+    # قسم البحث والتعديل الفوري الذكي المصلح بالكامل
     st.markdown("---")
     st.subheader("🔍 البحث الفوري والتعديل الذكي على العقارات")
     
     search_query = st.text_input("ادخل رقم العقار أو المنطقة لتعديل بياناته القديمة:", placeholder="اكتب للبحث والتعديل الفوري هنا...", key="search_modify_field").strip()
     
     if search_query:
-        # البحث في قاعدة البيانات عن قيم مطابقة
         matched_records = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | df["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
         
         if not matched_records.empty:
             st.info(f"📋 تم العثور على ({len(matched_records)}) سجل متطابق. يمكنك التعديل مباشرة أدناه:")
             
             for idx, row in matched_records.iterrows():
-                # عمل صندوق منسدل لكل سجل يتم العثور عليه لتسهيل التعديل
                 with st.expander(f"⚙️ تعديل العقار رقم: {row['رقم العقار']} في منطقة: {row['المنطقة']}", expanded=True):
                     edit_c1, edit_c2 = st.columns(2)
                     with edit_c1:
@@ -154,7 +157,6 @@ with col2:
                     save_edit_btn = st.button("💾 حفظ التعديلات الجديدة للسجل", key=f"save_edit_{idx}")
                     if save_edit_btn:
                         if new_edit_region and new_edit_prop:
-                            # تحديث السجل المعدل في مكانه الفعلي داخل الـ DataFrame
                             st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
                             st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
                             st.success("✅ تم تحديث بيانات العقار بنجاح في الذاكرة!")
@@ -169,7 +171,6 @@ with col2:
         st.markdown("---")
         st.subheader("📥 استخراج وتحميل الملف النهائي")
         
-        # الترتيب التلقائي للبيانات بناءً على اسم المنطقة أولاً ثم رقم العقار تصاعدياً
         sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
         csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
         
