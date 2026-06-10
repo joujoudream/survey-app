@@ -3,29 +3,26 @@ import pandas as pd
 
 st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# معالجة هوامش موقع Streamlit الافتراضية لإنهاء تآكل المربع من الأعلى
+# التنسيقات وإلغاء التنبيهات الافتراضية تماماً
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
     html, body, [class*="css"] { font-family: 'Tajawal', sans-serif; direction: rtl; text-align: right; }
     .stApp { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
     
-    /* إخفاء الهيدر الشفاف التلقائي الخاص بـ Streamlit والذي يتسبب في قَص التصميم */
     header[data-testid="stHeader"] { background: transparent !important; height: 0px !important; display: none !important; }
     
-    /* ضبط حاوية الصفحة لتبدأ من مساحة مريحة وغير ملتصقة بالسقف */
     .block-container { 
-        padding-top: 2.5rem !important; /* دفع التصميم بالكامل لأسفل لمنع تآكله */
+        padding-top: 2.5rem !important; 
         padding-bottom: 1rem !important; 
     }
     
-    /* ضبط كارت الهيدر ليظهر مكتملاً ومحاطاً من جميع الجهات */
     .header-card { 
         background-color: #EBF8FF; 
         padding: 24px 12px 20px 12px; 
         border-radius: 12px; 
         box-shadow: 0 6px 12px rgba(30, 58, 138, 0.08); 
-        margin-top: 10px; /* مسافة أمان إضافية */
+        margin-top: 10px; 
         margin-bottom: 2px; 
         text-align: center; 
         border: 1px solid #BEE3F8; 
@@ -34,7 +31,6 @@ st.markdown("""
     .company-header { color: #1E3A8A; font-family: 'Arial', sans-serif; font-size: 30px; font-weight: bold; margin: 0; line-height: 1.2; }
     .company-subtitle { color: #2D3748; font-family: 'Arial', sans-serif; font-size: 16px; font-weight: 500; margin-top: 6px; }
     
-    /* كارت التوقيع الممتد والمتناسق */
     .main-signature-card { 
         background-color: #ffffff; 
         padding: 8px 16px; 
@@ -53,24 +49,20 @@ st.markdown("""
     .sig-name { font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #475569; margin: 2px 0; }
     .sig-note { font-size: 11px; color: #3b82f6; font-weight: 500; margin: 0; }
     
-    /* تنسيق وضغط العدادات الزرقاء */
     .metric-box { background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); color: white; padding: 8px 15px; border-radius: 10px; text-align: center; box-shadow: 0 3px 6px rgba(59, 130, 246, 0.15); margin-top: 2px; margin-bottom: 2px; }
     .metric-val { font-size: 22px; font-weight: bold; }
     .metric-lbl { font-size: 12px; opacity: 0.9; }
     
-    /* ضبط أحجام الأزرار وتقريبها */
     div.stButton > button, div.stDownloadButton > button { border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; transition: all 0.3s ease; width: 100%; height: 40px; margin-top: 2px; margin-bottom: 2px; }
     
-    /* تقليص الفراغات العامة السفلية وتراص الأسطر */
     div[data-testid="stVerticalBlock"] > div { depth: 0 !important; margin-bottom: -0.3rem !important; }
     hr { margin-top: 0.4rem !important; margin-bottom: 0.4rem !important; }
     
-    /* إخفاء جملة Press Enter to Apply */
-    [data-testid="stInputInstructions"] { display: none !important; }
+    /* إلغاء ومنع ظهور جملة الإدخال الافتراضية نهائياً لعدم تشتيت النظر */
+    [data-testid="stInputInstructions"] { display: none !important; visibility: hidden !important; }
     </style>
 """, unsafe_allow_html=True)
 
-# إدارة قاعدة البيانات وحالة الرفع في الـ Session State
 if "local_db" not in st.session_state:
     st.session_state.local_db = pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
@@ -83,9 +75,8 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v5.4</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v5.5</div></div>""", unsafe_allow_html=True)
     
-    # خانة الرفع الاحتياطية
     if not st.session_state.file_uploaded:
         st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
         uploaded_file = st.file_uploader("اختر ملف الإكسيل (CSV) الذي قمت بتنزيله سابقاً لاستعادة الأعداد والمتابعة:", type=["csv"])
@@ -104,7 +95,6 @@ with col2:
 
     st.markdown("---")
     
-    # حقول إدخال البيانات المباشرة
     c1, c2 = st.columns(2)
     with c1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="ادخل اسم المنطقة الحالية ....", key="region_field").strip()
@@ -114,7 +104,6 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # أزرار الحفظ والتنزيل جنباً إلى جنب
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", type="primary", use_container_width=True)
@@ -127,23 +116,20 @@ with col2:
         else:
             st.button("🟢 سجل CSV فارغ حالياً", disabled=True, use_container_width=True)
 
-    # حساب العدادات بدقة
     total_properties_count = len(df)
     region_properties_count = 0
     if region_input:
         region_properties_count = len(df[df["المنطقة"].str.strip().str.lower() == region_input.lower()])
 
-    # عرض العدادات مدمجة
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1: st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     with stat_col2: st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
     st.markdown("---")
 
-    # خانة البحث الفوري
     search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", placeholder="البحث الفوري عن عقار وتعديله...", key="search_modify_field").strip()
 
-    # كود الجافا سكريبت الذكي لحماية حقول الإدخال
+    # كود الجافا سكريبت المحسن لمنع طلب Enter مرتين وللإدخال الفوري المباشر
     st.components.v1.html("""<script>
         var attachMidanEvents = function() {
             var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');
@@ -165,18 +151,33 @@ with col2:
             
             if (regInput && propInput) {
                 regInput.removeEventListener('keydown', window.regMidanHandler);
-                window.regMidanHandler = function(e) { if (e.key === 'Enter') { e.preventDefault(); propInput.focus(); propInput.select(); } };
+                window.regMidanHandler = function(e) { 
+                    if (e.key === 'Enter') { 
+                        e.preventDefault(); 
+                        e.stopPropagation(); // منع انتقال الحدث لـ Streamlit لتجنب طلب التثبيت
+                        propInput.focus(); 
+                        propInput.select(); 
+                    } 
+                };
                 regInput.addEventListener('keydown', window.regMidanHandler);
             }
             if (propInput && saveBtn && regInput) {
                 propInput.removeEventListener('keydown', window.propMidanHandler);
-                window.propMidanHandler = function(e) { if (e.key === 'Enter') { if (propInput.value.trim() !== "") { e.preventDefault(); saveBtn.click(); setTimeout(function() { regInput.focus(); regInput.select(); }, 80); } } };
+                window.propMidanHandler = function(e) { 
+                    if (e.key === 'Enter') { 
+                        if (propInput.value.trim() !== "") { 
+                            e.preventDefault(); 
+                            e.stopPropagation(); // كسر طلب المرة الثانية والإرسال فوراً
+                            saveBtn.click(); 
+                            setTimeout(function() { regInput.focus(); regInput.select(); }, 80); 
+                        } 
+                    } 
+                };
                 propInput.addEventListener('keydown', window.propMidanHandler);
             }
         }; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);
     </script>""", height=0)
 
-    # معالجة وحفظ البيانات الجديدة
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
@@ -192,13 +193,11 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    # تشغيل منطق التعديل المباشر
     if search_query:
         matched_records = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | df["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
         
         if not matched_records.empty:
             st.info(f"📋 تم العثور على ({len(matched_records)}) سجل متطابق:")
-            
             for idx, row in matched_records.iterrows():
                 with st.expander(f"⚙️ تعديل العقار رقم {row['رقم العقار']} في {row['المنطقة']}", expanded=True):
                     edit_c1, edit_c2 = st.columns(2)
