@@ -43,7 +43,7 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>KhatibAlami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v4.7</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v4.8</div></div>""", unsafe_allow_html=True)
     
     # خانة الرفع المؤقتة
     if not st.session_state.file_uploaded:
@@ -76,7 +76,7 @@ with col2:
     
     st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
 
-    # التوزيع الجديد: الحفظ والتنزيل جنباً إلى جنب أولاً
+    # التوزيع: الحفظ والتنزيل جنباً إلى جنب أولاً
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", type="primary", use_container_width=True)
@@ -89,8 +89,22 @@ with col2:
         else:
             st.button("🟢 سجل CSV فارغ حالياً", disabled=True, use_container_width=True)
 
-    # خانة البحث فوق حقول التعديل مفرودة بعرض كامل وممتاز
-    st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top: 15px;'></div>", unsafe_allow_html=True)
+
+    # حساب العدادات بدقة
+    total_properties_count = len(df)
+    region_properties_count = 0
+    if region_input:
+        region_properties_count = len(df[df["المنطقة"].str.strip().str.lower() == region_input.lower()])
+
+    # 📊 رفع العدادات هنا (فوق خانة البحث وتحت أزرار العمل)
+    stat_col1, stat_col2 = st.columns(2)
+    with stat_col1: st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
+    with stat_col2: st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # 🔍 خانة البحث تحت العدادات مباشرة
     search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", placeholder="البحث الفوري عن عقار وتعديله...", key="search_modify_field").strip()
 
     # كود الجافا سكريبت الذكي لمنع خطف الماوس أثناء البحث والتعديل
@@ -149,18 +163,6 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    st.markdown("---")
-
-    # حساب العدادات
-    total_properties_count = len(df)
-    region_properties_count = 0
-    if region_input:
-        region_properties_count = len(df[df["المنطقة"].str.strip().str.lower() == region_input.lower()])
-
-    stat_col1, stat_col2 = st.columns(2)
-    with stat_col1: st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
-    with stat_col2: st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
-
     # تشغيل منطق التعديل المباشر عند وجود نص في البحث
     if search_query:
         matched_records = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | df["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
@@ -169,21 +171,4 @@ with col2:
             st.info(f"📋 تم العثور على ({len(matched_records)}) سجل متطابق. يمكنك التعديل مباشرة أدناه:")
             
             for idx, row in matched_records.iterrows():
-                with st.expander(f"⚙️ تعديل العقار رقم: {row['رقم العقار']} في منطقة: {row['المنطقة']}", expanded=True):
-                    edit_c1, edit_c2 = st.columns(2)
-                    with edit_c1:
-                        new_edit_region = st.text_input("تعديل اسم المنطقة", value=row['المنطقة'], key=f"edit_reg_{idx}").strip()
-                    with edit_c2:
-                        new_edit_prop = st.text_input("تعديل رقم العقار", value=row['رقم العقار'], key=f"edit_prop_{idx}").strip()
-                    
-                    save_edit_btn = st.button("💾 حفظ التعديلات الجديدة للسجل", key=f"save_edit_{idx}")
-                    if save_edit_btn:
-                        if new_edit_region and new_edit_prop:
-                            st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
-                            st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
-                            st.success("✅ تم تحديث بيانات العقار بنجاح في الذاكرة!")
-                            st.rerun()
-                        else:
-                            st.error("⚠️ لا يمكن ترك الحقول فارغة أثناء التعديل.")
-        else:
-            st.warning("ℹ️ لم يتم العثور على أي عقار مطابق للبحث.")
+                with st.expander(f"⚙️ تعديل العقار رقم
