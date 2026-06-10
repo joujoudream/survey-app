@@ -3,7 +3,7 @@ import pandas as pd
 
 st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# التنسيقات وإلغاء التنبيهات الافتراضية تماماً
+# التنسيقات وحماية الواجهة وإلغاء التنبيهات الافتراضية تماماً
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -58,7 +58,6 @@ st.markdown("""
     div[data-testid="stVerticalBlock"] > div { depth: 0 !important; margin-bottom: -0.3rem !important; }
     hr { margin-top: 0.4rem !important; margin-bottom: 0.4rem !important; }
     
-    /* إلغاء ومنع ظهور جملة الإدخال الافتراضية نهائياً لعدم تشتيت النظر */
     [data-testid="stInputInstructions"] { display: none !important; visibility: hidden !important; }
     </style>
 """, unsafe_allow_html=True)
@@ -75,7 +74,7 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v5.5</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v5.6</div></div>""", unsafe_allow_html=True)
     
     if not st.session_state.file_uploaded:
         st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
@@ -129,7 +128,7 @@ with col2:
 
     search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", placeholder="البحث الفوري عن عقار وتعديله...", key="search_modify_field").strip()
 
-    # كود الجافا سكريبت المحسن لمنع طلب Enter مرتين وللإدخال الفوري المباشر
+    # جافا سكريبت لمنع طلب Enter مرتين وللإدخال الفوري بنقرة واحدة
     st.components.v1.html("""<script>
         var attachMidanEvents = function() {
             var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');
@@ -153,10 +152,8 @@ with col2:
                 regInput.removeEventListener('keydown', window.regMidanHandler);
                 window.regMidanHandler = function(e) { 
                     if (e.key === 'Enter') { 
-                        e.preventDefault(); 
-                        e.stopPropagation(); // منع انتقال الحدث لـ Streamlit لتجنب طلب التثبيت
-                        propInput.focus(); 
-                        propInput.select(); 
+                        e.preventDefault(); e.stopPropagation();
+                        propInput.focus(); propInput.select(); 
                     } 
                 };
                 regInput.addEventListener('keydown', window.regMidanHandler);
@@ -166,8 +163,7 @@ with col2:
                 window.propMidanHandler = function(e) { 
                     if (e.key === 'Enter') { 
                         if (propInput.value.trim() !== "") { 
-                            e.preventDefault(); 
-                            e.stopPropagation(); // كسر طلب المرة الثانية والإرسال فوراً
+                            e.preventDefault(); e.stopPropagation();
                             saveBtn.click(); 
                             setTimeout(function() { regInput.focus(); regInput.select(); }, 80); 
                         } 
@@ -178,11 +174,16 @@ with col2:
         }; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);
     </script>""", height=0)
 
+    # معالجة وحفظ البيانات وتطبيق شروط منع التكرار الشاملة
     if btn_save:
         if region_input and property_number:
-            is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
-            if is_duplicate:
-                st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
+            # التحقق من وجود رقم العقار في أي منطقة على إمتداد قاعدة البيانات بالكامل
+            duplicate_record = df[df["رقم العقار"].str.strip() == property_number]
+            
+            if not duplicate_record.empty:
+                # العثور على اسم المنطقة الأولى التي تحتوي على هذا العقار لعرضها في التنبيه
+                existing_region = duplicate_record.iloc[0]["المنطقة"]
+                st.error(f"❌ إلغاء: رقم العقار ({property_number}) مسجل مسبقاً في منطقة [{existing_region}]! ممنوع التكرار في جميع المناطق.")
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
@@ -209,11 +210,4 @@ with col2:
                     save_edit_btn = st.button("💾 حفظ التعديلات", key=f"save_edit_{idx}")
                     if save_edit_btn:
                         if new_edit_region and new_edit_prop:
-                            st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
-                            st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
-                            st.success("✅ تم التحديث بنجاح!")
-                            st.rerun()
-                        else:
-                            st.error("⚠️ لا يمكن ترك الحقول فارغة.")
-        else:
-            st.warning("ℹ️ لم يتم العثور على أي عقار مطابق للبحث.")
+                            # عند التعد
