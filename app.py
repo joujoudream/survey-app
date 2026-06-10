@@ -3,32 +3,39 @@ import pandas as pd
 
 st.set_page_config(page_title="KhatibAlami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# كود التنسيق الجمالي والتباعد لمنع تداخل العناصر نهائياً
+# كود التنسيق الجمالي مع تقليص المسافات والفراغات تماماً لجعل البرنامج مدمجاً
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
     html, body, [class*="css"] { font-family: 'Tajawal', sans-serif; direction: rtl; text-align: right; }
     .stApp { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
-    .header-card { background-color: #EBF8FF; padding: 20px; border-radius: 15px; box-shadow: 0 10px 20px rgba(30, 58, 138, 0.1); margin-top: 15px; margin-bottom: 5px; text-align: center; border: 1px solid #BEE3F8; }
-    .company-header { color: #1E3A8A; font-family: 'Arial', sans-serif; font-size: 32px; font-weight: bold; margin: 0; }
-    .company-subtitle { color: #2D3748; font-family: 'Arial', sans-serif; font-size: 18px; font-weight: 500; margin-top: 5px; }
-    .main-signature-card { background-color: #ffffff; padding: 6px 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); margin-top: 5px; margin-bottom: 15px; border: 1px solid #e2e8f0; max-width: 450px; margin-left: auto; margin-right: auto; }
-    .sig-title { font-family: 'Arial', sans-serif; font-size: 15px; font-weight: bold; color: #1E3A8A; margin: 0; }
-    .sig-name { font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #475569; margin: 1px 0; }
-    .sig-note { font-size: 11px; color: #3b82f6; font-weight: 500; margin: 0; }
     
-    /* تنسيق وبطانات العدادات الزرقاء */
-    .metric-box { background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); color: white; padding: 12px 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); margin-top: 5px; margin-bottom: 5px; }
-    .metric-val { font-size: 26px; font-weight: bold; }
-    .metric-lbl { font-size: 13px; opacity: 0.9; }
+    /* تقريب مسافات الهيدر الكرتي */
+    .header-card { background-color: #EBF8FF; padding: 12px; border-radius: 12px; box-shadow: 0 6px 12px rgba(30, 58, 138, 0.08); margin-top: 5px; margin-bottom: 2px; text-align: center; border: 1px solid #BEE3F8; }
+    .company-header { color: #1E3A8A; font-family: 'Arial', sans-serif; font-size: 28px; font-weight: bold; margin: 0; }
+    .company-subtitle { color: #2D3748; font-family: 'Arial', sans-serif; font-size: 16px; font-weight: 500; margin-top: 2px; }
     
-    /* تنسيق موحد وثابت للأزرار مع مسافة علوية آمنة لمنع التداخل */
-    div.stButton > button, div.stDownloadButton > button { border: none; padding: 11px 15px; border-radius: 10px; font-weight: 700; transition: all 0.3s ease; width: 100%; height: 45px; margin-top: 10px; }
+    /* تقريب مسافات كارت التوقيع */
+    .main-signature-card { background-color: #ffffff; padding: 4px 12px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); margin-top: 2px; margin-bottom: 8px; border: 1px solid #e2e8f0; max-width: 420px; margin-left: auto; margin-right: auto; }
+    .sig-title { font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #1E3A8A; margin: 0; }
+    .sig-name { font-family: 'Arial', sans-serif; font-size: 13px; font-weight: bold; color: #475569; margin: 1px 0; }
+    .sig-note { font-size: 10px; color: #3b82f6; font-weight: 500; margin: 0; }
     
-    /* حذف وإخفاء جملة Press Enter to Apply تماماً من الواجهة */
-    [data-testid="stInputInstructions"] {
-        display: none !important;
-    }
+    /* تنسيق وضغط العدادات الزرقاء */
+    .metric-box { background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); color: white; padding: 8px 15px; border-radius: 10px; text-align: center; box-shadow: 0 3px 6px rgba(59, 130, 246, 0.15); margin-top: 2px; margin-bottom: 2px; }
+    .metric-val { font-size: 22px; font-weight: bold; }
+    .metric-lbl { font-size: 12px; opacity: 0.9; }
+    
+    /* ضبط أحجام الأزرار وتقريبها */
+    div.stButton > button, div.stDownloadButton > button { border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; transition: all 0.3s ease; width: 100%; height: 40px; margin-top: 2px; margin-bottom: 2px; }
+    
+    /* تقليص الفراغات العامة التي يضعها سبريم ليت تلقائياً */
+    .block-container { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+    div[data-testid="stVerticalBlock"] > div { depth: 0 !important; margin-bottom: -0.3rem !important; }
+    hr { margin-top: 0.5rem !important; margin-bottom: 0.5rem !important; }
+    
+    /* إخفاء جملة Press Enter to Apply تماماً */
+    [data-testid="stInputInstructions"] { display: none !important; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -45,9 +52,9 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>KhatibAlami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v4.9</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v5.0</div></div>""", unsafe_allow_html=True)
     
-    # خانة رفع الملف الاحتياطي
+    # خانة الرفع الاحتياطية
     if not st.session_state.file_uploaded:
         st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
         uploaded_file = st.file_uploader("اختر ملف الإكسيل (CSV) الذي قمت بتنزيله سابقاً لاستعادة الأعداد والمتابعة:", type=["csv"])
@@ -66,7 +73,7 @@ with col2:
 
     st.markdown("---")
     
-    # حقول إدخال البيانات المباشرة النظيفة
+    # حقول إدخال البيانات المباشرة
     c1, c2 = st.columns(2)
     with c1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="ادخل اسم المنطقة الحالية ....", key="region_field").strip()
@@ -75,8 +82,8 @@ with col2:
         property_number = st.text_input("🔢 رقم العقار الجديد", value=prop_val, placeholder="ادخل رقم العقار الحالي....", key="property_field").strip()
     
     st.session_state.clear_trigger = False
-    
-    # أزرار الحفظ والتنزيل جنباً إلى جنب بشكل نظيف ومتناسق
+
+    # أزرار الحفظ والتنزيل متراصة جنباً إلى جنب
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", type="primary", use_container_width=True)
@@ -89,27 +96,23 @@ with col2:
         else:
             st.button("🟢 سجل CSV فارغ حالياً", disabled=True, use_container_width=True)
 
-    # مسافة أمان عازلة قبل العدادات لمنع أي تداخل بصري
-    st.markdown("<br>", unsafe_allow_html=True)
-
     # حساب العدادات بدقة
     total_properties_count = len(df)
     region_properties_count = 0
     if region_input:
         region_properties_count = len(df[df["المنطقة"].str.strip().str.lower() == region_input.lower()])
 
-    # عرض العدادات فوق خانة البحث تماماً
+    # عرض العدادات مدمجة ومقربة جداً تحت الأزرار
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1: st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     with stat_col2: st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
-    # مسافة أمان قبل خانة البحث ليكون المظهر مكتملاً ومريحاً
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("---")
 
-    # خانة البحث الفوري تحت العدادات
+    # خانة البحث الفوري متراصة تحت العدادات مباشرة
     search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", placeholder="البحث الفوري عن عقار وتعديله...", key="search_modify_field").strip()
 
-    # كود الجافا سكريبت الذكي (تمت مطابقة مسميات الأزرار 100% لإلغاء الخطأ الأحمر)
+    # كود الجافا سكريبت الذكي لحماية حقول البحث والتعديل من خطف الماوس ومطابق تماماً للأزرار
     st.components.v1.html("""<script>
         var attachMidanEvents = function() {
             var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');
@@ -123,18 +126,11 @@ with col2:
             for (var j = 0; j < buttons.length; j++) { if (buttons[j].textContent.includes('🚀 حفظ العقار والتحقق من التكرار')) saveBtn = buttons[j]; }
             
             var activeInput = mainDoc.activeElement;
-            
             var isUserInSearchOrEdit = false;
-            if (searchInput && (searchInput.value.trim() !== "" || activeInput === searchInput)) {
-                isUserInSearchOrEdit = true;
-            }
-            if (activeInput && (activeInput.id.includes('edit_reg_') || activeInput.id.includes('edit_prop_'))) {
-                isUserInSearchOrEdit = true;
-            }
+            if (searchInput && (searchInput.value.trim() !== "" || activeInput === searchInput)) { isUserInSearchOrEdit = true; }
+            if (activeInput && (activeInput.id.includes('edit_reg_') || activeInput.id.includes('edit_prop_'))) { isUserInSearchOrEdit = true; }
             
-            if (regInput && !isUserInSearchOrEdit && activeInput !== regInput && activeInput !== propInput) {
-                regInput.focus();
-            }
+            if (regInput && !isUserInSearchOrEdit && activeInput !== regInput && activeInput !== propInput) { regInput.focus(); }
             
             if (regInput && propInput) {
                 regInput.removeEventListener('keydown', window.regMidanHandler);
@@ -165,29 +161,29 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    # تشغيل منطق التعديل المباشر عند وجود نص في البحث
+    # تشغيل منطق التعديل المباشر عند وجود نص في البحث (تم إصلاح خطأ السنتكس بالكامل هنا)
     if search_query:
         matched_records = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | df["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
         
         if not matched_records.empty:
-            st.info(f"📋 تم العثور على ({len(matched_records)}) سجل متطابق. يمكنك التعديل مباشرة أدناه:")
+            st.info(f"📋 تم العثور على ({len(matched_records)}) سجل متطابق:")
             
             for idx, row in matched_records.iterrows():
-                with st.expander(f"⚙️ تعديل العقار رقم: {row['رقم العقار']} في منطقة: {row['المنطقة']}", expanded=True):
+                with st.expander(f"⚙️ تعديل العقار رقم {row['رقم العقار']} في {row['المنطقة']}", expanded=True):
                     edit_c1, edit_c2 = st.columns(2)
                     with edit_c1:
                         new_edit_region = st.text_input("تعديل اسم المنطقة", value=row['المنطقة'], key=f"edit_reg_{idx}").strip()
                     with edit_c2:
                         new_edit_prop = st.text_input("تعديل رقم العقار", value=row['رقم العقار'], key=f"edit_prop_{idx}").strip()
                     
-                    save_edit_btn = st.button("💾 حفظ التعديلات الجديدة للسجل", key=f"save_edit_{idx}")
+                    save_edit_btn = st.button("💾 حفظ التعديلات", key=f"save_edit_{idx}")
                     if save_edit_btn:
                         if new_edit_region and new_edit_prop:
                             st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
                             st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
-                            st.success("✅ تم تحديث بيانات العقار بنجاح في الذاكرة!")
+                            st.success("✅ تم التحديث بنجاح!")
                             st.rerun()
                         else:
-                            st.error("⚠️ لا يمكن ترك الحقول فارغة أثناء التعديل.")
+                            st.error("⚠️ لا يمكن ترك الحقول فارغة.")
         else:
             st.warning("ℹ️ لم يتم العثور على أي عقار مطابق للبحث.")
