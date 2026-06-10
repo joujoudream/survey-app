@@ -3,20 +3,29 @@ import pandas as pd
 
 st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# كود التنسيق وتوسيع المربع الأبيض ليكمل المربع العلوي بشكل متناسق ومريح للعين
+# معالجة هوامش موقع Streamlit الافتراضية لإنهاء تآكل المربع من الأعلى
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
     html, body, [class*="css"] { font-family: 'Tajawal', sans-serif; direction: rtl; text-align: right; }
     .stApp { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
     
-    /* ضبط الهيدر العلوي الأساسي */
+    /* إخفاء الهيدر الشفاف التلقائي الخاص بـ Streamlit والذي يتسبب في قَص التصميم */
+    header[data-testid="stHeader"] { background: transparent !important; height: 0px !important; display: none !important; }
+    
+    /* ضبط حاوية الصفحة لتبدأ من مساحة مريحة وغير ملتصقة بالسقف */
+    .block-container { 
+        padding-top: 2.5rem !important; /* دفع التصميم بالكامل لأسفل لمنع تآكله */
+        padding-bottom: 1rem !important; 
+    }
+    
+    /* ضبط كارت الهيدر ليظهر مكتملاً ومحاطاً من جميع الجهات */
     .header-card { 
         background-color: #EBF8FF; 
-        padding: 24px 12px 16px 12px; 
+        padding: 24px 12px 20px 12px; 
         border-radius: 12px; 
         box-shadow: 0 6px 12px rgba(30, 58, 138, 0.08); 
-        margin-top: 5px; 
+        margin-top: 10px; /* مسافة أمان إضافية */
         margin-bottom: 2px; 
         text-align: center; 
         border: 1px solid #BEE3F8; 
@@ -25,7 +34,7 @@ st.markdown("""
     .company-header { color: #1E3A8A; font-family: 'Arial', sans-serif; font-size: 30px; font-weight: bold; margin: 0; line-height: 1.2; }
     .company-subtitle { color: #2D3748; font-family: 'Arial', sans-serif; font-size: 16px; font-weight: 500; margin-top: 6px; }
     
-    /* توسيع كارت التوقيع ليطابق عرض العناصر الأساسية ويكمل التصميم بشكل فخم */
+    /* كارت التوقيع الممتد والمتناسق */
     .main-signature-card { 
         background-color: #ffffff; 
         padding: 8px 16px; 
@@ -35,8 +44,8 @@ st.markdown("""
         margin-top: 4px; 
         margin-bottom: 12px; 
         border: 1px solid #e2e8f0; 
-        width: 100%; /* جعل المربع يمتد بالكامل ليتناسق بصرياً */
-        max-width: 550px; /* توازن الحجم العام للمربع تحت الهيدر */
+        width: 100%; 
+        max-width: 550px; 
         margin-left: auto; 
         margin-right: auto; 
     }
@@ -52,8 +61,7 @@ st.markdown("""
     /* ضبط أحجام الأزرار وتقريبها */
     div.stButton > button, div.stDownloadButton > button { border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; transition: all 0.3s ease; width: 100%; height: 40px; margin-top: 2px; margin-bottom: 2px; }
     
-    /* تقليص الفراغات العامة */
-    .block-container { padding-top: 0.8rem !important; padding-bottom: 1rem !important; }
+    /* تقليص الفراغات العامة السفلية وتراص الأسطر */
     div[data-testid="stVerticalBlock"] > div { depth: 0 !important; margin-bottom: -0.3rem !important; }
     hr { margin-top: 0.4rem !important; margin-bottom: 0.4rem !important; }
     
@@ -75,7 +83,7 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v5.3</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v5.4</div></div>""", unsafe_allow_html=True)
     
     # خانة الرفع الاحتياطية
     if not st.session_state.file_uploaded:
@@ -125,14 +133,14 @@ with col2:
     if region_input:
         region_properties_count = len(df[df["المنطقة"].str.strip().str.lower() == region_input.lower()])
 
-    # عرض العدادات مدمجة تحت الأزرار مباشرة
+    # عرض العدادات مدمجة
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1: st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     with stat_col2: st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
     st.markdown("---")
 
-    # خانة البحث الفوري متراصة تحت العدادات
+    # خانة البحث الفوري
     search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", placeholder="البحث الفوري عن عقار وتعديله...", key="search_modify_field").strip()
 
     # كود الجافا سكريبت الذكي لحماية حقول الإدخال
