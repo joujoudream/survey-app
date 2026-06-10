@@ -3,6 +3,7 @@ import pandas as pd
 
 st.set_page_config(page_title="KhatibAlami Company", layout="wide", initial_sidebar_state="collapsed")
 
+# كود التنسيق الجمالي مع إخفاء تنبيهات وجمل "Press Enter to Apply" المزعجة
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -19,6 +20,11 @@ st.markdown("""
     .metric-val { font-size: 26px; font-weight: bold; }
     .metric-lbl { font-size: 13px; opacity: 0.9; }
     div.stButton > button { border: none; padding: 11px 25px; border-radius: 10px; font-weight: 700; transition: all 0.3s ease; width: 100%; margin-top: 24px; }
+    
+    /* الكود السحري لحذف وإخفاء جملة Press Enter to Apply تماماً من الواجهة */
+    [data-testid="stInputInstructions"] {
+        display: none !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -32,7 +38,7 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>KhatibAlami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v3.6</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v3.7</div></div>""", unsafe_allow_html=True)
     
     st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
     uploaded_file = st.file_uploader("اختر ملف الإكسيل (CSV) الذي قمت بتنزيله سابقاً لاستعادة الأعداد والمتابعة:", type=["csv"])
@@ -61,11 +67,40 @@ with col2:
     
     btn_save = st.button("🚀 زر حفظ العقار والتحقق من التكرار", type="primary")
 
+    # كود الجافا سكريبت الذكي لتوجه المتصفح تلقائياً وخطف التركيز لخانة اسم المنطقة
+    st.components.v1.html("""<script>
+        var attachMidanEvents = function() {
+            var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');
+            var regInput = null; var propInput = null; var saveBtn = null;
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].getAttribute('placeholder') === 'ادخل اسم المنطقة الحالية ....') regInput = inputs[i];
+                if (inputs[i].getAttribute('placeholder') === 'ادخل رقم العقار الحالي....') propInput = inputs[i];
+            }
+            for (var j = 0; j < buttons.length; j++) { if (buttons[j].textContent.includes('🚀 زر حفظ العقار والتحقق من التكرار')) saveBtn = buttons[j]; }
+            
+            // التركيز التلقائي عند فتح البرنامج أو الرفع
+            if (regInput && mainDoc.activeElement !== regInput && mainDoc.activeElement !== propInput) {
+                regInput.focus();
+            }
+            
+            if (regInput && propInput) {
+                regInput.removeEventListener('keydown', window.regMidanHandler);
+                window.regMidanHandler = function(e) { if (e.key === 'Enter') { e.preventDefault(); propInput.focus(); propInput.select(); } };
+                regInput.addEventListener('keydown', window.regMidanHandler);
+            }
+            if (propInput && saveBtn && regInput) {
+                propInput.removeEventListener('keydown', window.propMidanHandler);
+                window.propMidanHandler = function(e) { if (e.key === 'Enter') { if (propInput.value.trim() !== "") { e.preventDefault(); saveBtn.click(); setTimeout(function() { regInput.focus(); regInput.select(); }, 80); } } };
+                propInput.addEventListener('keydown', window.propMidanHandler);
+            }
+        }; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);
+    </script>""", height=0)
+
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
             if is_duplicate:
-                st.error("❌ إلغاء: هذا العقار مسجل سابقاً in هذه المنطقة!")
+                st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
@@ -76,7 +111,7 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    # حساب الأعداد بناءً على الملف المرفوع
+    # حساب العدادات
     total_properties_count = len(df)
     region_properties_count = 0
     if region_input:
@@ -86,14 +121,12 @@ with col2:
     with stat_col1: st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     with stat_col2: st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
 
-    # التعديل: إخفاء الجدول تماماً وإبقاء زر التحميل فقط
     if not df.empty:
         st.markdown("---")
         st.subheader("📥 استخراج وتحميل الملف النهائي")
         
-        # الترتيب التلقائي (Sorting) بناءً على المنطقة ورقم العقار قبل التنزيل ليكون مرتباً وجاهزاً
+        # الترتيب التلقائي للبيانات
         sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
         csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
         
-        # زر التحميل النظيف والاحترافي فقط
         st.download_button(label="🟢 تحميل وتنزيل سجلات الإكسيل الكاملة (CSV)", data=csv_data, file_name="KhatibAlami_Midan_Data.csv", mime="text/csv")
