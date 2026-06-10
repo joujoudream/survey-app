@@ -3,17 +3,27 @@ import pandas as pd
 
 st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# كود التنسيق الجمالي المدمج مع إظهار اسم الشركة كاملاً بوضوح
+# كود التنسيق الجمالي المدمج مع حل مشكلة قص الحروف العلوية نهائياً
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
     html, body, [class*="css"] { font-family: 'Tajawal', sans-serif; direction: rtl; text-align: right; }
     .stApp { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
     
-    /* ضبط كارت الهيدر ليظهر الاسم كاملاً دون اقتطاع */
-    .header-card { background-color: #EBF8FF; padding: 16px 12px; border-radius: 12px; box-shadow: 0 6px 12px rgba(30, 58, 138, 0.08); margin-top: 5px; margin-bottom: 2px; text-align: center; border: 1px solid #BEE3F8; height: auto; }
+    /* إصلاح كارت الهيدر بإعطاء مساحة علوية (Padding) كافية لمنع تآكل الاسم */
+    .header-card { 
+        background-color: #EBF8FF; 
+        padding: 24px 12px 16px 12px; /* زيادة البطانة العلوية لمنع الاقتصاص */
+        border-radius: 12px; 
+        box-shadow: 0 6px 12px rgba(30, 58, 138, 0.08); 
+        margin-top: 5px; 
+        margin-bottom: 2px; 
+        text-align: center; 
+        border: 1px solid #BEE3F8; 
+        overflow: visible !important; /* السماح للنص بالظهور بالكامل دون قص */
+    }
     .company-header { color: #1E3A8A; font-family: 'Arial', sans-serif; font-size: 30px; font-weight: bold; margin: 0; line-height: 1.2; }
-    .company-subtitle { color: #2D3748; font-family: 'Arial', sans-serif; font-size: 16px; font-weight: 500; margin-top: 4px; }
+    .company-subtitle { color: #2D3748; font-family: 'Arial', sans-serif; font-size: 16px; font-weight: 500; margin-top: 6px; }
     
     /* كارت التوقيع المدمج */
     .main-signature-card { background-color: #ffffff; padding: 4px 12px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); margin-top: 2px; margin-bottom: 8px; border: 1px solid #e2e8f0; max-width: 420px; margin-left: auto; margin-right: auto; }
@@ -51,9 +61,9 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
-    # تعديل الاسم هنا ليصبح كاملاً وواضحاً
+    # كارت الشركة مع الاسم الكامل الواضح بدون اقتصاص
     st.markdown("""<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v5.1</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v5.2</div></div>""", unsafe_allow_html=True)
     
     # خانة الرفع الاحتياطية
     if not st.session_state.file_uploaded:
@@ -113,7 +123,7 @@ with col2:
     # خانة البحث الفوري
     search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", placeholder="البحث الفوري عن عقار وتعديله...", key="search_modify_field").strip()
 
-    # كود الجافا سكريبت الذكي لحماية حقول الإدخال
+    # كود الجافا سكريبت الذكي لحماية حقول الإدخال ومنع خطف الماوس
     st.components.v1.html("""<script>
         var attachMidanEvents = function() {
             var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');
