@@ -3,7 +3,7 @@ import pandas as pd
 
 st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# 🎨 التنسيقات الذهبية لجعل عداد المنطقة صندوقاً أزرق متطابقاً 100% مع العداد الكلي
+# 🎨 التنسيقات الذهبية الموحدة لجعل الصناديق متطابقة 100% كتوأم حقيقي
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -48,54 +48,53 @@ st.markdown("""
     .sig-name { font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #475569; margin: 2px 0; }
     .sig-note { font-size: 11px; color: #3b82f6; font-weight: 500; margin: 0; }
     
-    /* 🔵 الصندوق الأزرق الثابت للعداد الكلي */
-    .metric-box { 
+    /* 🔵 صندوق العداد الكلي وصندوق العداد المحلي - تصميم موحد ومطابق تماماً */
+    .metric-box-twin { 
         background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); 
         color: white !important; 
         padding: 12px 15px; 
         border-radius: 10px; 
         text-align: center; 
         box-shadow: 0 4px 8px rgba(30, 58, 138, 0.15); 
-        min-height: 75px;
+        height: 85px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        box-sizing: border-box;
     }
-    .metric-val { font-size: 24px; font-weight: bold; line-height: 1.1; color: white !important; }
-    .metric-lbl { font-size: 13px; opacity: 0.95; margin-top: 4px; color: white !important; }
+    .metric-val-twin { font-size: 26px; font-weight: bold; line-height: 1.1; color: white !important; }
+    .metric-lbl-twin { font-size: 13px; opacity: 0.95; margin-top: 5px; color: white !important; }
     
-    /* 🔵 تحويل الزر إلى صندوق أزرق مطابق تماماً للعداد الكلي وقابل للضغط */
-    div.stButton > button.metric-clickable-box-final {
-        background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
-        color: white !important;
+    /* اخفاء الزر الحقيقي الميكانيكي لجعله شفافاً تماماً فوق التصميم الجذاب */
+    div.stButton > button.hidden-clickable-btn {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 85px !important;
+        background: transparent !important;
+        color: transparent !important;
         border: none !important;
-        padding: 12px 15px !important;
-        border-radius: 10px !important;
-        box-shadow: 0 4px 8px rgba(30, 58, 138, 0.15) !important;
-        height: 75px !important;
-        width: 100% !important;
+        box-shadow: none !important;
         cursor: pointer !important;
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: center !important;
-        align-items: center !important;
+        z-index: 10;
         margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* حاوية نسبية لتركيب الزر الشفاف بدقة */
+    .interactive-container {
+        position: relative;
+        width: 100%;
+        height: 85px;
         transition: all 0.2s ease-in-out;
     }
-    
-    /* تأثير تمرير الماوس فوق الصندوق التفاعلي */
-    div.stButton > button.metric-clickable-box-final:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 14px rgba(30, 58, 138, 0.3) !important;
-        filter: brightness(1.1);
+    .interactive-container:hover {
+        transform: translateY(-3px);
+        filter: brightness(1.15);
     }
     
     div.stButton > button, div.stDownloadButton > button { border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; transition: all 0.3s ease; width: 100%; height: 40px; margin-top: 2px; margin-bottom: 2px; }
-    
     div[data-testid="stVerticalBlock"] > div { depth: 0 !important; margin-bottom: -0.3rem !important; }
     hr { margin-top: 0.4rem !important; margin-bottom: 0.4rem !important; }
-    
     [data-testid="stInputInstructions"] { display: none !important; visibility: hidden !important; }
     </style>
 """, unsafe_allow_html=True)
@@ -116,7 +115,7 @@ if "show_excel_sheet" not in st.session_state: st.session_state.show_excel_sheet
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v6.6</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v6.7</div></div>""", unsafe_allow_html=True)
     
     if not st.session_state.file_uploaded:
         st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
@@ -133,7 +132,6 @@ with col2:
                 st.error("❌ حدث خطأ أثناء قراءة الملف.")
     
     df = st.session_state.local_db
-
     st.markdown("---")
     
     # حقول الإدخال الأساسية الثنائية (المنطقة والعقار)
@@ -164,28 +162,38 @@ with col2:
     if region_input:
         region_properties_count = len(df[df["المنطقة"].str.strip().str.lower() == region_input.lower()])
 
-    # 📊 عرض التوأم المتطابق بالكامل (الصندوق الكلي الثابت والصندوق المحلي القابل للضغط)
+    # 📊 عرض التوأم المتطابق بالكامل باللون الأزرق الملكي والحجم الموحد 100%
     stat_col1, stat_col2 = st.columns(2)
     
     with stat_col1: 
-        st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
+        # العداد الكلي الثابت
+        st.markdown(f"""
+            <div class='metric-box-twin'>
+                <div class='metric-val-twin'>{total_properties_count}</div>
+                <div class='metric-lbl-twin'>📊 مجموع عدد العقارات الكلي</div>
+            </div>
+        """, unsafe_allow_html=True)
     
     with stat_col2: 
-        # الزر التفاعلي الجديد بصيغة نصية مصفوفة للتحكم الكامل بالمظهر عبر الـ JS
-        btn_show_sheet = st.button(
-            f"{region_properties_count}\n📍 عدد العقارات في نفس المنطقة الحالية", 
-            key="final_blue_metric_btn", 
-            use_container_width=True
-        )
+        # العداد المحلي التفاعلي المتطابق بالكامل والمثبت فوقه زر شفاف للضغط
+        st.markdown(f"""
+            <div class='interactive-container'>
+                <div class='metric-box-twin'>
+                    <div class='metric-val-twin'>{region_properties_count}</div>
+                    <div class='metric-lbl-twin'>📍 عدد العقارات في نفس المنطقة (اضغط للعرض)</div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
         
-        # كود التثبيت السحري لربط التنسيق بالزر ليصبح صندوقاً أزرق تماماً
+        # الزر الفعلي مخفي وشفاف تماماً ويأخذ نفس الأبعاد لتأمين التفاعل الحقيقي عند النقر بالماوس
+        btn_show_sheet = st.button("شاشه", key="invisible_action_trigger_btn")
+        
         st.markdown("""
             <script>
             var btns = window.parent.document.getElementsByTagName('button');
             for(var i=0; i<btns.length; i++){
-                if(btns[i].textContent.includes('عدد العقارات في نفس المنطقة الحالية')){
-                    btns[i].classList.add('metric-clickable-box-final');
-                    btns[i].style.whiteSpace = 'pre-line';
+                if(btns[i].textContent === 'شاشه'){
+                    btns[i].classList.add('hidden-clickable-btn');
                 }
             }
             </script>
@@ -194,20 +202,18 @@ with col2:
         if btn_show_sheet:
             st.session_state.show_excel_sheet = True
 
-    # 📊 عرض الـ Excel Sheet المخصص والمصحح بالكامل
+    # 📊 عرض الجدول المخصص والمصفى بدقة لأرقام العقارات الحقيقية
     if st.session_state.show_excel_sheet and region_input:
         st.markdown("<div id='excel_section'></div>", unsafe_allow_html=True) 
         st.markdown(f"### 📊 أرقام العقارات الجاري العمل عليها في منطقة: ({region_input})")
         
-        # فلترة جلب أرقام العقارات الصافية فقط للمنطقة النشطة
         filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
         
         if not filtered_df.empty:
             excel_sheet_df = pd.DataFrame(filtered_df["رقم العقار"].values, columns=["رقم العقار"])
             excel_sheet_df = excel_sheet_df.sort_values(by="رقم العقار").reset_index(drop=True)
-            excel_sheet_df.index += 1 # الترقيم من 1 للإكسيل
+            excel_sheet_df.index += 1
             
-            # عرض الجدول النظيف
             st.dataframe(excel_sheet_df, use_container_width=True, height=220)
             
             if st.button("❌ إغلاق وعودة لسطر الإدخال", key="close_excel_btn"):
@@ -222,7 +228,6 @@ with col2:
     search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", value=st.session_state.search_val, placeholder="البحث الفوري عن عقار وتعديله...", key="search_modify_field").strip()
     st.session_state.search_val = search_query
 
-    # جافا سكريبت للتحكم التلقائي بالتركيز والـ Scroll
     focus_script = "false"
     if st.session_state.focus_on_region:
         focus_script = "true"
@@ -282,7 +287,7 @@ with col2:
         }}; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);
     </script>""", height=0)
 
-    # حفظ البيانات
+    # حفظ البيانات والتحقق من التكرار
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
