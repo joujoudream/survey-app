@@ -3,7 +3,7 @@ import pandas as pd
 
 st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# 🎨 التنسيقات الذهبية الموحدة لجعل الصناديق متطابقة 100% كتوأم حقيقي
+# 🎨 التنسيقات الذهبية الموحدة والمطابقة 100% بدون أي نصوص مشوهة
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -48,7 +48,7 @@ st.markdown("""
     .sig-name { font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #475569; margin: 2px 0; }
     .sig-note { font-size: 11px; color: #3b82f6; font-weight: 500; margin: 0; }
     
-    /* 🔵 صندوق العداد الكلي وصندوق العداد المحلي - تصميم موحد ومطابق تماماً */
+    /* 🔵 تصميم العدادات المتطابقة تماماً كتوأم أزرق ملكي */
     .metric-box-twin { 
         background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); 
         color: white !important; 
@@ -66,12 +66,13 @@ st.markdown("""
     .metric-val-twin { font-size: 26px; font-weight: bold; line-height: 1.1; color: white !important; }
     .metric-lbl-twin { font-size: 13px; opacity: 0.95; margin-top: 5px; color: white !important; }
     
-    /* اخفاء الزر الحقيقي الميكانيكي لجعله شفافاً تماماً فوق التصميم الجذاب */
+    /* جعل الزر الميكانيكي شفاف وغير مرئي تماماً وممتد فوق كامل المساحة للضغط المباشر */
     div.stButton > button.hidden-clickable-btn {
         position: absolute;
         top: 0; left: 0; width: 100%; height: 85px !important;
         background: transparent !important;
         color: transparent !important;
+        color: rgba(0,0,0,0) !important; /* إخفاء أي نص داخلي بشكل قاطع */
         border: none !important;
         box-shadow: none !important;
         cursor: pointer !important;
@@ -80,7 +81,7 @@ st.markdown("""
         padding: 0 !important;
     }
     
-    /* حاوية نسبية لتركيب الزر الشفاف بدقة */
+    /* الحاوية التفاعلية مع تأثير التمرير الصاعد */
     .interactive-container {
         position: relative;
         width: 100%;
@@ -115,7 +116,7 @@ if "show_excel_sheet" not in st.session_state: st.session_state.show_excel_sheet
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v6.7</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v6.8</div></div>""", unsafe_allow_html=True)
     
     if not st.session_state.file_uploaded:
         st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
@@ -175,7 +176,7 @@ with col2:
         """, unsafe_allow_html=True)
     
     with stat_col2: 
-        # العداد المحلي التفاعلي المتطابق بالكامل والمثبت فوقه زر شفاف للضغط
+        # العداد المحلي التفاعلي المتطابق بالكامل
         st.markdown(f"""
             <div class='interactive-container'>
                 <div class='metric-box-twin'>
@@ -185,17 +186,25 @@ with col2:
             </div>
         """, unsafe_allow_html=True)
         
-        # الزر الفعلي مخفي وشفاف تماماً ويأخذ نفس الأبعاد لتأمين التفاعل الحقيقي عند النقر بالماوس
-        btn_show_sheet = st.button("شاشه", key="invisible_action_trigger_btn")
+        # زر شفاف بالكامل يعتمد على الـ Key للاستدعاء البرمجي دون طباعة أي حروف مشوهة للتصميم
+        btn_show_sheet = st.button("", key="regional_action_trigger_secret_key")
         
+        # كود الاستهداف الدقيق لشفافية هذا الزر تحديداً
         st.markdown("""
             <script>
             var btns = window.parent.document.getElementsByTagName('button');
             for(var i=0; i<btns.length; i++){
-                if(btns[i].textContent === 'شاشه'){
-                    btns[i].classList.add('hidden-clickable-btn');
+                if(btns[i].getAttribute('aria-label') === 'regional_action_trigger_secret_key' || i === (btns.length - 2) || btns[i].id.includes('regional_action_trigger_secret_key')){
+                     // يتم استهدافه مباشرة بالخلفية لجعله شفافاً بالكامل فوق العداد المخصص
                 }
             }
+            // استهداف مباشر عبر الكود التعريفي للـ Streamlit Button لضمان الشفافية المطلقة وحذف أي حروف
+            var allButtons = window.parent.document.querySelectorAll('div.stButton > button');
+            allButtons.forEach(function(b) {
+                if(b.innerHTML === "" || b.innerText === "" || b.textContent === "") {
+                    b.classList.add('hidden-clickable-btn');
+                }
+            });
             </script>
         """, unsafe_allow_html=True)
         
