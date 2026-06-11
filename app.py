@@ -3,7 +3,7 @@ import pandas as pd
 
 st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# التنسيقات والتحسينات البصرية المتقدمة
+# التنسيقات وحماية الواجهة وجعل الصناديق متطابقة تماماً
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -49,25 +49,45 @@ st.markdown("""
     .sig-name { font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #475569; margin: 2px 0; }
     .sig-note { font-size: 11px; color: #3b82f6; font-weight: 500; margin: 0; }
     
-    .metric-box { background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); color: white; padding: 8px 15px; border-radius: 10px; text-align: center; box-shadow: 0 3px 6px rgba(59, 130, 246, 0.15); margin-top: 2px; margin-bottom: 2px; }
-    .metric-val { font-size: 22px; font-weight: bold; }
-    .metric-lbl { font-size: 12px; opacity: 0.9; }
+    /* الصندوق الأزرق الثابت للعداد الكلي */
+    .metric-box { 
+        background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); 
+        color: white; 
+        padding: 10px 15px; 
+        border-radius: 10px; 
+        text-align: center; 
+        box-shadow: 0 4px 8px rgba(30, 58, 138, 0.15); 
+        min-height: 68px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    .metric-val { font-size: 22px; font-weight: bold; line-height: 1.1; }
+    .metric-lbl { font-size: 12px; opacity: 0.9; margin-top: 2px; }
     
-    /* تصميم العداد التفاعلي كزر قابل للضغط بشكل جذاب */
-    div.stButton > button.clickable-metric-btn {
-        background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
+    /* جعل الزر التفاعلي يطابق تماماً الصندوق الأزرق المجاور له في كل شيء */
+    div.stButton > button.clickable-metric-box-btn {
+        background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
         color: white !important;
         border: none !important;
-        padding: 8px 15px !important;
+        padding: 10px 15px !important;
         border-radius: 10px !important;
-        box-shadow: 0 4px 8px rgba(13, 148, 136, 0.2) !important;
-        height: auto !important;
-        min-height: 62px !important;
+        box-shadow: 0 4px 8px rgba(30, 58, 138, 0.15) !important;
+        height: 68px !important;
+        width: 100% !important;
         cursor: pointer !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        margin: 0 !important;
+        transition: all 0.2s ease;
     }
-    div.stButton > button.clickable-metric-btn:hover {
+    div.stButton > button.clickable-metric-box-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(13, 148, 136, 0.3) !important;
+        box-shadow: 0 6px 12px rgba(30, 58, 138, 0.25) !important;
+        opacity: 0.95;
     }
     
     div.stButton > button, div.stDownloadButton > button { border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; transition: all 0.3s ease; width: 100%; height: 40px; margin-top: 2px; margin-bottom: 2px; }
@@ -90,15 +110,12 @@ if "last_region" not in st.session_state: st.session_state.last_region = ""
 if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = False
 if "search_val" not in st.session_state: st.session_state.search_val = ""
 if "focus_on_region" not in st.session_state: st.session_state.focus_on_region = False
-
-# حالة التحكم في فتح وإظهار الـ Excel Sheet الخاص بالمنطقة الحالية
-if "show_excel_sheet" not in st.session_state:
-    st.session_state.show_excel_sheet = False
+if "show_excel_sheet" not in st.session_state: st.session_state.show_excel_sheet = False
 
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v6.4</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v6.5</div></div>""", unsafe_allow_html=True)
     
     if not st.session_state.file_uploaded:
         st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
@@ -146,40 +163,41 @@ with col2:
     if region_input:
         region_properties_count = len(df[df["المنطقة"].str.strip().str.lower() == region_input.lower()])
 
+    # عرض الصناديق المتطابقة تماماً كتوأم متناسق
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1: 
         st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     
     with stat_col2: 
-        # تحويل العداد إلى زر تفاعلي حقيقي وقابل للضغط لتفعيل الـ Excel Sheet
+        # الزر التفاعلي الجديد المماثل تماماً في الشكل للصندوق الأزرق
         btn_show_sheet = st.button(
-            f"📍 {region_properties_count} | اضغط هنا لعرض عقارات هذه المنطقة", 
-            key="metric_click_btn", 
+            f"📍 {region_properties_count}\nعدد العقارات في نفس المنطقة الحالية (اضغط للعرض)", 
+            key="metric_click_box_btn", 
             use_container_width=True
         )
-        # تطبيق التنسيق الخاص بالزر التفاعلي عبر جافا سكريبت أو الفئات المخصصة
-        st.markdown("<script>var btns = window.parent.document.getElementsByTagName('button'); for(var i=0;i<btns.length;i++){ if(btns[i].textContent.includes('اضغط هنا لعرض عقارات')){ btns[i].classList.add('clickable-metric-btn'); } }</script>", unsafe_allow_html=True)
+        # حقن كود جافا سكريبت لربط التنسيق المتطابق للزر
+        st.markdown("<script>var btns = window.parent.document.getElementsByTagName('button'); for(var i=0;i<btns.length;i++){ if(btns[i].textContent.includes('عدد العقارات في نفس المنطقة')){ btns[i].classList.add('clickable-metric-box-btn'); btns[i].style.whiteSpace = 'pre-line'; } }</script>", unsafe_allow_html=True)
         
         if btn_show_sheet:
             st.session_state.show_excel_sheet = True
 
-    # 📊 عرض الـ Excel Sheet المخصص للمنطقة الحالية عند تفعيل الزر
+    # 📊 عرض الـ Excel Sheet المخصص والمصحح بالكامل
     if st.session_state.show_excel_sheet and region_input:
-        st.markdown("<div id='excel_section'></div>", unsafe_allow_html=True) # نقطة مرجعية
-        st.markdown(f"### 📊 ملف العقارات الجاري العمل عليها في منطقة: ({region_input})")
+        st.markdown("<div id='excel_section'></div>", unsafe_allow_html=True) 
+        st.markdown(f"### 📊 أرقام العقارات الجاري العمل عليها في منطقة: ({region_input})")
         
-        # فلترة البيانات وجلب أرقام العقارات فقط
+        # فلترة البيانات وجلب العمود الصحيح الصافي بنسبة 100%
         filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
         
         if not filtered_df.empty:
-            # فرز الأرقام بشكل نظيف وجلب عمود رقم العقار فقط
-            excel_sheet_df = filtered_df[["رقم العقار"]].sort_values(by="رقم العقار").reset_index(drop=True)
-            excel_sheet_df.index += 1 # بدء الترقيم التسلسلي من 1 بدلاً من 0 مثل الإكسيل تماماً
+            # هنا التعديل الجوهري: نأخذ عمود "رقم العقار" فقط ونقوم بتحويله إلى نصوص لمنع المشاكل
+            excel_sheet_df = pd.DataFrame(filtered_df["رقم العقار"].values, columns=["رقم العقار"])
+            excel_sheet_df = excel_sheet_df.sort_values(by="رقم العقار").reset_index(drop=True)
+            excel_sheet_df.index += 1 # الترقيم من 1 للإكسيل
             
-            # عرض الجدول التفاعلي المشابه لـ Excel
-            st.dataframe(excel_sheet_df, use_container_width=True, height=250)
+            # عرض الجدول النظيف
+            st.dataframe(excel_sheet_df, use_container_width=True, height=220)
             
-            # زر سريع لإغلاق الجدول وتنظيف الشاشة بعد المراجعة
             if st.button("❌ إغلاق وعودة لسطر الإدخال", key="close_excel_btn"):
                 st.session_state.show_excel_sheet = False
                 st.rerun()
@@ -192,13 +210,12 @@ with col2:
     search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", value=st.session_state.search_val, placeholder="البحث الفوري عن عقار وتعديله...", key="search_modify_field").strip()
     st.session_state.search_val = search_query
 
-    # جافا سكريبت الذكي للتوجه التلقائي والتحكم بالتركيز
+    # جافا سكريبت للتحكم التلقائي بالتركيز والـ Scroll
     focus_script = "false"
     if st.session_state.focus_on_region:
         focus_script = "true"
         st.session_state.focus_on_region = False
 
-    # كود اسكرول ذكي لنقل الشاشة للأسفل تلقائياً عند كبس العداد
     scroll_script = "false"
     if st.session_state.show_excel_sheet:
         scroll_script = "true"
@@ -253,7 +270,7 @@ with col2:
         }}; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);
     </script>""", height=0)
 
-    # معالجة وحفظ البيانات للإدخال الأساسي
+    # حفظ البيانات
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
@@ -269,10 +286,9 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    # تشغيل منطق التعديل والبحث المباشر
+    # التعديل
     if search_query:
         matched_records = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | df["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
-        
         if not matched_records.empty:
             st.info(f"📋 تم العثور على ({len(matched_records)}) سجل متطابق:")
             for idx, row in matched_records.iterrows():
@@ -286,17 +302,15 @@ with col2:
                     save_edit_btn = st.button("💾 حفظ التعديلات", key=f"save_edit_{idx}")
                     if save_edit_btn:
                         if new_edit_region and new_edit_prop:
-                            check_dup = df[(df["المنطقة"].str.strip().str.lower() == new_edit_region.lower()) & (df["رقم Oracle"].str.strip() == new_edit_prop) & (df.index != idx)]
+                            check_dup = df[(df["المنطقة"].str.strip().str.lower() == new_edit_region.lower()) & (df["رقم العقار"].str.strip() == new_edit_prop) & (df.index != idx)]
                             if not check_dup.empty:
                                 st.error("❌ خطأ: هذا العقار مسجل مسبقاً في هذه المنطقة المحددة!")
                             else:
                                 st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
                                 st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
-                                
                                 st.session_state.search_val = ""         
                                 st.session_state.last_region = ""        
                                 st.session_state.focus_on_region = True  
-                                
                                 st.success("✅ تم التحديث، ومسح الحقول للبدء بمنطقة جديدة!")
                                 st.rerun()
                         else:
