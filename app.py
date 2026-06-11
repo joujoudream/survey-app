@@ -3,7 +3,7 @@ import pandas as pd
 
 st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# 🎨 التنسيقات الذهبية الموحدة لإعادة العدادات وإخفاء المربع الأبيض تماماً
+# 🎨 التنسيقات الصارمة - إعادة الألوان الأصلية للأزرار (الأحمر والأبيض) ومنع أي اختفاء
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -48,7 +48,42 @@ st.markdown("""
     .sig-name { font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #475569; margin: 2px 0; }
     .sig-note { font-size: 11px; color: #3b82f6; font-weight: 500; margin: 0; }
     
-    /* 🔵 تصميم العدادات الموحدة والمطابقة 100% كتوأم أزرق ملكي */
+    /* 🔴 زر حفظ العقار باللون الأحمر الناري الأصلي */
+    div.red-save-btn div.stButton > button {
+        background-color: #EF4444 !important;
+        color: white !important;
+        border: none !important;
+        padding: 8px 12px !important;
+        border-radius: 8px !important;
+        font-weight: 700 !important;
+        width: 100% !important;
+        height: 44px !important;
+        box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2) !important;
+        transition: all 0.2s ease;
+    }
+    div.red-save-btn div.stButton > button:hover {
+        background-color: #DC2626 !important;
+    }
+    
+    /* ⚪ زر تحميل ملف الإكسيل باللون الأبيض الأصلي والحواف الخفيفة */
+    div.white-download-btn div.stDownloadButton > button {
+        background-color: #FFFFFF !important;
+        color: #2D3748 !important;
+        border: 1px solid #CBD5E1 !important;
+        padding: 8px 12px !important;
+        border-radius: 8px !important;
+        font-weight: 700 !important;
+        width: 100% !important;
+        height: 44px !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+        transition: all 0.2s ease;
+    }
+    div.white-download-btn div.stDownloadButton > button:hover {
+        background-color: #F8FAFC !important;
+        border-color: #94A3B8 !important;
+    }
+    
+    /* 🔵 تصميم الصناديق الزرقاء الموحدة للعدادات */
     .metric-box-twin { 
         background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); 
         color: white !important; 
@@ -66,21 +101,7 @@ st.markdown("""
     .metric-val-twin { font-size: 26px; font-weight: bold; line-height: 1.1; color: white !important; }
     .metric-lbl-twin { font-size: 13px; opacity: 0.95; margin-top: 5px; color: white !important; }
     
-    /* إلغاء المربع الأبيض الافتراضي وأي حدود للزر في العمود الثاني نهائياً */
-    div.stButton > button {
-        background: transparent !important;
-        background-color: transparent !important;
-        border: none !important;
-        outline: none !important;
-        box-shadow: none !important;
-        color: transparent !important;
-        width: 100% !important;
-        height: 0px !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-    
-    /* الحاوية التفاعلية للعداد القابل للضغط */
+    /* تفاعلية صندوق العداد القابل للضغط وحماية الزر الداخلي */
     .interactive-container {
         position: relative;
         width: 100%;
@@ -93,18 +114,18 @@ st.markdown("""
         filter: brightness(1.15);
     }
     
-    /* أزرار الحفظ والتحميل العادية */
-    .main-action-btn div.stButton > button, div.stDownloadButton > button { 
-        border: none !important; 
-        padding: 8px 12px !important; 
-        border-radius: 8px !important; 
-        font-weight: 700 !important; 
-        width: 100% !important; 
-        height: 40px !important; 
-        background-color: #1E3A8A !important;
-        color: white !important;
+    div.secret-trigger-btn > div.stButton > button {
+        background: transparent !important;
+        background-color: transparent !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        color: transparent !important;
+        width: 100% !important;
+        height: 0px !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
-    div.stDownloadButton > button { background-color: #2f855a !important; }
     
     div[data-testid="stVerticalBlock"] > div { depth: 0 !important; margin-bottom: -0.3rem !important; }
     hr { margin-top: 0.4rem !important; margin-bottom: 0.4rem !important; }
@@ -128,7 +149,7 @@ if "show_excel_sheet" not in st.session_state: st.session_state.show_excel_sheet
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v7.1</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v7.2</div></div>""", unsafe_allow_html=True)
     
     if not st.session_state.file_uploaded:
         st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
@@ -157,21 +178,22 @@ with col2:
     
     st.session_state.clear_trigger = False
 
+    # 🔴⚪ إعادة صف الأزرار المتناسقة (حفظ العقار بالأمر والتحميل بالأبيض)
     action_col1, action_col2 = st.columns(2)
     with action_col1:
-        st.markdown("<div class='main-action-btn'>", unsafe_allow_html=True)
+        st.markdown("<div class='red-save-btn'>", unsafe_allow_html=True)
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", type="primary", use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
         
     with action_col2:
+        st.markdown("<div class='white-download-btn'>", unsafe_allow_html=True)
         if not df.empty:
             sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
             csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
             st.download_button(label="🟢 تحميل وتنزيل سجل CSV النهائي", data=csv_data, file_name="KhatibAlami_Midan_Data.csv", mime="text/csv", use_container_width=True)
         else:
-            st.markdown("<div class='main-action-btn'>", unsafe_allow_html=True)
             st.button("🟢 سجل CSV فارغ حالياً", disabled=True, use_container_width=True)
-            st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
     # احتساب الأعداد بدقة للحقول
     total_properties_count = len(df)
@@ -181,7 +203,7 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 إعادة العدادات الزرقاء الملكية لتظهر فوراً جنباً إلى جنب كتوأم حقيقي 100%
+    # 📊 صف العدادات الزرقاء المتكاملة
     stat_col1, stat_col2 = st.columns(2)
     
     with stat_col1: 
@@ -194,7 +216,7 @@ with col2:
         """, unsafe_allow_html=True)
     
     with stat_col2: 
-        # العداد المحلي التفاعلي (يسار) - يظهر بالكامل الآن ومحمي من ظهور المربع الأبيض
+        # العداد المحلي التفاعلي (يسار)
         st.markdown(f"""
             <div class='interactive-container' onclick="window.parent.document.querySelector('div.secret-trigger-btn button').click();">
                 <div class='metric-box-twin'>
@@ -204,7 +226,6 @@ with col2:
             </div>
         """, unsafe_allow_html=True)
         
-        # الزر مخفي داخل حاوية خاصة ومحمي تماماً من إنتاج أي لون أبيض مشوه
         st.markdown("<div class='secret-trigger-btn' style='display:none; height:0px;'>", unsafe_allow_html=True)
         btn_show_sheet = st.button("", key="regional_action_trigger_secret_key")
         st.markdown("</div>", unsafe_allow_html=True)
@@ -302,7 +323,7 @@ with col2:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
             if is_duplicate:
-                st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
+                st.error("❌ إلغاء: هذا العقار مسجل سابقاً in هذه المنطقة!")
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
