@@ -62,7 +62,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# إدارة الـ Session State لحفظ واستعادة البيانات
+# إدارة الـ Session State
 if "local_db" not in st.session_state:
     st.session_state.local_db = pd.DataFrame(columns=["المنطقة", "رقم العقار", "رقم المشروع"])
 
@@ -72,19 +72,13 @@ if "file_uploaded" not in st.session_state:
 if "last_region" not in st.session_state: st.session_state.last_region = ""
 if "last_project" not in st.session_state: st.session_state.last_project = ""
 if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = False
-
-# متغير للتحكم بقيمة حقل البحث عند إنهاء التعديل
-if "search_val" not in st.session_state:
-    st.session_state.search_val = ""
-
-# متغير توجيه الفوكس لحقل المنطقة بعد التعديل
-if "focus_on_region" not in st.session_state:
-    st.session_state.focus_on_region = False
+if "search_val" not in st.session_state: st.session_state.search_val = ""
+if "focus_on_region" not in st.session_state: st.session_state.focus_on_region = False
 
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v6.1</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v6.2</div></div>""", unsafe_allow_html=True)
     
     if not st.session_state.file_uploaded:
         st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
@@ -141,18 +135,18 @@ with col2:
 
     st.markdown("---")
 
-    # ربط حقل البحث بالـ Session State للتحكم بمسحه لاحقاً فور الحفظ
+    # حقل البحث الفوري
     search_query = st.text_input("🔍 البحث الفوري عن عقار، منطقة أو مشروع وتعديله:", value=st.session_state.search_val, placeholder="البحث الفوري...", key="search_modify_field").strip()
     st.session_state.search_val = search_query
 
-    # جافا سكريبت الذكي للتنقل الفوري والتركيز التلقائي على الحقول
+    # جافا سكريبت الذكي للتحكم بالتركيز والانتقال السريع
     focus_script = "false"
     if st.session_state.focus_on_region:
         focus_script = "true"
         st.session_state.focus_on_region = False
 
     st.components.v1.html(f"""<script>
-        var attachMidanEvents = function() {{(
+        var attachMidanEvents = function() {{
             var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');
             var regInput = null; var projInput = null; var propInput = null; var saveBtn = null; var searchInput = null;
             
@@ -169,7 +163,6 @@ with col2:
             if (searchInput && (searchInput.value.trim() !== "" || activeInput === searchInput)) {{ isUserInSearchOrEdit = true; }}
             if (activeInput && (activeInput.id.includes('edit_reg_') || activeInput.id.includes('edit_proj_') || activeInput.id.includes('edit_prop_'))) {{ isUserInSearchOrEdit = true; }}
             
-            // إذا انتهى التعديل، نجبر الماوس على الذهاب مباشرة للمنطقة
             if ({focus_script} && regInput) {{
                 regInput.focus();
                 regInput.select();
@@ -200,10 +193,10 @@ with col2:
                 }};
                 propInput.addEventListener('keydown', window.propMidanHandler);
             }}
-        )}}; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);
+        }}; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);
     </script>""", height=0)
 
-    # معالجة وحفظ البيانات وتطبيق التحقق الثلاثي من التكرار
+    # معالجة وحفظ البيانات عند الإدخال العادي
     if btn_save:
         if region_input and project_input and property_number:
             is_duplicate = df[
@@ -261,11 +254,13 @@ with col2:
                                 st.session_state.local_db.at[idx, "رقم المشروع"] = new_edit_project
                                 st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
                                 
-                                # التعديل الحاسم: مسح نص البحث فوراً لإخفاء صناديق التعديل وتوجيه الماوس للمنطقة
-                                st.session_state.search_val = ""
-                                st.session_state.focus_on_region = True
+                                # التعديل الذهبي المطلوب:
+                                st.session_state.search_val = ""         # 1. إخفاء شاشة البحث والتعديل
+                                st.session_state.last_region = ""        # 2. تفريغ (مسح) خانة اسم المنطقة الأساسية فوق تماماً
+                                st.session_state.last_project = ""       # 3. تفريغ حقل المشروع أيضاً للبدء من جديد بالكامل
+                                st.session_state.focus_on_region = True  # 4. توجيه مؤشر الماوس فوراً لخانة المنطقة
                                 
-                                st.success("✅ تم التحديث بنجاح وتم مسح شاشة البحث!")
+                                st.success("✅ تم حفظ التعديل، ومسح كافة الحقول للانتقال لمنطقة جديدة!")
                                 st.rerun()
                         else:
                             st.error("⚠️ لا يمكن ترك الحقول فارغة.")
