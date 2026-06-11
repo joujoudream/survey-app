@@ -3,7 +3,7 @@ import pandas as pd
 
 st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# التنسيقات وحماية الواجهة وإلغاء التنبيهات الافتراضية تماماً
+# التنسيقات والتحسينات البصرية المتقدمة
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -53,6 +53,23 @@ st.markdown("""
     .metric-val { font-size: 22px; font-weight: bold; }
     .metric-lbl { font-size: 12px; opacity: 0.9; }
     
+    /* تصميم العداد التفاعلي كزر قابل للضغط بشكل جذاب */
+    div.stButton > button.clickable-metric-btn {
+        background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
+        color: white !important;
+        border: none !important;
+        padding: 8px 15px !important;
+        border-radius: 10px !important;
+        box-shadow: 0 4px 8px rgba(13, 148, 136, 0.2) !important;
+        height: auto !important;
+        min-height: 62px !important;
+        cursor: pointer !important;
+    }
+    div.stButton > button.clickable-metric-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(13, 148, 136, 0.3) !important;
+    }
+    
     div.stButton > button, div.stDownloadButton > button { border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; transition: all 0.3s ease; width: 100%; height: 40px; margin-top: 2px; margin-bottom: 2px; }
     
     div[data-testid="stVerticalBlock"] > div { depth: 0 !important; margin-bottom: -0.3rem !important; }
@@ -62,7 +79,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# إدارة قاعدة البيانات (تمت العودة للأعمدة الأساسية: المنطقة، رقم العقار)
+# إدارة الـ Session State
 if "local_db" not in st.session_state:
     st.session_state.local_db = pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
@@ -74,10 +91,14 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 if "search_val" not in st.session_state: st.session_state.search_val = ""
 if "focus_on_region" not in st.session_state: st.session_state.focus_on_region = False
 
+# حالة التحكم في فتح وإظهار الـ Excel Sheet الخاص بالمنطقة الحالية
+if "show_excel_sheet" not in st.session_state:
+    st.session_state.show_excel_sheet = False
+
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v6.3</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v6.4</div></div>""", unsafe_allow_html=True)
     
     if not st.session_state.file_uploaded:
         st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
@@ -86,7 +107,6 @@ with col2:
         if uploaded_file is not None:
             try:
                 uploaded_df = pd.read_csv(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
-                # الحفاظ على الأعمدة الأساسية فقط في حال احتواء الملف على أعمدة قديمة
                 st.session_state.local_db = uploaded_df[["المنطقة", "رقم العقار"]]
                 st.session_state.file_uploaded = True  
                 st.success("✅ تم تحميل الملف بنجاح واستعادة كافة البيانات!")
@@ -120,26 +140,68 @@ with col2:
         else:
             st.button("🟢 سجل CSV فارغ حالياً", disabled=True, use_container_width=True)
 
+    # احتساب الأعداد بدقة للحقول
     total_properties_count = len(df)
     region_properties_count = 0
     if region_input:
         region_properties_count = len(df[df["المنطقة"].str.strip().str.lower() == region_input.lower()])
 
     stat_col1, stat_col2 = st.columns(2)
-    with stat_col1: st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
-    with stat_col2: st.markdown(f"<div class='metric-box'><div class='metric-val'>{region_properties_count}</div><div class='metric-lbl'>📍 عدد العقارات في نفس المنطقة الحالية</div></div>", unsafe_allow_html=True)
+    with stat_col1: 
+        st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
+    
+    with stat_col2: 
+        # تحويل العداد إلى زر تفاعلي حقيقي وقابل للضغط لتفعيل الـ Excel Sheet
+        btn_show_sheet = st.button(
+            f"📍 {region_properties_count} | اضغط هنا لعرض عقارات هذه المنطقة", 
+            key="metric_click_btn", 
+            use_container_width=True
+        )
+        # تطبيق التنسيق الخاص بالزر التفاعلي عبر جافا سكريبت أو الفئات المخصصة
+        st.markdown("<script>var btns = window.parent.document.getElementsByTagName('button'); for(var i=0;i<btns.length;i++){ if(btns[i].textContent.includes('اضغط هنا لعرض عقارات')){ btns[i].classList.add('clickable-metric-btn'); } }</script>", unsafe_allow_html=True)
+        
+        if btn_show_sheet:
+            st.session_state.show_excel_sheet = True
+
+    # 📊 عرض الـ Excel Sheet المخصص للمنطقة الحالية عند تفعيل الزر
+    if st.session_state.show_excel_sheet and region_input:
+        st.markdown("<div id='excel_section'></div>", unsafe_allow_html=True) # نقطة مرجعية
+        st.markdown(f"### 📊 ملف العقارات الجاري العمل عليها في منطقة: ({region_input})")
+        
+        # فلترة البيانات وجلب أرقام العقارات فقط
+        filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
+        
+        if not filtered_df.empty:
+            # فرز الأرقام بشكل نظيف وجلب عمود رقم العقار فقط
+            excel_sheet_df = filtered_df[["رقم العقار"]].sort_values(by="رقم العقار").reset_index(drop=True)
+            excel_sheet_df.index += 1 # بدء الترقيم التسلسلي من 1 بدلاً من 0 مثل الإكسيل تماماً
+            
+            # عرض الجدول التفاعلي المشابه لـ Excel
+            st.dataframe(excel_sheet_df, use_container_width=True, height=250)
+            
+            # زر سريع لإغلاق الجدول وتنظيف الشاشة بعد المراجعة
+            if st.button("❌ إغلاق وعودة لسطر الإدخال", key="close_excel_btn"):
+                st.session_state.show_excel_sheet = False
+                st.rerun()
+        else:
+            st.warning("ℹ️ هذه المنطقة لا تحتوي على أي عقارات مسجلة حالياً.")
 
     st.markdown("---")
 
-    # حقل البحث الفوري المعدل للبحث في الحقلين الأساسيين
+    # حقل البحث الفوري والتعديل
     search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", value=st.session_state.search_val, placeholder="البحث الفوري عن عقار وتعديله...", key="search_modify_field").strip()
     st.session_state.search_val = search_query
 
-    # جافا سكريبت الذكي للتوجه والتوجيه بـ Enter الفردي المباشر
+    # جافا سكريبت الذكي للتوجه التلقائي والتحكم بالتركيز
     focus_script = "false"
     if st.session_state.focus_on_region:
         focus_script = "true"
         st.session_state.focus_on_region = False
+
+    # كود اسكرول ذكي لنقل الشاشة للأسفل تلقائياً عند كبس العداد
+    scroll_script = "false"
+    if st.session_state.show_excel_sheet:
+        scroll_script = "true"
 
     st.components.v1.html(f"""<script>
         var attachMidanEvents = function() {{
@@ -163,6 +225,11 @@ with col2:
                 regInput.select();
             }} else if (regInput && !isUserInSearchOrEdit && activeInput !== regInput && activeInput !== propInput) {{
                 regInput.focus();
+            }}
+            
+            if ({scroll_script}) {{
+                var target = mainDoc.getElementById('excel_section');
+                if(target) {{ target.scrollIntoView({{ behavior: 'smooth', block: 'center' }}); }}
             }}
             
             if (regInput && propInput) {{
@@ -202,7 +269,7 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    # تشغيل منطق التعديل والبحث المباشر الثنائي واختفائه الفوري عند الحفظ
+    # تشغيل منطق التعديل والبحث المباشر
     if search_query:
         matched_records = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | df["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
         
@@ -219,21 +286,18 @@ with col2:
                     save_edit_btn = st.button("💾 حفظ التعديلات", key=f"save_edit_{idx}")
                     if save_edit_btn:
                         if new_edit_region and new_edit_prop:
-                            check_dup = df[(df["المنطقة"].str.strip().str.lower() == new_edit_region.lower()) & (df["رقم العقار"].str.strip() == new_edit_prop) & (df.index != idx)]
+                            check_dup = df[(df["المنطقة"].str.strip().str.lower() == new_edit_region.lower()) & (df["رقم Oracle"].str.strip() == new_edit_prop) & (df.index != idx)]
                             if not check_dup.empty:
                                 st.error("❌ خطأ: هذا العقار مسجل مسبقاً في هذه المنطقة المحددة!")
                             else:
                                 st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
                                 st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
                                 
-                                # الميزة المطلوبة: تفريغ الخانات تماماً عند إنهاء التعديل والتوجه الفوري للمنطقة
-                                st.session_state.search_val = ""         # مسح وإخفاء قسم البحث
-                                st.session_state.last_region = ""        # تصفير ومسح خانة "اسم المنطقة" الأساسية فوق كلياً
-                                st.session_state.focus_on_region = True  # توجيه الماوس فوراً لخانة المنطقة
+                                st.session_state.search_val = ""         
+                                st.session_state.last_region = ""        
+                                st.session_state.focus_on_region = True  
                                 
                                 st.success("✅ تم التحديث، ومسح الحقول للبدء بمنطقة جديدة!")
                                 st.rerun()
                         else:
                             st.error("⚠️ لا يمكن ترك الحقول فارغة.")
-        else:
-            st.warning("ℹ️ لم يتم العثور على أي عقار مطابق للبحث.")
