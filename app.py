@@ -3,7 +3,7 @@ import pandas as pd
 
 st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# التنسيقات وحماية الواجهة وضبط الأحجام
+# التنسيقات وحماية الواجهة وإلغاء التنبيهات الافتراضية تماماً
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -62,15 +62,14 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# إدارة الـ Session State
+# إدارة قاعدة البيانات (تمت العودة للأعمدة الأساسية: المنطقة، رقم العقار)
 if "local_db" not in st.session_state:
-    st.session_state.local_db = pd.DataFrame(columns=["المنطقة", "رقم العقار", "رقم المشروع"])
+    st.session_state.local_db = pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
 if "file_uploaded" not in st.session_state:
     st.session_state.file_uploaded = False
 
 if "last_region" not in st.session_state: st.session_state.last_region = ""
-if "last_project" not in st.session_state: st.session_state.last_project = ""
 if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = False
 if "search_val" not in st.session_state: st.session_state.search_val = ""
 if "focus_on_region" not in st.session_state: st.session_state.focus_on_region = False
@@ -78,7 +77,7 @@ if "focus_on_region" not in st.session_state: st.session_state.focus_on_region =
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v6.2</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v6.3</div></div>""", unsafe_allow_html=True)
     
     if not st.session_state.file_uploaded:
         st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
@@ -86,10 +85,9 @@ with col2:
         
         if uploaded_file is not None:
             try:
-                uploaded_df = pd.read_csv(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str, "رقم المشروع": str})
-                if "رقم المشروع" not in uploaded_df.columns:
-                    uploaded_df["رقم المشروع"] = ""
-                st.session_state.local_db = uploaded_df
+                uploaded_df = pd.read_csv(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
+                # الحفاظ على الأعمدة الأساسية فقط في حال احتواء الملف على أعمدة قديمة
+                st.session_state.local_db = uploaded_df[["المنطقة", "رقم العقار"]]
                 st.session_state.file_uploaded = True  
                 st.success("✅ تم تحميل الملف بنجاح واستعادة كافة البيانات!")
                 st.rerun()  
@@ -100,15 +98,13 @@ with col2:
 
     st.markdown("---")
     
-    # حقول الإدخال الأساسية
-    c1, c2, c3 = st.columns(3)
+    # حقول الإدخال الأساسية الثنائية (المنطقة والعقار)
+    c1, c2 = st.columns(2)
     with c1:
-        region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="ادخل اسم المنطقة....", key="region_field").strip()
+        region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="ادخل اسم المنطقة الحالية ....", key="region_field").strip()
     with c2:
-        project_input = st.text_input("📁 رقم المشروع الحالي", value=st.session_state.last_project, placeholder="ادخل رقم المشروع....", key="project_field").strip()
-    with c3:
         prop_val = "" if st.session_state.clear_trigger else ""
-        property_number = st.text_input("🔢 رقم العقار الجديد", value=prop_val, placeholder="ادخل رقم العقار....", key="property_field").strip()
+        property_number = st.text_input("🔢 رقم العقار الجديد", value=prop_val, placeholder="ادخل رقم العقار الحالي....", key="property_field").strip()
     
     st.session_state.clear_trigger = False
 
@@ -118,7 +114,7 @@ with col2:
         
     with action_col2:
         if not df.empty:
-            sorted_df = df.sort_values(by=["المنطقة", "رقم المشروع", "رقم العقار"]).reset_index(drop=True)
+            sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
             csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
             st.download_button(label="🟢 تحميل وتنزيل سجل CSV النهائي", data=csv_data, file_name="KhatibAlami_Midan_Data.csv", mime="text/csv", use_container_width=True)
         else:
@@ -135,11 +131,11 @@ with col2:
 
     st.markdown("---")
 
-    # حقل البحث الفوري
-    search_query = st.text_input("🔍 البحث الفوري عن عقار، منطقة أو مشروع وتعديله:", value=st.session_state.search_val, placeholder="البحث الفوري...", key="search_modify_field").strip()
+    # حقل البحث الفوري المعدل للبحث في الحقلين الأساسيين
+    search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", value=st.session_state.search_val, placeholder="البحث الفوري عن عقار وتعديله...", key="search_modify_field").strip()
     st.session_state.search_val = search_query
 
-    # جافا سكريبت الذكي للتحكم بالتركيز والانتقال السريع
+    # جافا سكريبت الذكي للتوجه والتوجيه بـ Enter الفردي المباشر
     focus_script = "false"
     if st.session_state.focus_on_region:
         focus_script = "true"
@@ -148,37 +144,31 @@ with col2:
     st.components.v1.html(f"""<script>
         var attachMidanEvents = function() {{
             var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');
-            var regInput = null; var projInput = null; var propInput = null; var saveBtn = null; var searchInput = null;
+            var regInput = null; var propInput = null; var saveBtn = null; var searchInput = null;
             
             for (var i = 0; i < inputs.length; i++) {{
-                if (inputs[i].getAttribute('placeholder') === 'ادخل اسم المنطقة....') regInput = inputs[i];
-                if (inputs[i].getAttribute('placeholder') === 'ادخل رقم المشروع....') projInput = inputs[i];
-                if (inputs[i].getAttribute('placeholder') === 'ادخل رقم العقار....') propInput = inputs[i];
-                if (inputs[i].getAttribute('placeholder') === 'البحث الفوري...') searchInput = inputs[i];
+                if (inputs[i].getAttribute('placeholder') === 'ادخل اسم المنطقة الحالية ....') regInput = inputs[i];
+                if (inputs[i].getAttribute('placeholder') === 'ادخل رقم العقار الحالي....') propInput = inputs[i];
+                if (inputs[i].getAttribute('placeholder') === 'البحث الفوري عن عقار وتعديله...') searchInput = inputs[i];
             }}
             for (var j = 0; j < buttons.length; j++) {{ if (buttons[j].textContent.includes('🚀 حفظ العقار والتحقق من التكرار')) saveBtn = buttons[j]; }}
             
             var activeInput = mainDoc.activeElement;
             var isUserInSearchOrEdit = false;
             if (searchInput && (searchInput.value.trim() !== "" || activeInput === searchInput)) {{ isUserInSearchOrEdit = true; }}
-            if (activeInput && (activeInput.id.includes('edit_reg_') || activeInput.id.includes('edit_proj_') || activeInput.id.includes('edit_prop_'))) {{ isUserInSearchOrEdit = true; }}
+            if (activeInput && (activeInput.id.includes('edit_reg_') || activeInput.id.includes('edit_prop_'))) {{ isUserInSearchOrEdit = true; }}
             
             if ({focus_script} && regInput) {{
                 regInput.focus();
                 regInput.select();
-            }} else if (regInput && !isUserInSearchOrEdit && activeInput !== regInput && activeInput !== projInput && activeInput !== propInput) {{
+            }} else if (regInput && !isUserInSearchOrEdit && activeInput !== regInput && activeInput !== propInput) {{
                 regInput.focus();
             }}
             
-            if (regInput && projInput) {{
+            if (regInput && propInput) {{
                 regInput.removeEventListener('keydown', window.regMidanHandler);
-                window.regMidanHandler = function(e) {{ if (e.key === 'Enter') {{ e.preventDefault(); e.stopPropagation(); projInput.focus(); projInput.select(); }} }};
+                window.regMidanHandler = function(e) {{ if (e.key === 'Enter') {{ e.preventDefault(); e.stopPropagation(); propInput.focus(); propInput.select(); }} }};
                 regInput.addEventListener('keydown', window.regMidanHandler);
-            }}
-            if (projInput && propInput) {{
-                projInput.removeEventListener('keydown', window.projMidanHandler);
-                window.projMidanHandler = function(e) {{ if (e.key === 'Enter') {{ e.preventDefault(); e.stopPropagation(); propInput.focus(); propInput.select(); }} }};
-                projInput.addEventListener('keydown', window.projMidanHandler);
             }}
             if (propInput && saveBtn && regInput) {{
                 propInput.removeEventListener('keydown', window.propMidanHandler);
@@ -187,7 +177,7 @@ with col2:
                         if (propInput.value.trim() !== "") {{ 
                             e.preventDefault(); e.stopPropagation();
                             saveBtn.click(); 
-                            setTimeout(function() {{ projInput.focus(); projInput.select(); }}, 80); 
+                            setTimeout(function() {{ regInput.focus(); regInput.select(); }}, 80); 
                         }} 
                     }} 
                 }};
@@ -196,73 +186,54 @@ with col2:
         }}; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);
     </script>""", height=0)
 
-    # معالجة وحفظ البيانات عند الإدخال العادي
+    # معالجة وحفظ البيانات للإدخال الأساسي
     if btn_save:
-        if region_input and project_input and property_number:
-            is_duplicate = df[
-                (df["المنطقة"].str.strip().str.lower() == region_input.lower()) & 
-                (df["رقم المشروع"].str.strip().str.lower() == project_input.lower()) & 
-                (df["رقم العقار"].str.strip() == property_number)
-            ].shape[0] > 0
-            
+        if region_input and property_number:
+            is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
             if is_duplicate:
-                st.error(f"❌ إلغاء: هذا العقار رقم ({property_number}) مسجل مسبقاً في نفس المشروع [{project_input}] بمنطقة [{region_input}]!")
+                st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
             else:
-                new_row = pd.DataFrame([{"المنطقة": region_input, "رقم المشروع": project_input, "رقم العقار": property_number}])
+                new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
                 st.session_state.last_region = region_input
-                st.session_state.last_project = project_input
                 st.session_state.clear_trigger = True
-                st.success(f"✅ تم حفظ العقار رقم ({property_number}) للمشروع ({project_input}) بنجاح!")
+                st.success(f"✅ تم حفظ العقار رقم ({property_number}) بنجاح!")
                 st.rerun()
         else:
-            st.warning("⚠️ فضلاً، يرجى ملء كافة الخانات الثلاثة قبل الحفظ.")
+            st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    # تشغيل منطق التعديل والبحث المباشر
+    # تشغيل منطق التعديل والبحث المباشر الثنائي واختفائه الفوري عند الحفظ
     if search_query:
-        matched_records = df[
-            df["المنطقة"].str.contains(search_query, case=False, na=False) | 
-            df["رقم المشروع"].astype(str).str.contains(search_query, case=False, na=False) | 
-            df["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)
-        ]
+        matched_records = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | df["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
         
         if not matched_records.empty:
             st.info(f"📋 تم العثور على ({len(matched_records)}) سجل متطابق:")
             for idx, row in matched_records.iterrows():
-                with st.expander(f"⚙️ تعديل عقار {row['رقم العقار']} - مشروع {row['رقم المشروع']} - منطقة {row['المنطقة']}", expanded=True):
-                    edit_c1, edit_c2, edit_c3 = st.columns(3)
+                with st.expander(f"⚙️ تعديل العقار رقم {row['رقم العقار']} في {row['المنطقة']}", expanded=True):
+                    edit_c1, edit_c2 = st.columns(2)
                     with edit_c1:
                         new_edit_region = st.text_input("تعديل اسم المنطقة", value=row['المنطقة'], key=f"edit_reg_{idx}").strip()
                     with edit_c2:
-                        new_edit_project = st.text_input("تعديل رقم المشروع", value=row['رقم المشروع'], key=f"edit_proj_{idx}").strip()
-                    with edit_c3:
                         new_edit_prop = st.text_input("تعديل رقم العقار", value=row['رقم العقار'], key=f"edit_prop_{idx}").strip()
                     
                     save_edit_btn = st.button("💾 حفظ التعديلات", key=f"save_edit_{idx}")
                     if save_edit_btn:
-                        if new_edit_region and new_edit_project and new_edit_prop:
-                            check_dup = df[
-                                (df["المنطقة"].str.strip().str.lower() == new_edit_region.lower()) & 
-                                (df["رقم المشروع"].str.strip().str.lower() == new_edit_project.lower()) & 
-                                (df["رقم العقار"].str.strip() == new_edit_prop) & 
-                                (df.index != idx)
-                            ]
+                        if new_edit_region and new_edit_prop:
+                            check_dup = df[(df["المنطقة"].str.strip().str.lower() == new_edit_region.lower()) & (df["رقم العقار"].str.strip() == new_edit_prop) & (df.index != idx)]
                             if not check_dup.empty:
-                                st.error("❌ خطأ: التعديل المختار يطابق تماماً سجلاً آخر موجود بالفعل!")
+                                st.error("❌ خطأ: هذا العقار مسجل مسبقاً في هذه المنطقة المحددة!")
                             else:
                                 st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
-                                st.session_state.local_db.at[idx, "رقم المشروع"] = new_edit_project
                                 st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
                                 
-                                # التعديل الذهبي المطلوب:
-                                st.session_state.search_val = ""         # 1. إخفاء شاشة البحث والتعديل
-                                st.session_state.last_region = ""        # 2. تفريغ (مسح) خانة اسم المنطقة الأساسية فوق تماماً
-                                st.session_state.last_project = ""       # 3. تفريغ حقل المشروع أيضاً للبدء من جديد بالكامل
-                                st.session_state.focus_on_region = True  # 4. توجيه مؤشر الماوس فوراً لخانة المنطقة
+                                # الميزة المطلوبة: تفريغ الخانات تماماً عند إنهاء التعديل والتوجه الفوري للمنطقة
+                                st.session_state.search_val = ""         # مسح وإخفاء قسم البحث
+                                st.session_state.last_region = ""        # تصفير ومسح خانة "اسم المنطقة" الأساسية فوق كلياً
+                                st.session_state.focus_on_region = True  # توجيه الماوس فوراً لخانة المنطقة
                                 
-                                st.success("✅ تم حفظ التعديل، ومسح كافة الحقول للانتقال لمنطقة جديدة!")
+                                st.success("✅ تم التحديث، ومسح الحقول للبدء بمنطقة جديدة!")
                                 st.rerun()
                         else:
                             st.error("⚠️ لا يمكن ترك الحقول فارغة.")
         else:
-            st.warning("ℹ️ لم يتم العثور على أي بيانات مطابقة للبحث.")
+            st.warning("ℹ️ لم يتم العثور على أي عقار مطابق للبحث.")
