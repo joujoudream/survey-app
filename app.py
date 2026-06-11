@@ -3,7 +3,7 @@ import pandas as pd
 
 st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# 🎨 التنسيقات الذهبية الموحدة والمطابقة 100% بدون أي نصوص مشوهة
+# 🎨 التنسيقات الذهبية الموحدة مع الإخفاء الكامل للمربع الأبيض والزر الشفاف
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -66,13 +66,22 @@ st.markdown("""
     .metric-val-twin { font-size: 26px; font-weight: bold; line-height: 1.1; color: white !important; }
     .metric-lbl-twin { font-size: 13px; opacity: 0.95; margin-top: 5px; color: white !important; }
     
-    /* جعل الزر الميكانيكي شفاف وغير مرئي تماماً وممتد فوق كامل المساحة للضغط المباشر */
+    /* 🔴 تفجير وإلغاء المربع الأبيض الافتراضي من الحاوية نهائياً */
+    div[data-testid="stBlock"] div.stButton {
+        background: transparent !important;
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    /* جعل الزر الميكانيكي الشفاف ممتداً فوق كامل مساحة الصندوق الأزرق للضغط المباشر */
     div.stButton > button.hidden-clickable-btn {
         position: absolute;
         top: 0; left: 0; width: 100%; height: 85px !important;
         background: transparent !important;
+        background-color: transparent !important;
         color: transparent !important;
-        color: rgba(0,0,0,0) !important; /* إخفاء أي نص داخلي بشكل قاطع */
+        color: rgba(0,0,0,0) !important;
         border: none !important;
         box-shadow: none !important;
         cursor: pointer !important;
@@ -116,7 +125,7 @@ if "show_excel_sheet" not in st.session_state: st.session_state.show_excel_sheet
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v6.8</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v6.9</div></div>""", unsafe_allow_html=True)
     
     if not st.session_state.file_uploaded:
         st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
@@ -163,7 +172,7 @@ with col2:
     if region_input:
         region_properties_count = len(df[df["المنطقة"].str.strip().str.lower() == region_input.lower()])
 
-    # 📊 عرض التوأم المتطابق بالكامل باللون الأزرق الملكي والحجم الموحد 100%
+    # 📊 عرض التوأم المتطابق بالكامل باللون الأزرق الملكي والحجم الموحد 100% النظيف تماماً
     stat_col1, stat_col2 = st.columns(2)
     
     with stat_col1: 
@@ -186,23 +195,21 @@ with col2:
             </div>
         """, unsafe_allow_html=True)
         
-        # زر شفاف بالكامل يعتمد على الـ Key للاستدعاء البرمجي دون طباعة أي حروف مشوهة للتصميم
+        # زر شفاف صامت بالكامل وبدون إظهار أي مربعات بيضاء في الخلفية
         btn_show_sheet = st.button("", key="regional_action_trigger_secret_key")
         
-        # كود الاستهداف الدقيق لشفافية هذا الزر تحديداً
+        # كود التثبيت الفوري لإخفاء بقايا أزرار الـ Streamlit البيضاء وجعلها غير مرئية
         st.markdown("""
             <script>
-            var btns = window.parent.document.getElementsByTagName('button');
-            for(var i=0; i<btns.length; i++){
-                if(btns[i].getAttribute('aria-label') === 'regional_action_trigger_secret_key' || i === (btns.length - 2) || btns[i].id.includes('regional_action_trigger_secret_key')){
-                     // يتم استهدافه مباشرة بالخلفية لجعله شفافاً بالكامل فوق العداد المخصص
-                }
-            }
-            // استهداف مباشر عبر الكود التعريفي للـ Streamlit Button لضمان الشفافية المطلقة وحذف أي حروف
             var allButtons = window.parent.document.querySelectorAll('div.stButton > button');
             allButtons.forEach(function(b) {
                 if(b.innerHTML === "" || b.innerText === "" || b.textContent === "") {
                     b.classList.add('hidden-clickable-btn');
+                    // إخفاء حاوية الإطار الخارجي لمنع ظهور أي بقايا بيضاء
+                    if(b.parentElement) {
+                        b.parentElement.style.background = 'transparent';
+                        b.parentElement.style.backgroundColor = 'transparent';
+                    }
                 }
             });
             </script>
