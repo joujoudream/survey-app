@@ -3,7 +3,7 @@ import pandas as pd
 
 st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# التنسيقات وحماية الواجهة وجعل الصناديق متطابقة تماماً
+# 🎨 التنسيقات الذهبية لجعل عداد المنطقة صندوقاً أزرق متطابقاً 100% مع العداد الكلي
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -26,7 +26,6 @@ st.markdown("""
         margin-bottom: 2px; 
         text-align: center; 
         border: 1px solid #BEE3F8; 
-        overflow: visible !important; 
     }
     .company-header { color: #1E3A8A; font-family: 'Arial', sans-serif; font-size: 30px; font-weight: bold; margin: 0; line-height: 1.2; }
     .company-subtitle { color: #2D3748; font-family: 'Arial', sans-serif; font-size: 16px; font-weight: 500; margin-top: 6px; }
@@ -49,32 +48,32 @@ st.markdown("""
     .sig-name { font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #475569; margin: 2px 0; }
     .sig-note { font-size: 11px; color: #3b82f6; font-weight: 500; margin: 0; }
     
-    /* الصندوق الأزرق الثابت للعداد الكلي */
+    /* 🔵 الصندوق الأزرق الثابت للعداد الكلي */
     .metric-box { 
         background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); 
-        color: white; 
-        padding: 10px 15px; 
+        color: white !important; 
+        padding: 12px 15px; 
         border-radius: 10px; 
         text-align: center; 
         box-shadow: 0 4px 8px rgba(30, 58, 138, 0.15); 
-        min-height: 68px;
+        min-height: 75px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
     }
-    .metric-val { font-size: 22px; font-weight: bold; line-height: 1.1; }
-    .metric-lbl { font-size: 12px; opacity: 0.9; margin-top: 2px; }
+    .metric-val { font-size: 24px; font-weight: bold; line-height: 1.1; color: white !important; }
+    .metric-lbl { font-size: 13px; opacity: 0.95; margin-top: 4px; color: white !important; }
     
-    /* جعل الزر التفاعلي يطابق تماماً الصندوق الأزرق المجاور له في كل شيء */
-    div.stButton > button.clickable-metric-box-btn {
+    /* 🔵 تحويل الزر إلى صندوق أزرق مطابق تماماً للعداد الكلي وقابل للضغط */
+    div.stButton > button.metric-clickable-box-final {
         background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
         color: white !important;
         border: none !important;
-        padding: 10px 15px !important;
+        padding: 12px 15px !important;
         border-radius: 10px !important;
         box-shadow: 0 4px 8px rgba(30, 58, 138, 0.15) !important;
-        height: 68px !important;
+        height: 75px !important;
         width: 100% !important;
         cursor: pointer !important;
         display: flex !important;
@@ -82,12 +81,14 @@ st.markdown("""
         justify-content: center !important;
         align-items: center !important;
         margin: 0 !important;
-        transition: all 0.2s ease;
+        transition: all 0.2s ease-in-out;
     }
-    div.stButton > button.clickable-metric-box-btn:hover {
+    
+    /* تأثير تمرير الماوس فوق الصندوق التفاعلي */
+    div.stButton > button.metric-clickable-box-final:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(30, 58, 138, 0.25) !important;
-        opacity: 0.95;
+        box-shadow: 0 6px 14px rgba(30, 58, 138, 0.3) !important;
+        filter: brightness(1.1);
     }
     
     div.stButton > button, div.stDownloadButton > button { border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; transition: all 0.3s ease; width: 100%; height: 40px; margin-top: 2px; margin-bottom: 2px; }
@@ -115,7 +116,7 @@ if "show_excel_sheet" not in st.session_state: st.session_state.show_excel_sheet
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown("""<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>""", unsafe_allow_html=True)
-    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v6.5</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>صمم بعناية لأجل دقة التوثيق والراحة | KhatibAlami System v6.6</div></div>""", unsafe_allow_html=True)
     
     if not st.session_state.file_uploaded:
         st.markdown("### 📥 خطوة 1: رفع ملف البيانات الاحتياطي")
@@ -163,20 +164,32 @@ with col2:
     if region_input:
         region_properties_count = len(df[df["المنطقة"].str.strip().str.lower() == region_input.lower()])
 
-    # عرض الصناديق المتطابقة تماماً كتوأم متناسق
+    # 📊 عرض التوأم المتطابق بالكامل (الصندوق الكلي الثابت والصندوق المحلي القابل للضغط)
     stat_col1, stat_col2 = st.columns(2)
+    
     with stat_col1: 
         st.markdown(f"<div class='metric-box'><div class='metric-val'>{total_properties_count}</div><div class='metric-lbl'>📊 مجموع عدد العقارات الكلي</div></div>", unsafe_allow_html=True)
     
     with stat_col2: 
-        # الزر التفاعلي الجديد المماثل تماماً في الشكل للصندوق الأزرق
+        # الزر التفاعلي الجديد بصيغة نصية مصفوفة للتحكم الكامل بالمظهر عبر الـ JS
         btn_show_sheet = st.button(
-            f"📍 {region_properties_count}\nعدد العقارات في نفس المنطقة الحالية (اضغط للعرض)", 
-            key="metric_click_box_btn", 
+            f"{region_properties_count}\n📍 عدد العقارات في نفس المنطقة الحالية", 
+            key="final_blue_metric_btn", 
             use_container_width=True
         )
-        # حقن كود جافا سكريبت لربط التنسيق المتطابق للزر
-        st.markdown("<script>var btns = window.parent.document.getElementsByTagName('button'); for(var i=0;i<btns.length;i++){ if(btns[i].textContent.includes('عدد العقارات في نفس المنطقة')){ btns[i].classList.add('clickable-metric-box-btn'); btns[i].style.whiteSpace = 'pre-line'; } }</script>", unsafe_allow_html=True)
+        
+        # كود التثبيت السحري لربط التنسيق بالزر ليصبح صندوقاً أزرق تماماً
+        st.markdown("""
+            <script>
+            var btns = window.parent.document.getElementsByTagName('button');
+            for(var i=0; i<btns.length; i++){
+                if(btns[i].textContent.includes('عدد العقارات في نفس المنطقة الحالية')){
+                    btns[i].classList.add('metric-clickable-box-final');
+                    btns[i].style.whiteSpace = 'pre-line';
+                }
+            }
+            </script>
+        """, unsafe_allow_html=True)
         
         if btn_show_sheet:
             st.session_state.show_excel_sheet = True
@@ -186,11 +199,10 @@ with col2:
         st.markdown("<div id='excel_section'></div>", unsafe_allow_html=True) 
         st.markdown(f"### 📊 أرقام العقارات الجاري العمل عليها في منطقة: ({region_input})")
         
-        # فلترة البيانات وجلب العمود الصحيح الصافي بنسبة 100%
+        # فلترة جلب أرقام العقارات الصافية فقط للمنطقة النشطة
         filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
         
         if not filtered_df.empty:
-            # هنا التعديل الجوهري: نأخذ عمود "رقم العقار" فقط ونقوم بتحويله إلى نصوص لمنع المشاكل
             excel_sheet_df = pd.DataFrame(filtered_df["رقم العقار"].values, columns=["رقم العقار"])
             excel_sheet_df = excel_sheet_df.sort_values(by="رقم العقار").reset_index(drop=True)
             excel_sheet_df.index += 1 # الترقيم من 1 للإكسيل
@@ -286,7 +298,7 @@ with col2:
         else:
             st.warning("⚠️ فضلاً، يرجى ملء الخانات أولاً قبل الحفظ.")
 
-    # التعديل
+    # التعديل والبحث
     if search_query:
         matched_records = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | df["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
         if not matched_records.empty:
