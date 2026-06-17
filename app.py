@@ -3,8 +3,8 @@ import pandas as pd
 
 st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# 🎨 ستايل هندسي دقيق لتوحيد وتطابق المربعات الحمراء والزرقاء المقابلة لبعضها البعض
-fixed_css = """
+# 🎨 الستايل الهندسي المطور لصبغ الأزرار والمربعات بشكل إجباري ومستقر
+ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
 html, body, [class*='css'] { 
@@ -83,30 +83,32 @@ header[data-testid='stHeader'] {
     margin: 0; 
 }
 
-/* 🔴 إجبار المربعين في الجهتين المتقابلتين على أخذ اللون الأحمر الناري بنفس الأبعاد والخط */
+/* 🔴 الستايل الصارم والنهائي لتوحيد وتطابق شكل الأزرار الحمراء المتقابلة تماماً في كل الحالات */
 div[data-testid="stColumn"] button, 
 div[data-testid="stColumn"] button[type="button"],
-div[data-testid="stColumn"] data-testid="baseButton-secondary" {
+div[data-testid="stColumn"] a {
     background-color: #EF4444 !important;
     color: white !important;
     border: 1px solid #DC2626 !important;
     font-weight: 700 !important;
     font-size: 15px !important;
-    height: 48px !important;
+    height: 46px !important;
     border-radius: 8px !important;
     box-shadow: 0 4px 6px rgba(239, 68, 68, 0.25) !important;
     width: 100% !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    text-decoration: none !important;
 }
 
-div[data-testid="stColumn"] button:hover {
+div[data-testid="stColumn"] button:hover, 
+div[data-testid="stColumn"] a:hover {
     background-color: #DC2626 !important;
     box-shadow: 0 6px 10px rgba(220, 38, 38, 0.4) !important;
 }
 
-/* 🔵 ستايل المربعات الزرقاء الإحصائية المتقابلة */
+/* 🔵 ستايل الإحصائيات الزرقاء الملكية المزدوجة والمتقابلة */
 div[data-testid="stMetric"] {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
     padding: 15px !important;
@@ -126,7 +128,7 @@ div[data-testid='stHorizontalBlock'] {
 }
 </style>
 """
-st.markdown(fixed_css, unsafe_allow_html=True)
+st.markdown(ultimate_css, unsafe_allow_html=True)
 
 # إدارة وحفظ حالات السجل والتحكم بالجلسة
 if "local_db" not in st.session_state:
@@ -140,11 +142,11 @@ if "focus_on_region" not in st.session_state: st.session_state.focus_on_region =
 
 col1, col2, col3 = st.columns([0.5, 11, 0.5])
 with col2:
-    # الهيدر الأساسي وبطاقة التوقيع الكريمة الخاصة بك
+    # الهيدر الأساسي وبطاقة التوقيع الخاصة بك
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
-    st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>واجهة متطابقة هندسياً بالمربعات الحمراء والزرقاء المتقابلة | KhatibAlami System v8.4</div></div>", unsafe_allow_html=True)
+    st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>تصميم مستقر وحل شامل لتطابق المربعات الحمراء والزرقاء | KhatibAlami System v8.5</div></div>", unsafe_allow_html=True)
     
-    # نافذة رفع الملف الاحتياطي المدمجة
+    # نافذة رفع الملف الاحتياطي
     with st.expander("📥 خطوة 1: رفع ملف البيانات الاحتياطي (إذا وجد)", expanded=not st.session_state.file_uploaded):
         uploaded_file = st.file_uploader("اختر ملف الإكسيل (CSV) المستخرج سابقاً لمتابعة العمل على البيانات:", type=["csv"])
         if uploaded_file is not None and not st.session_state.file_uploaded:
@@ -160,7 +162,7 @@ with col2:
     df = st.session_state.local_db
     st.markdown("---")
     
-    # حقول الإدخال مصفوفة أفقياً بشكل متناسق وسلس
+    # حقول الإدخال مصفوفة أفقياً بشكل متناسق
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -170,18 +172,21 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # 🔴🔴 المربعات الحمراء المتقابلة والمتطابقة تماماً في الحجم واللون والشكل
+    # 🔴🔴 صف المربعات الحمراء المتطابقة والمتجاورة تماماً (حفظ وتنزيل السجل)
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", type="primary", use_container_width=True)
         
     with action_col2:
+        # تعديل ذكي: الزر يبقى مفعلاً باللون الأحمر، وإذا كان فارغاً يوجه المستخدم بتنبيه ودود
         if not df.empty:
             sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
             csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
             st.download_button(label="📥 تحميل وتنزيل سجل CSV النهائي", data=csv_data, file_name="KhatibAlami_Midan_Data.csv", mime="text/csv", use_container_width=True)
         else:
-            st.button("📥 سجل CSV فارغ حالياً", disabled=True, use_container_width=True)
+            btn_empty = st.button("📥 تحميل وتنزيل سجل CSV النهائي", key="empty_btn_click", use_container_width=True)
+            if btn_empty:
+                st.warning("⚠️ السجل فارغ حالياً! يرجى إضافة عقار واحد على الأقل لتتمكن من التنزيل.")
 
     # احتساب الإحصائيات الفورية للمربعات الزرقاء
     total_count = len(df)
@@ -191,7 +196,7 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 المربعات الزرقاء المزدوجة المتطابقة والمتجاورة في الجهتين
+    # 📊 المربعات الزرقاء المزدوجة المتطابقة والمتجاورة في الجهتين المقابلتين
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1:
         st.metric(label="🗄️ مجموع عدد العقارات الكلي", value=total_count)
@@ -246,7 +251,7 @@ with col2:
                     with edit_c2:
                         new_edit_prop = st.text_input("تعديل رقم العقار", value=row['رقم العقار'], key=f"edit_prop_{idx}").strip()
                     
-                    save_edit_btn = st.button("💾 حفظ Tعديلات السجل", key=f"save_edit_{idx}")
+                    save_edit_btn = st.button("💾 حفظ تعديلات السجل", key=f"save_edit_{idx}")
                     if save_edit_btn:
                         if new_edit_region and new_edit_prop:
                             st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
