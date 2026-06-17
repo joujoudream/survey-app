@@ -1,9 +1,47 @@
 import streamlit as st
 import pandas as pd
+import requests
+import base64
 
 st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# 🎨 الستايل الهندسي المطور لصبغ الأزرار والمربعات بشكل إجباري ومستقر
+# 🔑 إعدادات الربط التلقائي بمنصة GitHub (ضع بياناتك هنا)
+# ضع الرمز الطويل الذي نسخته هنا
+GITHUB_TOKEN = "ghp_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" 
+
+# ضع اسم مستخدم حسابك ثم علامة / ثم اسم المستودع
+GITHUB_REPO = "walid-mrad/khatib-alami-data" 
+
+# اترك هذا الاسم كما هو ليكون اسم ملف العقارات على جيت هاب
+GITHUB_FILENAME = "KhatibAlami_Midan_Data.csv"
+GITHUB_FILENAME = "KhatibAlami_Midan_Data.csv"
+
+def upload_to_github(dataframe):
+    """دالة برمجية ذكية لرفع وتحديث ملف البيانات على جيت هاب تلقائياً خلف الكواليس"""
+    try:
+        csv_content = dataframe.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True).to_csv(index=False).encode('utf-8-sig')
+        encoded_content = base64.b64encode(csv_content).decode('utf-8')
+        
+        url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_FILENAME}"
+        headers = {"Authorization": f"token {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
+        
+        # التحقق أولاً إذا كان الملف موجوداً لتحديثه، أو إنشاء ملف جديد إن لم يكن موجوداً
+        res = requests.get(url, headers=headers)
+        sha = res.json().get("sha") if res.status_code == 200 else None
+        
+        data = {
+            "message": "تحديث تلقائي لسجل العقارات الميداني - الريس وليد",
+            "content": encoded_content
+        }
+        if sha:
+            data["sha"] = sha
+            
+        put_res = requests.put(url, headers=headers, json=data)
+        return put_res.status_code in [200, 201]
+    except Exception as e:
+        return False
+
+# 🎨 الستايل الهندسي لتوحيد وتطابق شكل الأزرار والمربعات
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -83,7 +121,7 @@ header[data-testid='stHeader'] {
     margin: 0; 
 }
 
-/* 🔴 الستايل الصارم والنهائي لتوحيد وتطابق شكل الأزرار الحمراء المتقابلة تماماً في كل الحالات */
+/* 🔴 الستايل الصارم لتوحيد حجم ولون الأزرار المتقابلة */
 div[data-testid="stColumn"] button, 
 div[data-testid="stColumn"] button[type="button"],
 div[data-testid="stColumn"] a {
@@ -108,7 +146,7 @@ div[data-testid="stColumn"] a:hover {
     box-shadow: 0 6px 10px rgba(220, 38, 38, 0.4) !important;
 }
 
-/* 🔵 ستايل الإحصائيات الزرقاء الملكية المزدوجة والمتقابلة */
+/* 🔵 ستايل الإحصائيات الزرقاء الملكية المتطابقة */
 div[data-testid="stMetric"] {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
     padding: 15px !important;
@@ -130,7 +168,7 @@ div[data-testid='stHorizontalBlock'] {
 """
 st.markdown(ultimate_css, unsafe_allow_html=True)
 
-# إدارة وحفظ حالات السجل والتحكم بالجلسة
+# إدارة حالات السجل والتحكم بالجلسة
 if "local_db" not in st.session_state:
     st.session_state.local_db = pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 if "file_uploaded" not in st.session_state:
@@ -142,9 +180,8 @@ if "focus_on_region" not in st.session_state: st.session_state.focus_on_region =
 
 col1, col2, col3 = st.columns([0.5, 11, 0.5])
 with col2:
-    # الهيدر الأساسي وبطاقة التوقيع الخاصة بك
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
-    st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>تصميم مستقر وحل شامل لتطابق المربعات الحمراء والزرقاء | KhatibAlami System v8.5</div></div>", unsafe_allow_html=True)
+    st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>نسخة مطورة تدعم الرفع والنسخ الاحتياطي التلقائي إلى GitHub | KhatibAlami System v8.6</div></div>", unsafe_allow_html=True)
     
     # نافذة رفع الملف الاحتياطي
     with st.expander("📥 خطوة 1: رفع ملف البيانات الاحتياطي (إذا وجد)", expanded=not st.session_state.file_uploaded):
@@ -162,7 +199,7 @@ with col2:
     df = st.session_state.local_db
     st.markdown("---")
     
-    # حقول الإدخال مصفوفة أفقياً بشكل متناسق
+    # حقول الإدخال
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -172,23 +209,32 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # 🔴🔴 صف المربعات الحمراء المتطابقة والمتجاورة تماماً (حفظ وتنزيل السجل)
+    # 🔴🔴 صف المربعات الحمراء المتطابقة (حفظ وتنزيل السجل مع ميزة الرفع التلقائي لـ GitHub)
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", type="primary", use_container_width=True)
         
     with action_col2:
-        # تعديل ذكي: الزر يبقى مفعلاً باللون الأحمر، وإذا كان فارغاً يوجه المستخدم بتنبيه ودود
-        if not df.empty:
-            sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-            csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
-            st.download_button(label="📥 تحميل وتنزيل سجل CSV النهائي", data=csv_data, file_name="KhatibAlami_Midan_Data.csv", mime="text/csv", use_container_width=True)
-        else:
-            btn_empty = st.button("📥 تحميل وتنزيل سجل CSV النهائي", key="empty_btn_click", use_container_width=True)
-            if btn_empty:
-                st.warning("⚠️ السجل فارغ حالياً! يرجى إضافة عقار واحد على الأقل لتتمكن من التنزيل.")
+        btn_download = st.button("📥 تحميل وتنزيل سجل CSV ومزامنته", use_container_width=True)
+        if btn_download:
+            if not df.empty:
+                # 1. الرفع والمزامنة التلقائية مع GitHub خلف الكواليس
+                if GITHUB_TOKEN != "ضع_هنا_رمز_الوصول_الخاص_بك_YOUR_GITHUB_TOKEN":
+                    with st.spinner("🔄 جاري رفع وتأمين السجل احتياطياً على منصة GitHub..."):
+                        success = upload_to_github(df)
+                        if success:
+                            st.success("☁️ تم رفع وتأمين النسخة الاحتياطية على GitHub بنجاح!")
+                        else:
+                            st.error("⚠️ لم نتمكن من الاتصال بـ GitHub. يرجى التحقق من إعدادات الرمز (Token).")
+                
+                # 2. إتاحة التحميل المباشر للمستخدم كالمعتاد
+                sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
+                csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
+                st.download_button(label="💾 اضغط هنا لتأكيد التنزيل على جهازك", data=csv_data, file_name=GITHUB_FILENAME, mime="text/csv", use_container_width=True)
+            else:
+                st.warning("⚠️ السجل فارغ حالياً! يرجى إضافة عقار واحد على الأقل لتتمكن من التنزيل أو المزامنة.")
 
-    # احتساب الإحصائيات الفورية للمربعات الزرقاء
+    # احتساب الإحصائيات الفورية
     total_count = len(df)
     region_count = 0
     if region_input:
@@ -196,7 +242,7 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 المربعات الزرقاء المزدوجة المتطابقة والمتجاورة في الجهتين المقابلتين
+    # 📊 المربعات الزرقاء المزدوجة المتطابقة
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1:
         st.metric(label="🗄️ مجموع عدد العقارات الكلي", value=total_count)
@@ -260,7 +306,7 @@ with col2:
                             st.success("✅ تم تحديث وتصحيح السجل بنجاح!")
                             st.rerun()
 
-    # جافا سكريبت إدارة مؤشر الكتابة التلقائي لزر الـ Enter والتنقل الميداني السريع
+    # جافا سكريبت إدارة مؤشر الكتابة التلقائي
     focus_script = "true" if st.session_state.focus_on_region else "false"
     st.session_state.focus_on_region = False
 
