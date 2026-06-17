@@ -151,7 +151,7 @@ with col2:
     # هيدر الشركة الرئيسي
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     
-    # بطاقة التوقيع النظيفة والمختصرة مباشرة أسفل الهيدر بدون لوجو
+    # بطاقة التوقيع النظيفة والمختصرة مباشرة أسفل الهيدر بدون لوجو وبدون أسطر إضافية
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
     
     # نافذة الرفع الاحتياطي للملف القديم
@@ -233,7 +233,60 @@ with col2:
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
-            if is_duplicate: st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
+            if is_duplicate: st.error("❌ إلغاء: هذا العقار مسجل سابقاً in هذه المنطقة!")
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
-                st.session_state.local_db = pd.concat(
+                st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
+                st.session_state.last_region = region_input
+                st.session_state.clear_trigger = True
+                st.success(f"✅ تم حفظ العقار رقم ({property_number}) بنجاح!")
+                st.rerun()
+        else: st.warning("⚠️ فضلاً، يرجى ملء حقول المنطقة ورقم العقار أولاً.")
+
+    if search_query:
+        matched_records = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | df["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
+        if not matched_records.empty:
+            st.info(f"📋 تم العثور على ({len(matched_records)}) سجل متطابق:")
+            for idx, row in matched_records.iterrows():
+                with st.expander(f"⚙️ تعديل العقار رقم {row['رقم العقار']} في {row['المنطقة']}", expanded=True):
+                    edit_c1, edit_c2 = st.columns(2)
+                    with edit_c1: new_edit_region = st.text_input("تعديل اسم المنطقة", value=row['المنطقة'], key=f"edit_reg_{idx}").strip()
+                    with edit_c2: new_edit_prop = st.text_input("تعديل رقم العقار", value=row['رقم العقار'], key=f"edit_prop_{idx}").strip()
+                    if st.button("💾 حفظ تعديلات السجل", key=f"save_edit_{idx}"):
+                        if new_edit_region and new_edit_prop:
+                            st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
+                            st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
+                            st.session_state.search_val = ""         
+                            st.success("✅ تم تحديث وتصحيح السجل بنجاح!")
+                            st.rerun()
+
+    # نص أتمتة التركيز الميداني للمؤشر والتنقل بزر Enter
+    focus_script = "true" if st.session_state.focus_on_region else "false"
+    st.session_state.focus_on_region = False
+    js_code = [
+        "<script>",
+        "var attachMidanEvents = function() {",
+        "var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');",
+        "var regInput = null; var propInput = null; var saveBtn = null;",
+        "for (var i = 0; i < inputs.length; i++) {",
+        "if (inputs[i].getAttribute('placeholder') === 'النبطية، صور، صيدا...') regInput = inputs[i];",
+        "if (inputs[i].getAttribute('placeholder') === 'ادخل رقم العقار الحالي....') propInput = inputs[i];",
+        "}",
+        "for (var j = 0; j < buttons.length; j++) { if (buttons[j].textContent.includes('🚀')) saveBtn = buttons[j]; }",
+        "var activeInput = mainDoc.activeElement;",
+        "if (" + focus_script + " && regInput) { regInput.focus(); regInput.select(); }",
+        "else if (regInput && activeInput !== regInput && activeInput !== propInput && (!activeInput || activeInput.tagName !== 'INPUT')) { regInput.focus(); }",
+        "if (regInput && propInput) {",
+        "regInput.removeEventListener('keydown', window.regMidanHandler);",
+        "window.regMidanHandler = function(e) { if (e.key === 'Enter') { e.preventDefault(); propInput.focus(); propInput.select(); } };",
+        "regInput.addEventListener('keydown', window.regMidanHandler);",
+        "}",
+        "if (propInput && saveBtn && regInput) {",
+        "propInput.removeEventListener('keydown', window.propMidanHandler);",
+        "window.propMidanHandler = function(e) { if (e.key === 'Enter') { if (propInput.value.trim() !== '') { e.preventDefault(); saveBtn.click(); setTimeout(function() { regInput.focus(); regInput.select(); }, 100); } } };",
+        "propInput.addEventListener('keydown', window.propMidanHandler);",
+        "}",
+        "}; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);",
+        "</script>"
+    ]
+    st.components.v1.html("".join(js_code), height=0)
