@@ -3,8 +3,8 @@ import pandas as pd
 
 st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# 🎨 ستايل CSS مخصص لضمان ظهور المربعين الأزرقين بشكل متناسق وأنيق جداً
-clean_css = "<style>@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap'); html, body, [class*='css'] { font-family: 'Tajawal', sans-serif; direction: rtl; text-align: right; } .stApp { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); } header[data-testid='stHeader'] { background: transparent !important; height: 0px !important; display: none !important; } .block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; } .header-card { background-color: #EBF8FF; padding: 20px 12px; border-radius: 12px; box-shadow: 0 6px 12px rgba(30, 58, 138, 0.08); margin-bottom: 2px; text-align: center; border: 1px solid #BEE3F8; } .company-header { color: #1E3A8A; font-family: 'Arial', sans-serif; font-size: 28px; font-weight: bold; margin: 0; line-height: 1.2; } .company-subtitle { color: #2D3748; font-family: 'Arial', sans-serif; font-size: 15px; font-weight: 500; margin-top: 4px; } .main-signature-card { background-color: #ffffff; padding: 8px 16px; border-radius: 10px; text-align: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04); margin-top: 4px; margin-bottom: 15px; border: 1px solid #e2e8f0; width: 100%; max-width: 550px; margin-left: auto; margin-right: auto; } .sig-title { font-family: 'Arial', sans-serif; font-size: 15px; font-weight: bold; color: #1E3A8A; margin: 0; } .sig-name { font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #475569; margin: 2px 0; } .sig-note { font-size: 11px; color: #3b82f6; font-weight: 500; margin: 0; } div[data-testid='stBlock'] button[type='button']:contains('🚀') { background-color: #EF4444 !important; color: white !important; border: none !important; font-weight: 700 !important; height: 45px !important; box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2) !important; } div[data-testid='stBlock'] button[type='button']:contains('🚀'):hover { background-color: #DC2626 !important; } div[data-testid='stMetric'] { background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important; color: white !important; padding: 12px !important; border-radius: 10px !important; text-align: center !important; box-shadow: 0 4px 8px rgba(30, 58, 138, 0.15) !important; } div[data-testid='stMetric'] * { color: white !important; } div[data-testid='stHorizontalBlock'] { gap: 10px !important; } [data-testid='stInputInstructions'] { display: none !important; visibility: hidden !important; }</style>"
+# 🎨 ستايل CSS مخصص لجعل الأزرار والمربعات متناسقة تماماً باللونين الأحمر والأزرق
+clean_css = "<style>@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap'); html, body, [class*='css'] { font-family: 'Tajawal', sans-serif; direction: rtl; text-align: right; } .stApp { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); } header[data-testid='stHeader'] { background: transparent !important; height: 0px !important; display: none !important; } .block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; } .header-card { background-color: #EBF8FF; padding: 20px 12px; border-radius: 12px; box-shadow: 0 6px 12px rgba(30, 58, 138, 0.08); margin-bottom: 2px; text-align: center; border: 1px solid #BEE3F8; } .company-header { color: #1E3A8A; font-family: 'Arial', sans-serif; font-size: 28px; font-weight: bold; margin: 0; line-height: 1.2; } .company-subtitle { color: #2D3748; font-family: 'Arial', sans-serif; font-size: 15px; font-weight: 500; margin-top: 4px; } .main-signature-card { background-color: #ffffff; padding: 8px 16px; border-radius: 10px; text-align: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04); margin-top: 4px; margin-bottom: 15px; border: 1px solid #e2e8f0; width: 100%; max-width: 550px; margin-left: auto; margin-right: auto; } .sig-title { font-family: 'Arial', sans-serif; font-size: 15px; font-weight: bold; color: #1E3A8A; margin: 0; } .sig-name { font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; color: #475569; margin: 2px 0; } .sig-note { font-size: 11px; color: #3b82f6; font-weight: 500; margin: 0; } div[data-testid='stBlock'] button { background-color: #EF4444 !important; color: white !important; border: none !important; font-weight: 700 !important; height: 45px !important; box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2) !important; width: 100% !important; border-radius: 8px !important; } div[data-testid='stBlock'] button:hover { background-color: #DC2626 !important; } div[data-testid='stMetric'] { background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important; color: white !important; padding: 12px !important; border-radius: 10px !important; text-align: center !important; box-shadow: 0 4px 8px rgba(30, 58, 138, 0.15) !important; } div[data-testid='stMetric'] * { color: white !important; } div[data-testid='stHorizontalBlock'] { gap: 10px !important; } [data-testid='stInputInstructions'] { display: none !important; visibility: hidden !important; }</style>"
 st.markdown(clean_css, unsafe_allow_html=True)
 
 # إدارة وحفظ حالات السجل والتحكم بالجلسة
@@ -21,7 +21,7 @@ col1, col2, col3 = st.columns([0.5, 11, 0.5])
 with col2:
     # الهيدر الأساسي وبطاقة التوقيع الكريمة الخاصة بك
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
-    st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>واجهة مطورة ببطاقات إحصائية مزدوجة ومتناسقة | KhatibAlami System v8.1</div></div>", unsafe_allow_html=True)
+    st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>تصميم متوازن بأزرار حمراء مزدوجة وبطاقات زرقاء أنيقة | KhatibAlami System v8.2</div></div>", unsafe_allow_html=True)
     
     # نافذة رفع الملف الاحتياطي المدمجة
     with st.expander("📥 خطوة 1: رفع ملف البيانات الاحتياطي (إذا وجد)", expanded=not st.session_state.file_uploaded):
@@ -49,7 +49,7 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # صف أزرار التفاعل والإجراءات الرئيسية
+    # 🔴 صف الأزرار الحمراء المزدوجة المتطابقة لأعلى درجات الأناقة والتوازن
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", type="primary", use_container_width=True)
@@ -58,9 +58,9 @@ with col2:
         if not df.empty:
             sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
             csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
-            st.download_button(label="🟢 تحميل وتنزيل سجل CSV النهائي", data=csv_data, file_name="KhatibAlami_Midan_Data.csv", mime="text/csv", use_container_width=True)
+            st.download_button(label="📥 تحميل وتنزيل سجل CSV النهائي", data=csv_data, file_name="KhatibAlami_Midan_Data.csv", mime="text/csv", use_container_width=True)
         else:
-            st.button("🟢 سجل CSV فارغ حالياً", disabled=True, use_container_width=True)
+            st.button("📥 سجل CSV فارغ حالياً", disabled=True, use_container_width=True)
 
     # احتساب الإحصائيات الفورية للمربعات الزرقاء
     total_count = len(df)
@@ -70,15 +70,14 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 المربعات الزرقاء المزدوجة المتطابقة والمتجاورة لأناقة واجهة المستخدم
+    # 📊 المربعات الزرقاء المزدوجة المتطابقة والمتجاورة
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1:
         st.metric(label="🗄️ مجموع عدد العقارات الكلي", value=total_count)
     with stat_col2:
-        # هنا المربع الأزرق الثاني الجديد تماماً بنفس التصميم ليعرض عقارات المنطقة الحالية
         st.metric(label=f"📍 عدد عقارات منطقة ({region_input if region_input else '...'})", value=region_count)
 
-    # جدول استعراض عقارات المنطقة الحالية لسهولة المراجعة البصرية
+    # جدول استعراض عقارات المنطقة الحالية
     if region_input:
         st.markdown(f"### 📊 ملف العقارات الجاري العمل عليها في منطقة: ({region_input})")
         filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
