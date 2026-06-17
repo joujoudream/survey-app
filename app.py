@@ -25,7 +25,7 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# 🎨 الستايل الهندسي لتنسيق العناصر والشعار والأزرار المتطابقة إجبارياً
+# 🎨 الستايل الهندسي الميداني لتنسيق العناصر والأزرار المتطابقة إجبارياً
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -73,11 +73,11 @@ header[data-testid='stHeader'] {
 .main-signature-card { 
     background-color: #ffffff; 
     padding: 14px 16px; 
-    border-radius: 10px; cutlery
+    border-radius: 10px; 
     text-align: center; 
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04); 
-    margin-top: 4px; 
-    margin-bottom: 15px; 
+    margin-top: 10px; 
+    margin-bottom: 20px; 
     border: 1px solid #e2e8f0; 
     width: 100%; 
     max-width: 550px; 
@@ -97,10 +97,6 @@ header[data-testid='stHeader'] {
     font-weight: bold; 
     color: #475569; 
     margin: 4px 0 0 0; 
-}
-.logo-container {
-    text-align: center;
-    margin-bottom: 10px;
 }
 
 /* 🔴 الستايل الحازم لتوحيد وتناظر الأزرار الحمراء */
@@ -155,24 +151,7 @@ with col2:
     # هيدر الشركة الرئيسي
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     
-    # الشعار الهندسي المدمج
-    logo_svg = """
-    <div class='logo-container'>
-        <svg width="100" height="100" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="display: block; margin: 0 auto;">
-            <circle cx="100" cy="100" r="90" fill="#ffffff" stroke="#1E3A8A" stroke-width="3" stroke-dasharray="2"/>
-            <path d="M60 65 L100 35 L140 65 L140 135 L100 165 L60 135 Z" fill="none" stroke="#1E3A8A" stroke-width="5" stroke-linejoin="round"/>
-            <rect x="75" y="110" width="14" height="30" rx="2" fill="#3B82F6"/>
-            <rect x="93" y="85" width="14" height="55" rx="2" fill="#1E3A8A"/>
-            <rect x="111" y="65" width="14" height="75" rx="2" fill="#EF4444"/>
-            <circle cx="100" cy="100" r="12" fill="none" stroke="#3B82F6" stroke-width="3"/>
-            <line x1="100" y1="80" x2="100" y2="120" stroke="#3B82F6" stroke-width="2"/>
-            <line x1="80" y1="100" x2="120" y2="100" stroke="#3B82F6" stroke-width="2"/>
-        </svg>
-    </div>
-    """
-    st.markdown(logo_svg, unsafe_allow_html=True)
-    
-    # بطاقة التوقيع النظيفة والمختصرة (تم محو سطر الوصف)
+    # بطاقة التوقيع النظيفة والمختصرة مباشرة أسفل الهيدر بدون لوجو
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
     
     # نافذة الرفع الاحتياطي للملف القديم
@@ -257,57 +236,4 @@ with col2:
             if is_duplicate: st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
-                st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
-                st.session_state.last_region = region_input
-                st.session_state.clear_trigger = True
-                st.success(f"✅ تم حفظ العقار رقم ({property_number}) بنجاح!")
-                st.rerun()
-        else: st.warning("⚠️ فضلاً، يرجى ملء حقول المنطقة ورقم العقار أولاً.")
-
-    if search_query:
-        matched_records = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | df["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
-        if not matched_records.empty:
-            st.info(f"📋 تم العثور على ({len(matched_records)}) سجل متطابق:")
-            for idx, row in matched_records.iterrows():
-                with st.expander(f"⚙️ تعديل العقار رقم {row['رقم العقار']} في {row['المنطقة']}", expanded=True):
-                    edit_c1, edit_c2 = st.columns(2)
-                    with edit_c1: new_edit_region = st.text_input("تعديل اسم المنطقة", value=row['المنطقة'], key=f"edit_reg_{idx}").strip()
-                    with edit_c2: new_edit_prop = st.text_input("تعديل رقم العقار", value=row['رقم العقار'], key=f"edit_prop_{idx}").strip()
-                    if st.button("💾 حفظ تعديلات السجل", key=f"save_edit_{idx}"):
-                        if new_edit_region and new_edit_prop:
-                            st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
-                            st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
-                            st.session_state.search_val = ""         
-                            st.success("✅ تم تحديث وتصحيح السجل بنجاح!")
-                            st.rerun()
-
-    # نص أتمتة التركيز الميداني للمؤشر والتنقل بزر Enter
-    focus_script = "true" if st.session_state.focus_on_region else "false"
-    st.session_state.focus_on_region = False
-    js_code = [
-        "<script>",
-        "var attachMidanEvents = function() {",
-        "var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');",
-        "var regInput = null; var propInput = null; var saveBtn = null;",
-        "for (var i = 0; i < inputs.length; i++) {",
-        "if (inputs[i].getAttribute('placeholder') === 'النبطية، صور، صيدا...') regInput = inputs[i];",
-        "if (inputs[i].getAttribute('placeholder') === 'ادخل رقم العقار الحالي....') propInput = inputs[i];",
-        "}",
-        "for (var j = 0; j < buttons.length; j++) { if (buttons[j].textContent.includes('🚀')) saveBtn = buttons[j]; }",
-        "var activeInput = mainDoc.activeElement;",
-        "if (" + focus_script + " && regInput) { regInput.focus(); regInput.select(); }",
-        "else if (regInput && activeInput !== regInput && activeInput !== propInput && (!activeInput || activeInput.tagName !== 'INPUT')) { regInput.focus(); }",
-        "if (regInput && propInput) {",
-        "regInput.removeEventListener('keydown', window.regMidanHandler);",
-        "window.regMidanHandler = function(e) { if (e.key === 'Enter') { e.preventDefault(); propInput.focus(); propInput.select(); } };",
-        "regInput.addEventListener('keydown', window.regMidanHandler);",
-        "}",
-        "if (propInput && saveBtn && regInput) {",
-        "propInput.removeEventListener('keydown', window.propMidanHandler);",
-        "window.propMidanHandler = function(e) { if (e.key === 'Enter') { if (propInput.value.trim() !== '') { e.preventDefault(); saveBtn.click(); setTimeout(function() { regInput.focus(); regInput.select(); }, 100); } } };",
-        "propInput.addEventListener('keydown', window.propMidanHandler);",
-        "}",
-        "}; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);",
-        "</script>"
-    ]
-    st.components.v1.html("".join(js_code), height=0)
+                st.session_state.local_db = pd.concat(
