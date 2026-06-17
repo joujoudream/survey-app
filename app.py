@@ -3,8 +3,8 @@ import pandas as pd
 
 st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
 
-# 🎨 الستايل الجديد والمضمون برمجياً لإجبار الألوان على الظهور (الأحمر للأزرار والأزرق للمربعات)
-all_new_css = """
+# 🎨 ستايل هندسي دقيق لتوحيد وتطابق المربعات الحمراء والزرقاء المقابلة لبعضها البعض
+fixed_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
 html, body, [class*='css'] { 
@@ -83,25 +83,30 @@ header[data-testid='stHeader'] {
     margin: 0; 
 }
 
-/* 🔴 كود صارم لتلوين جميع الأزرار (حفظ وتنزيل) باللون الأحمر فوراً */
-div[data-testid="stBlock"] button, div[data-testid="stBlock"] button[type="button"] {
+/* 🔴 إجبار المربعين في الجهتين المتقابلتين على أخذ اللون الأحمر الناري بنفس الأبعاد والخط */
+div[data-testid="stColumn"] button, 
+div[data-testid="stColumn"] button[type="button"],
+div[data-testid="stColumn"] data-testid="baseButton-secondary" {
     background-color: #EF4444 !important;
     color: white !important;
-    border: none !important;
-    font-weight: bold !important;
-    font-size: 16px !important;
+    border: 1px solid #DC2626 !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
     height: 48px !important;
     border-radius: 8px !important;
     box-shadow: 0 4px 6px rgba(239, 68, 68, 0.25) !important;
     width: 100% !important;
-    transition: all 0.3s ease !important;
-}
-div[data-testid="stBlock"] button:hover {
-    background-color: #DC2626 !important;
-    box-shadow: 0 6px 8px rgba(220, 38, 38, 0.4) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
-/* 🔵 كود صارم لتلوين المربعات الإحصائية المزدوجة باللون الأزرق */
+div[data-testid="stColumn"] button:hover {
+    background-color: #DC2626 !important;
+    box-shadow: 0 6px 10px rgba(220, 38, 38, 0.4) !important;
+}
+
+/* 🔵 ستايل المربعات الزرقاء الإحصائية المتقابلة */
 div[data-testid="stMetric"] {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
     padding: 15px !important;
@@ -121,7 +126,7 @@ div[data-testid='stHorizontalBlock'] {
 }
 </style>
 """
-st.markdown(all_new_css, unsafe_allow_html=True)
+st.markdown(fixed_css, unsafe_allow_html=True)
 
 # إدارة وحفظ حالات السجل والتحكم بالجلسة
 if "local_db" not in st.session_state:
@@ -137,7 +142,7 @@ col1, col2, col3 = st.columns([0.5, 11, 0.5])
 with col2:
     # الهيدر الأساسي وبطاقة التوقيع الكريمة الخاصة بك
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
-    st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>تحديث هندسي شامل للألوان والأزرار المتناسقة | KhatibAlami System v8.3</div></div>", unsafe_allow_html=True)
+    st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div><div class='sig-note'>واجهة متطابقة هندسياً بالمربعات الحمراء والزرقاء المتقابلة | KhatibAlami System v8.4</div></div>", unsafe_allow_html=True)
     
     # نافذة رفع الملف الاحتياطي المدمجة
     with st.expander("📥 خطوة 1: رفع ملف البيانات الاحتياطي (إذا وجد)", expanded=not st.session_state.file_uploaded):
@@ -165,7 +170,7 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # 🔴 صف الأزرار الحمراء المزدوجة المتطابقة
+    # 🔴🔴 المربعات الحمراء المتقابلة والمتطابقة تماماً في الحجم واللون والشكل
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", type="primary", use_container_width=True)
@@ -186,7 +191,7 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 المربعات الزرقاء المزدوجة المتطابقة والمتجاورة
+    # 📊 المربعات الزرقاء المزدوجة المتطابقة والمتجاورة في الجهتين
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1:
         st.metric(label="🗄️ مجموع عدد العقارات الكلي", value=total_count)
@@ -241,7 +246,7 @@ with col2:
                     with edit_c2:
                         new_edit_prop = st.text_input("تعديل رقم العقار", value=row['رقم العقار'], key=f"edit_prop_{idx}").strip()
                     
-                    save_edit_btn = st.button("💾 حفظ التعديلات", key=f"save_edit_{idx}")
+                    save_edit_btn = st.button("💾 حفظ Tعديلات السجل", key=f"save_edit_{idx}")
                     if save_edit_btn:
                         if new_edit_region and new_edit_prop:
                             st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
