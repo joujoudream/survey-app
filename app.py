@@ -32,7 +32,7 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# 🎨 ستايل عام متناسق يعتمد بالكامل على تدرجات الأزرق الأنيقة وبدون أي ألوان حمراء
+# 🎨 ستايل عام متناسق لتوحيد تدرجات الأزرق وتصميم الكبسة الإحصائية التفاعلية لتطابق المربع الكلي 100%
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -83,7 +83,7 @@ header[data-testid='stHeader'] {
     max-width: 550px !important; 
 }
 
-/* كروت مخصصة للمربعات الإحصائية الزرقاء الموحدة هندسياً وبشكل كامل */
+/* كرت مخصص للمربع الإحصائي الكلي الثابت */
 .blue-stat-box {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
     padding: 22px 15px !important;
@@ -92,6 +92,10 @@ header[data-testid='stHeader'] {
     box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
     color: white !important;
     height: 115px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
 }
 .blue-stat-title {
     font-size: 14px !important;
@@ -102,6 +106,30 @@ header[data-testid='stHeader'] {
 .blue-stat-value {
     font-size: 32px !important;
     font-weight: 700 !important;
+}
+
+/* 🔵 ستايل هندسي لجعل كبسة إحصاء المنطقة زرقاء ومطابقة 100% للمربع الكلي المجاور */
+div.midan-interactive-box button {
+    background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
+    border: none !important;
+    color: white !important;
+    border-radius: 12px !important;
+    padding: 22px 15px !important;
+    height: 115px !important;
+    width: 100% !important;
+    box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: pre-line !important;
+}
+div.midan-interactive-box button:hover {
+    background: linear-gradient(135deg, #172554 0%, #1D4ED8 100%) !important;
+    box-shadow: 0 8px 16px rgba(30, 58, 138, 0.3) !important;
+}
+div.midan-interactive-box button div p {
+    color: white !important;
 }
 
 [data-testid='stInputInstructions'] { display: none !important; visibility: hidden !important; }
@@ -136,7 +164,7 @@ with col2:
     df = st.session_state.local_db
     st.markdown("---")
     
-    # حقول الإدخال للمستخدم
+    # حقول الإدخال
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -146,7 +174,7 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # الأزرار التشغيلية - زرقاء رسمية وممتدة بعرض العمود بالتساوي ومتجانسة
+    # الأزرار التشغيلية الممتدة بعرض العمود بالتساوي ومتجانسة باللون الأزرق الموحد
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True, type="primary")
@@ -170,7 +198,7 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 المربعات الإحصائية الزرقاء الموحدة 100% في الحجم والتناسق اللوني
+    # 📊 المربعات الإحصائية: اليمين مربع ثابت واليسار كبسة زرقاء تفاعلية ذكية متطابقة 100%
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1: 
         st.markdown(f"""
@@ -179,14 +207,16 @@ with col2:
             <div class='blue-stat-value'>{total_count}</div>
         </div>
         """, unsafe_allow_html=True)
+        
     with stat_col2: 
+        st.markdown("<div class='midan-interactive-box'>", unsafe_allow_html=True)
         display_name = region_input if region_input else "..."
-        st.markdown(f"""
-        <div class='blue-stat-box'>
-            <div class='blue-stat-title'>📍 عدد عقارات منطقة ({display_name})</div>
-            <div class='blue-stat-value'>{region_count}</div>
-        </div>
-        """, unsafe_allow_html=True)
+        # جعل النص يظهر بوضوح كعنوان وقيمة داخل الكبسة
+        button_text = f"📍 عدد عقارات منطقة ({display_name})\n\n{region_count}"
+        if st.button(label=button_text, key="interactive_region_stat_btn"):
+            st.session_state.focus_on_region = True
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
 
     if region_input:
         st.markdown(f"### 📊 ملف العقارات الجاري العمل عليها في منطقة: ({region_input})")
@@ -221,4 +251,43 @@ with col2:
             st.info(f"📋 تم العثور على ({len(matched_records)}) سجل متطابق:")
             for idx, row in matched_records.iterrows():
                 with st.expander(f"⚙️ تعديل العقار رقم {row['رقم العقار']} في {row['المنطقة']}", expanded=True):
-                    edit_c1, edit_
+                    edit_c1, edit_c2 = st.columns(2)
+                    with edit_c1: new_edit_region = st.text_input("تعديل اسم المنطقة", value=row['المنطقة'], key=f"edit_reg_{idx}").strip()
+                    with edit_c2: new_edit_prop = st.text_input("تعديل رقم العقار", value=row['رقم العقار'], key=f"edit_prop_{idx}").strip()
+                    if st.button("💾 حفظ تعديلات السجل", key=f"save_edit_{idx}", use_container_width=True, type="primary"):
+                        if new_edit_region and new_edit_prop:
+                            st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
+                            st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
+                            st.session_state.search_val = ""         
+                            st.success("✅ تم تحديث وتصحيح السجل بنجاح!")
+                            st.rerun()
+
+    focus_script = "true" if st.session_state.focus_on_region else "false"
+    st.session_state.focus_on_region = False
+    js_code = [
+        "<script>",
+        "var attachMidanEvents = function() {",
+        "var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');",
+        "var regInput = null; var propInput = null; var saveBtn = null;",
+        "for (var i = 0; i < inputs.length; i++) {",
+        "if (inputs[i].getAttribute('placeholder') === 'النبطية، صور، صيدا...') regInput = inputs[i];",
+        "if (inputs[i].getAttribute('placeholder') === 'ادخل رقم العقار الحالي....') propInput = inputs[i];",
+        "}",
+        "for (var j = 0; j < buttons.length; j++) { if (buttons[j].textContent.includes('🚀')) saveBtn = buttons[j]; }",
+        "var activeInput = mainDoc.activeElement;",
+        "if (" + focus_script + " && regInput) { regInput.focus(); regInput.select(); }",
+        "else if (regInput && activeInput !== regInput && activeInput !== propInput && (!activeInput || activeInput.tagName !== 'INPUT')) { regInput.focus(); }",
+        "if (regInput && propInput) {",
+        "regInput.removeEventListener('keydown', window.regMidanHandler);",
+        "window.regMidanHandler = function(e) { if (e.key === 'Enter') { e.preventDefault(); propInput.focus(); propInput.select(); } };",
+        "regInput.addEventListener('keydown', window.regMidanHandler);",
+        "}",
+        "if (propInput && saveBtn && regInput) {",
+        "propInput.removeEventListener('keydown', window.propMidanHandler);",
+        "window.propMidanHandler = function(e) { if (e.key === 'Enter') { if (propInput.value.trim() !== '') { e.preventDefault(); saveBtn.click(); setTimeout(function() { regInput.focus(); regInput.select(); }, 100); } } };",
+        "propInput.addEventListener('keydown', window.propMidanHandler);",
+        "}",
+        "}; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);",
+        "</script>"
+    ]
+    st.components.v1.html("".join(js_code), height=0)
