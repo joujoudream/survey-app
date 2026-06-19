@@ -32,7 +32,7 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# 🎨 ستايل عام لتوحيد الخطوط والاتجاهات والخلفية المريحة للعين
+# 🎨 ستايل عام متناسق يعتمد بالكامل على تدرجات الأزرق الأنيقة وبدون أي ألوان حمراء
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -83,7 +83,7 @@ header[data-testid='stHeader'] {
     max-width: 550px !important; 
 }
 
-/* كروت مخصصة للمربعات الإحصائية الزرقاء الموحدة */
+/* كروت مخصصة للمربعات الإحصائية الزرقاء الموحدة هندسياً وبشكل كامل */
 .blue-stat-box {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
     padding: 22px 15px !important;
@@ -136,7 +136,7 @@ with col2:
     df = st.session_state.local_db
     st.markdown("---")
     
-    # حقول الإدخال
+    # حقول الإدخال للمستخدم
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -146,12 +146,12 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # تمديد الأزرار لملء الأعمدة بالتساوي واستخدام ميزة استخدام كامل العرض المتاحة افتراضياً
+    # الأزرار التشغيلية - زرقاء رسمية وممتدة بعرض العمود بالتساوي ومتجانسة
     action_col1, action_col2 = st.columns(2)
     with action_col1:
-        btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
+        btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True, type="primary")
     with action_col2:
-        btn_download = st.button("📥 تحميل وتنزيل سجل CSV ومزامنته", key="download_btn_main", use_container_width=True)
+        btn_download = st.button("📥 تحميل وتنزيل سجل CSV ومزامنته", key="download_btn_main", use_container_width=True, type="primary")
         if btn_download:
             if not df.empty:
                 if GITHUB_TOKEN != "ضع_هنا_رمز_الوصول_الخاص_بك_YOUR_GITHUB_TOKEN":
@@ -170,7 +170,7 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 إعادة بناء المربعات الإحصائية الزرقاء برموز مخصصة لتكون متوازية ومطابقة 100% في الحجم واللون
+    # 📊 المربعات الإحصائية الزرقاء الموحدة 100% في الحجم والتناسق اللوني
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1: 
         st.markdown(f"""
@@ -221,43 +221,4 @@ with col2:
             st.info(f"📋 تم العثور على ({len(matched_records)}) سجل متطابق:")
             for idx, row in matched_records.iterrows():
                 with st.expander(f"⚙️ تعديل العقار رقم {row['رقم العقار']} في {row['المنطقة']}", expanded=True):
-                    edit_c1, edit_c2 = st.columns(2)
-                    with edit_c1: new_edit_region = st.text_input("تعديل اسم المنطقة", value=row['المنطقة'], key=f"edit_reg_{idx}").strip()
-                    with edit_c2: new_edit_prop = st.text_input("تعديل رقم العقار", value=row['رقم العقار'], key=f"edit_prop_{idx}").strip()
-                    if st.button("💾 حفظ تعديلات السجل", key=f"save_edit_{idx}", use_container_width=True):
-                        if new_edit_region and new_edit_prop:
-                            st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
-                            st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
-                            st.session_state.search_val = ""         
-                            st.success("✅ تم تحديث وتصحيح السجل بنجاح!")
-                            st.rerun()
-
-    focus_script = "true" if st.session_state.focus_on_region else "false"
-    st.session_state.focus_on_region = False
-    js_code = [
-        "<script>",
-        "var attachMidanEvents = function() {",
-        "var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');",
-        "var regInput = null; var propInput = null; var saveBtn = null;",
-        "for (var i = 0; i < inputs.length; i++) {",
-        "if (inputs[i].getAttribute('placeholder') === 'النبطية، صور، صيدا...') regInput = inputs[i];",
-        "if (inputs[i].getAttribute('placeholder') === 'ادخل رقم العقار الحالي....') propInput = inputs[i];",
-        "}",
-        "for (var j = 0; j < buttons.length; j++) { if (buttons[j].textContent.includes('🚀')) saveBtn = buttons[j]; }",
-        "var activeInput = mainDoc.activeElement;",
-        "if (" + focus_script + " && regInput) { regInput.focus(); regInput.select(); }",
-        "else if (regInput && activeInput !== regInput && activeInput !== propInput && (!activeInput || activeInput.tagName !== 'INPUT')) { regInput.focus(); }",
-        "if (regInput && propInput) {",
-        "regInput.removeEventListener('keydown', window.regMidanHandler);",
-        "window.regMidanHandler = function(e) { if (e.key === 'Enter') { e.preventDefault(); propInput.focus(); propInput.select(); } };",
-        "regInput.addEventListener('keydown', window.regMidanHandler);",
-        "}",
-        "if (propInput && saveBtn && regInput) {",
-        "propInput.removeEventListener('keydown', window.propMidanHandler);",
-        "window.propMidanHandler = function(e) { if (e.key === 'Enter') { if (propInput.value.trim() !== '') { e.preventDefault(); saveBtn.click(); setTimeout(function() { regInput.focus(); regInput.select(); }, 100); } } };",
-        "propInput.addEventListener('keydown', window.propMidanHandler);",
-        "}",
-        "}; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);",
-        "</script>"
-    ]
-    st.components.v1.html("".join(js_code), height=0)
+                    edit_c1, edit_
