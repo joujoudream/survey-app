@@ -2,10 +2,18 @@ import streamlit as st
 import pandas as pd
 import requests
 import base64
+import os
+from PIL import Image
 
-st.set_page_config(page_title="Khatib & Alami Company", layout="wide", initial_sidebar_state="collapsed")
+# 🌐 1. إعدادات الصفحة الرسمية للشركة
+st.set_page_config(
+    page_title="Khatib & Alami Company", 
+    page_icon="K_and_A_icon.ico" if os.path.exists("K_and_A_icon.ico") else "🏢", 
+    layout="wide", 
+    initial_sidebar_state="collapsed"
+)
 
-# 🔑 إعدادات الربط التلقائي بمنصة GitHub (يرجى ملء بياناتك هنا)
+# 🔑 إعدادات الربط التلقائي بمنصة GitHub
 GITHUB_TOKEN = "ضع_هنا_رمز_الوصول_الخاص_بك_YOUR_GITHUB_TOKEN"
 GITHUB_REPO = "اسم_حسابك/اسم_المستودع_YOUR_USERNAME/YOUR_REPO"
 GITHUB_FILENAME = "KhatibAlami_Midan_Data.csv"
@@ -25,7 +33,7 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# 🎨 الستايل الهندسي الميداني لتنسيق العناصر والأزرار المتطابقة إجبارياً
+# 🎨 الستايل الهندسي الميداني المتناظر والمطابق للأزرار والمقاييس
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -99,7 +107,7 @@ header[data-testid='stHeader'] {
     margin: 4px 0 0 0; 
 }
 
-/* 🔴 الستايل الحازم لتوحيد وتناظر الأزرار الحمراء */
+/* توحيد وتناظر الأزرار الحمراء ميدانياً */
 div[data-testid="stColumn"] button, 
 div[data-testid="stColumn"] button[type="button"],
 div[data-testid="stColumn"] a {
@@ -123,7 +131,7 @@ div[data-testid="stColumn"] a:hover {
     box-shadow: 0 6px 10px rgba(220, 38, 38, 0.4) !important;
 }
 
-/* 🔵 ستايل مربعات الإحصاء الزرقاء */
+/* ستايل المربع الأزرق الكلي الكبير */
 div[data-testid="stMetric"] {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
     padding: 15px !important;
@@ -132,6 +140,30 @@ div[data-testid="stMetric"] {
     box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
 }
 div[data-testid="stMetric"] * { color: white !important; }
+
+/* الستايل المخصص لكبسة إحصاء المنطقة التفاعلية الكبيرة */
+.midan-metric-btn button {
+    background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%) !important;
+    border: 2px solid #3B82F6 !important;
+    color: white !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    height: auto !important;
+    min-height: 82px !important;
+    box-shadow: 0 6px 12px rgba(37, 99, 235, 0.2) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.midan-metric-btn button:hover {
+    background: linear-gradient(135deg, #172554 0%, #1D4ED8 100%) !important;
+    box-shadow: 0 8px 16px rgba(29, 78, 216, 0.35) !important;
+    border-color: #60A5FA !important;
+}
+.metric-btn-label { font-size: 14px; opacity: 0.95; font-weight: 500; margin-bottom: 2px; }
+.metric-btn-value { font-size: 24px; font-weight: bold; }
+
 div[data-testid='stHorizontalBlock'] { gap: 12px !important; }
 [data-testid='stInputInstructions'] { display: none !important; visibility: hidden !important; }
 </style>
@@ -151,9 +183,27 @@ with col2:
     # هيدر الشركة الرئيسي
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     
-    # بطاقة التوقيع النظيفة والمختصرة مباشرة أسفل الهيدر بدون لوجو وبدون أسطر إضافية
+    # بطاقة التوقيع النظيفة والمختصرة
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
     
+    # مركز التحويل الفوري للصورة لملف ICO رسمي
+    with st.expander("🖼️ مركز تحويل الصورة الميدانية الفاخرة إلى أيقونة مجلد (.ico)", expanded=False):
+        target_img_name = "Gemini_Generated_Image_.jpg"
+        if os.path.exists(target_img_name):
+            try:
+                img_pil = Image.open(target_img_name)
+                import io
+                ico_buf = io.BytesIO()
+                img_pil.save(ico_buf, format="ICO", sizes=[(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
+                ico_bytes = ico_buf.getvalue()
+                with open("K_and_A_icon.ico", "wb") as f: f.write(ico_bytes)
+                c_preview, c_action = st.columns([3, 9])
+                with c_preview: st.image(img_pil, width=140)
+                with c_action:
+                    st.success("🎯 تم التحويل بنجاح إلى ملف أيقونة جاهز.")
+                    st.download_button(label="📥 تنزيل ملف الأيقونة لجهازك (K_and_A_icon.ico)", data=ico_bytes, file_name="K_and_A_icon.ico", mime="image/x-icon", use_container_width=True)
+            except Exception as ex: st.error(f"⚠️ مشكلة بالمعالجة: {ex}")
+
     # نافذة الرفع الاحتياطي للملف القديم
     with st.expander("📥 خطوة 1: رفع ملف البيانات الاحتياطي (إذا وجد)", expanded=not st.session_state.file_uploaded):
         uploaded_file = st.file_uploader("اختر ملف الإكسيل (CSV) المستخرج سابقاً لمتابعة العمل على البيانات:", type=["csv"])
@@ -164,8 +214,7 @@ with col2:
                 st.session_state.file_uploaded = True  
                 st.success("✅ تم تحميل السجل بنجاح!")
                 st.rerun()  
-            except Exception as e:
-                st.error("❌ حدث خطأ أثناء قراءة الملف.")
+            except Exception as e: st.error("❌ حدث خطأ أثناء قراءة الملف.")
     
     df = st.session_state.local_db
     st.markdown("---")
@@ -184,7 +233,6 @@ with col2:
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", type="primary", use_container_width=True)
-        
     with action_col2:
         btn_download = st.button("📥 تحميل وتنزيل سجل CSV ومزامنته", use_container_width=True)
         if btn_download:
@@ -193,14 +241,13 @@ with col2:
                     with st.spinner("🔄 جاري رفع وتأمين السجل احتياطياً على منصة GitHub..."):
                         success = upload_to_github(df)
                         if success: st.success("☁️ تم رفع وتأمين النسخة الاحتياطية على GitHub بنجاح!")
-                        else: st.error("⚠️ لم نتمكن من الاتصال بـ GitHub. يرجى التحقق من إعدادات الرمز (Token).")
+                        else: st.error("⚠️ لم نتمكن من الاتصال بـ GitHub.")
                 sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
                 st.download_button(label="💾 اضغط هنا لتأكيد التنزيل على جهازك", data=csv_data, file_name=GITHUB_FILENAME, mime="text/csv", use_container_width=True)
-            else:
-                st.warning("⚠️ السجل فارغ حالياً! يرجى إضافة عقار واحد على الأقل.")
+            else: st.warning("⚠️ السجل فارغ حالياً!")
 
-    # معالجة وعرض الإحصائيات الفورية
+    # حساب الإحصائيات الفورية لعرضها
     total_count = len(df)
     region_count = 0
     if region_input:
@@ -208,10 +255,20 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # مربعات العرض الإحصائي الزرقاء
+    # 📊 قسم المربعات الإحصائية (تحويل إحصاء المنطقة إلى كبسة دغري بناءً على طلبك)
     stat_col1, stat_col2 = st.columns(2)
-    with stat_col1: st.metric(label="🗄️ مجموع عدد العقارات الكلي", value=total_count)
-    with stat_col2: st.metric(label=f"📍 عدد عقارات منطقة ({region_input if region_input else '...'})", value=region_count)
+    with stat_col1: 
+        st.metric(label="🗄️ مجموع عدد العقارات الكلي في الملف", value=total_count)
+    with stat_col2: 
+        # وضع الزر داخل حاوية ستايل زرقاء مخصصة
+        st.markdown("<div class='midan-metric-btn'>", unsafe_allow_html=True)
+        display_label = f"📍 عدد عقارات منطقة ({region_input if region_input else '...'})"
+        
+        # عند الضغط على الكبسة، يتم تفعيل مؤشر التوجيه الفوري للحقل
+        if st.button(label=f"📊 {display_label}\n\n{region_count}", key="go_to_region_btn", use_container_width=True):
+            st.session_state.focus_on_region = True
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
 
     # جدول مراجعة السجلات الحالية للمنطقة
     if region_input:
@@ -221,8 +278,7 @@ with col2:
             display_sheet = pd.DataFrame(filtered_df["رقم العقار"].values, columns=["رقم العقار"]).sort_values(by="رقم العقار").reset_index(drop=True)
             display_sheet.index += 1
             st.dataframe(display_sheet, use_container_width=True, height=200)
-        else:
-            st.info("ℹ️ لا توجد عقارات مسجلة لهذه المنطقة حالياً في السجل الحالي.")
+        else: st.info("ℹ️ لا توجد عقارات مسجلة لهذه المنطقة حالياً.")
 
     st.markdown("---")
 
@@ -233,7 +289,7 @@ with col2:
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
-            if is_duplicate: st.error("❌ إلغاء: هذا العقار مسجل سابقاً in هذه المنطقة!")
+            if is_duplicate: st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
@@ -260,7 +316,7 @@ with col2:
                             st.success("✅ تم تحديث وتصحيح السجل بنجاح!")
                             st.rerun()
 
-    # نص أتمتة التركيز الميداني للمؤشر والتنقل بزر Enter
+    # نص أتمتة جافا سكربت للقفز الفوري وتحديد حقل المنطقة دغري عند كبس الزر
     focus_script = "true" if st.session_state.focus_on_region else "false"
     st.session_state.focus_on_region = False
     js_code = [
