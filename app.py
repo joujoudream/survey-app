@@ -33,7 +33,7 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# 🎨 إصلاح وتثبيت الـ CSS الصارم لإجبار الألوان الصحيحة على الظهور ومقاومة تغييرات السيرفر
+# 🎨 الستايل الهندسي الصارم لحل أخطاء الحجم والتناظر البصري للأزرار والمربعات الإحصائية
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -54,7 +54,7 @@ header[data-testid='stHeader'] {
     padding-bottom: 1rem !important; 
 }
 
-/* هيدر الشركة والموقع */
+/* هيدر وبطاقة تعريف الشركة */
 .header-card { 
     background-color: #EBF8FF !important; 
     padding: 20px 12px !important; 
@@ -87,53 +87,60 @@ header[data-testid='stHeader'] {
     max-width: 550px !important; 
 }
 
-/* 🛑 فرض اللون الأحمر الميداني الفاخر للأزرار التشغيلية الحالية ومقاومة اللون الأبيض الافتراضي */
-div[data-testid="stColumn"] button, 
-div[data-testid="stColumn"] button[type="button"],
-div[data-testid="stElementContainer"] button[data-testid="baseButton-secondary"],
-div[data-testid="stElementContainer"] button[data-testid="baseButton-primary"] {
+/* 🛑 حل الخطأ الأول: إجبار الأزرار الحمراء التشغيلية على أخذ كامل العرض وبحجم كبير ومتناسق تماماً */
+div[data-testid="stColumn"] button[data-testid="baseButton-secondary"],
+div[data-testid="stColumn"] button[data-testid="baseButton-primary"],
+div[data-testid="stColumn"] button {
     background: #EF4444 !important;
     color: white !important;
     border: 1px solid #DC2626 !important;
     font-weight: 700 !important;
     font-size: 16px !important;
-    height: 48px !important;
+    height: 52px !important;
     border-radius: 8px !important;
     box-shadow: 0 4px 6px rgba(239, 68, 68, 0.25) !important;
     width: 100% !important;
+    display: block !important;
 }
 div[data-testid="stColumn"] button:hover {
     background: #DC2626 !important;
-    box-shadow: 0 6px 10px rgba(220, 38, 38, 0.4) !important;
+    box-shadow: 0 6px 12px rgba(220, 38, 38, 0.4) !important;
 }
 
-/* 📊 تثبيت خلفية المربع الأزرق الكبير للمجموع الكلي وضمان ظهور ألوان الكتابة البيضاء بوضوح */
+/* 🔵 حل الخطأ الثاني: تثبيت وتوحيد حجم المربع الإحصائي الأزرق الكبير بالكامل */
 div[data-testid="stMetric"] {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
-    padding: 18px !important;
+    padding: 20px !important;
     border-radius: 12px !important;
     text-align: center !important;
     box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
     border: none !important;
+    height: 105px !important; /* توحيد الارتفاع البرمجي صراحة */
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
 }
 div[data-testid="stMetric"] [data-testid="stMetricLabel"],
 div[data-testid="stMetric"] [data-testid="stMetricValue"] {
     color: white !important;
 }
 
-/* 🔵 فرض الخلفية الزرقاء المتدرجة والمطابقة تماماً لزر عدد عقارات المنطقة التفاعلي الجديد */
+/* 🔵 حل الخطأ الثاني: جعل زر إحصاء المنطقة التفاعلي متطابق تماماً في الحجم واللون التدرجي مع المربع الأزرق الكلي */
 div.midan-metric-btn button {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
     border: none !important;
     color: white !important;
     border-radius: 12px !important;
-    padding: 15px !important;
-    height: auto !important;
-    min-height: 84px !important;
+    padding: 20px !important;
+    height: 105px !important; /* تطابق تام في الارتفاع بالبكسل */
+    width: 100% !important;
     box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
-    font-size: 15px !important;
-    font-weight: bold !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
     display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
     white-space: pre-line !important;
 }
 div.midan-metric-btn button:hover {
@@ -141,7 +148,7 @@ div.midan-metric-btn button:hover {
     box-shadow: 0 8px 16px rgba(29, 78, 216, 0.35) !important;
 }
 
-div[data-testid='stHorizontalBlock'] { gap: 12px !important; }
+div[data-testid='stHorizontalBlock'] { gap: 16px !important; }
 [data-testid='stInputInstructions'] { display: none !important; visibility: hidden !important; }
 </style>
 """
@@ -188,7 +195,7 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # الأزرار الحمراء العملياتية المتناظرة تحت الحقول مباشرة
+    # الأزرار الحمراء الكبيرة المتناسقة أفقياً تماماً 100%
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main")
@@ -205,7 +212,7 @@ with col2:
                 st.download_button(label="💾 اضغط هنا لتأكيد التنزيل لجهازك", data=csv_data, file_name=GITHUB_FILENAME, mime="text/csv", key="confirm_dl_btn")
             else: st.warning("⚠️ السجل فارغ حالياً!")
 
-    # حساب الإحصائيات الفورية
+    # حساب الإحصائيات الفورية لعرضها داخل المربعات المتطابقة
     total_count = len(df)
     region_count = 0
     if region_input:
@@ -213,12 +220,12 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 قسم المربعات الإحصائية الكبيرة (الأزرق المتطابق تماماً لمنع الاختلال)
+    # 📊 قسم المربعات الإحصائية الزرقاء (متطابقة ومتناظرة في الارتفاع والألوان 100%)
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1: 
         st.metric(label="🗄️ مجموع عدد العقارات الكلي في الملف", value=total_count)
     with stat_col2: 
-        # الحاوية المخصصة لإجبار الكبسة التفاعلية على أخذ نفس مظهر المربع الجانبي بالضبط
+        # الحاوية المخصصة لإجبار كبسة المنطقة على التطابق اللوني والهندسي التام مع المربع الكلي
         st.markdown("<div class='midan-metric-btn'>", unsafe_allow_html=True)
         display_label = f"📍 عدد عقارات منطقة ({region_input if region_input else '...'})"
         
@@ -246,7 +253,7 @@ with col2:
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
-            if is_duplicate: st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
+            if is_duplicate: st.error("❌ إلغاء: هذا العقار مسجل سابقاً in هذه المنطقة!")
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
@@ -273,7 +280,7 @@ with col2:
                             st.success("✅ تم تحديث وتصحيح السجل بنجاح!")
                             st.rerun()
 
-    # نص أتمتة جافا سكربت للقفز الفوري وتحديد حقل المنطقة دغري عند كبس الزر
+    # نص أتمتة جافا سكربت للقفز الفوري وتحديد حقل المنطقة دغري عند كبس الزر التفاعلي
     focus_script = "true" if st.session_state.focus_on_region else "false"
     st.session_state.focus_on_region = False
     js_code = [
