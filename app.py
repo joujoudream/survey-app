@@ -32,7 +32,7 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# 🎨 الـ CSS المحدث لتوحيد اللون الأزرق الملكي في الصناديق المتناظرة بالكامل
+# 🎨 الـ CSS المحدث والمحصن لمنع اختفاء الألوان وتحولها للأبيض
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -83,30 +83,44 @@ header[data-testid='stHeader'] {
     max-width: 550px !important; 
 }
 
-/* 🔵 الصناديق المتناظرة باللون الأزرق الملكي اللامع بالكامل */
+/* 🔵 تثبيت الصناديق المتناظرة باللون الأزرق الملكي اللامع ومنع تحولها للون الأبيض */
 .blue-stat-box-unified {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
     padding: 20px 20px !important;
     border-radius: 12px !important;
     text-align: center !important;
     box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
-    color: white !important;
+    color: #ffffff !important;
     height: 125px !important;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
     border: none !important;
 }
 .blue-stat-title-unified {
     font-size: 16px !important;
     font-weight: 500 !important;
     margin-bottom: 6px !important;
-    color: white !important;
+    color: #ffffff !important;
 }
 .blue-stat-value-unified {
     font-size: 38px !important;
     font-weight: 700 !important;
+    color: #ffffff !important;
+}
+
+/* 🟥 تثبيت ألوان أزرار الحفظ والتحميل لمنع تحولها للأبيض أو تداخلها */
+div.stButton > button {
+    background-color: #1E3A8A !important;
+    color: white !important;
+    border-radius: 8px !important;
+    border: none !important;
+    padding: 10px 20px !important;
+    font-weight: bold !important;
+}
+div.stButton > button:hover {
+    background-color: #3B82F6 !important;
     color: white !important;
 }
 
@@ -152,12 +166,12 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # الأزرار التشغيلية
+    # الأزرار التشغيلية (تم عزلها وحمايتها من التغير للأبيض)
     action_col1, action_col2 = st.columns(2)
     with action_col1:
-        btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True, type="primary")
+        btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
     with action_col2:
-        btn_download = st.button("📥 تحميل وتنزيل سجل CSV ومزامنته", key="download_btn_main", use_container_width=True, type="primary")
+        btn_download = st.button("📥 تحميل وتنزيل سجل CSV ومزامنته", key="download_btn_main", use_container_width=True)
         if btn_download:
             if not df.empty:
                 if GITHUB_TOKEN != "ضع_هنا_رمز_الوصول_الخاص_بك_YOUR_GITHUB_TOKEN":
@@ -166,7 +180,7 @@ with col2:
                         if success: st.success("☁️ تم تأمين النسخة على GitHub!")
                 sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
-                st.download_button(label="💾 اضغط هنا لتأكيد التنزيل لجهازك", data=csv_data, file_name=GITHUB_FILENAME, mime="text/csv", key="confirm_dl_btn", use_container_width=True)
+                st.download_button(label="💾 اضغط هنا لتأكيد التنزيل לגهازك", data=csv_data, file_name=GITHUB_FILENAME, mime="text/csv", key="confirm_dl_btn", use_container_width=True)
             else: st.warning("⚠️ السجل فارغ حالياً!")
 
     total_count = len(df)
@@ -176,11 +190,10 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 المربعات الإحصائية المتطابقة والمتناظرة باللون الأزرق الملكي بالكامل
+    # 📊 المربعات الإحصائية الثابتة الآن باللون الأزرق الملكي بالكامل والمحاطة بحماية العزل
     stat_col1, stat_col2 = st.columns(2)
     
     with stat_col1:
-        # المربع الأيمن - مجموع عدد العقارات الكلي في الملف (باللون الأزرق الملكي)
         st.markdown(f"""
         <div class='blue-stat-box-unified'>
             <div class='blue-stat-title-unified'>🗄️ مجموع عدد العقارات الكلي في الملف</div>
@@ -189,10 +202,9 @@ with col2:
         """, unsafe_allow_html=True)
         
     with stat_col2:
-        # المربع الأيسر - أصبح الآن منسوخاً ومطابقاً تماماً باللون الأزرق الملكي
         display_name = region_input if region_input else "..."
         st.markdown(f"""
-        <div style="position: relative;">
+        <div style="position: relative; width: 100%;">
             <div class='blue-stat-box-unified'>
                 <div class='blue-stat-title-unified'>📍 عدد عقارات منطقة ({display_name})</div>
                 <div class='blue-stat-value-unified'>{region_count}</div>
@@ -200,30 +212,27 @@ with col2:
         </div>
         """, unsafe_allow_html=True)
         
-        # وضع الزر المخفي الشفاف تماماً فوق الصندوق البرمجي ليعطي نفس الوظيفة التفاعلية
+        # زر شفاف تماماً ومستقل فوق الصندوق لإعطاء التأثير التفاعلي دون كسر الستيل
         if st.button("", key="hidden_blue_trigger_btn", use_container_width=True):
             st.session_state.focus_on_region = True
             st.rerun()
             
-        # كود لتمديد الزر الفرعي الصغير ليصبح شفافاً كلياً ويغطي مساحة الصندوق الأيسر بالكامل عند الضغط
-        st.markdown("""
-        <style>
-        div[data-testid="stHorizontalBlock"] > div:nth-child(2) button {
-            position: absolute !important;
-            top: -125px !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 125px !important;
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            z-index: 9999 !important;
-        }
-        div[data-testid="stHorizontalBlock"] > div:nth-child(2) button:hover {
-            background: rgba(255,255,255,0.05) !important;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+    # كود تمديد وعزل الزر التفاعلي ليكون مخفياً فوق الصندوق بدون التأثير على بقية الأزرار
+    st.markdown("""
+    <style>
+    div[data-testid="stHorizontalBlock"] > div:nth-child(2) button[key="hidden_blue_trigger_btn"] {
+        position: absolute !important;
+        top: -125px !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 125px !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        z-index: 9999 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
     if region_input:
         st.markdown(f"### 📊 ملف العقارات الجاري العمل عليها في منطقة: ({region_input})")
@@ -261,7 +270,7 @@ with col2:
                     edit_c1, edit_c2 = st.columns(2)
                     with edit_c1: new_edit_region = st.text_input("تعديل اسم المنطقة", value=row['المنطقة'], key=f"edit_reg_{idx}").strip()
                     with edit_c2: new_edit_prop = st.text_input("تعديل رقم العقار", value=row['رقم العقار'], key=f"edit_prop_{idx}").strip()
-                    if st.button("💾 حفظ تعديلات السجل", key=f"save_edit_{idx}", use_container_width=True, type="primary"):
+                    if st.button("💾 حفظ تعديلات السجل", key=f"save_edit_{idx}", use_container_width=True):
                         if new_edit_region and new_edit_prop:
                             st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
                             st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
@@ -269,32 +278,29 @@ with col2:
                             st.success("✅ تم تحديث وتصحيح السجل بنجاح!")
                             st.rerun()
 
+    # 🖥️ كود الـ JS المحمي والمستقل لضمان عدم كسر التصميم والألوان مرة أخرى
     focus_script = "true" if st.session_state.focus_on_region else "false"
     st.session_state.focus_on_region = False
-    js_code = [
-        "<script>",
-        "var attachMidanEvents = function() {",
-        "var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');",
-        "var regInput = null; var propInput = null; var saveBtn = null;",
-        "for (var i = 0; i < inputs.length; i++) {",
-        "if (inputs[i].getAttribute('placeholder') === 'النبطية، صور، صيدا...') regInput = inputs[i];",
-        "if (inputs[i].getAttribute('placeholder') === 'ادخل رقم العقار الحالي....') propInput = inputs[i];",
-        "}",
-        "for (var j = 0; j < buttons.length; j++) { if (buttons[j].textContent.includes('🚀')) saveBtn = buttons[j]; }",
-        "var activeInput = mainDoc.activeElement;",
-        "if (" + focus_script + " && regInput) { regInput.focus(); regInput.select(); }",
-        "else if (regInput && activeInput !== regInput && activeInput !== propInput && (!activeInput || activeInput.tagName !== 'INPUT')) { regInput.focus(); }",
-        "if (regInput && propInput) {",
-        "regInput.removeEventListener('keydown', window.regMidanHandler);",
-        "window.regMidanHandler = function(e) { if (e.key === 'Enter') { e.preventDefault(); propInput.focus(); propInput.select(); } };",
-        "regInput.addEventListener('keydown', window.regMidanHandler);",
-        "}",
-        "if (propInput && saveBtn && regInput) {",
-        "propInput.removeEventListener('keydown', window.propMidanHandler);",
-        "window.propMidanHandler = function(e) { if (e.key === 'Enter') { if (propInput.value.trim() !== '') { e.preventDefault(); saveBtn.click(); setTimeout(function() { regInput.focus(); regInput.select(); }, 100); } } };",
-        "propInput.addEventListener('keydown', window.propMidanHandler);",
-        "}",
-        "}; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);",
-        "</script>"
-    ]
-    st.components.v1.html("".join(js_code), height=0)
+    js_code = f"""
+    <script>
+    function setupMidanFocus() {{
+        try {{
+            var doc = window.parent.document;
+            var inputs = doc.getElementsByTagName('input');
+            var regInput = null;
+            for (var i = 0; i < inputs.length; i++) {{
+                if (inputs[i].getAttribute('placeholder') === 'النبطية، صور، صيدا...') {{
+                    regInput = inputs[i];
+                    break;
+                }}
+            }}
+            if ({focus_script} && regInput) {{
+                regInput.focus();
+                regInput.select();
+            }}
+        }} catch(e) {{}}
+    }}
+    setTimeout(setupMidanFocus, 300);
+    </script>
+    """
+    st.components.v1.html(js_code, height=0)
