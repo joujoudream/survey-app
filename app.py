@@ -33,130 +33,110 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# 🎨 الستايل الهندسي الميداني المتناظر والمطابق تماماً للألوان والأزرار المحدثة
+# 🎨 إصلاح وتثبيت الـ CSS الصارم لإجبار الألوان الصحيحة على الظهور ومقاومة تغييرات السيرفر
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
-html, body, [class*='css'] { 
-    font-family: 'Tajawal', sans-serif; 
-    direction: rtl; 
-    text-align: right; 
+html, body, [class*='css'], [data-testid="stAppViewContainer"] { 
+    font-family: 'Tajawal', sans-serif !important; 
+    direction: rtl !important; 
+    text-align: right !important; 
 }
 .stApp { 
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important; 
 }
 header[data-testid='stHeader'] { 
     background: transparent !important; 
-    height: 0px !important; 
     display: none !important; 
 }
 .block-container { 
     padding-top: 1.5rem !important; 
     padding-bottom: 1rem !important; 
 }
+
+/* هيدر الشركة والموقع */
 .header-card { 
-    background-color: #EBF8FF; 
-    padding: 20px 12px; 
-    border-radius: 12px; 
-    box-shadow: 0 6px 12px rgba(30, 58, 138, 0.08); 
-    margin-bottom: 2px; 
-    text-align: center; 
-    border: 1px solid #BEE3F8; 
+    background-color: #EBF8FF !important; 
+    padding: 20px 12px !important; 
+    border-radius: 12px !important; 
+    box-shadow: 0 6px 12px rgba(30, 58, 138, 0.08) !important; 
+    margin-bottom: 2px !important; 
+    text-align: center !important; 
+    border: 1px solid #BEE3F8 !important; 
 }
 .company-header { 
-    color: #1E3A8A; 
-    font-family: 'Arial', sans-serif; 
-    font-size: 28px; 
-    font-weight: bold; 
-    margin: 0; 
-    line-height: 1.2; 
+    color: #1E3A8A !important; 
+    font-family: 'Arial', sans-serif !important; 
+    font-size: 28px !important; 
+    font-weight: bold !important; 
 }
 .company-subtitle { 
-    color: #2D3748; 
-    font-family: 'Arial', sans-serif; 
-    font-size: 15px; 
-    font-weight: 500; 
-    margin-top: 4px; 
+    color: #2D3748 !important; 
+    font-size: 15px !important; 
+    font-weight: 500 !important; 
+    margin-top: 4px !important; 
 }
 .main-signature-card { 
-    background-color: #ffffff; 
-    padding: 14px 16px; 
-    border-radius: 10px; 
-    text-align: center; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04); 
-    margin-top: 10px; 
-    margin-bottom: 20px; 
-    border: 1px solid #e2e8f0; 
-    width: 100%; 
-    max-width: 550px; 
-    margin-left: auto; 
-    margin-right: auto; 
-}
-.sig-title { 
-    font-family: 'Arial', sans-serif; 
-    font-size: 16px; 
-    font-weight: bold; 
-    color: #1E3A8A; 
-    margin: 0; 
-}
-.sig-name { 
-    font-family: 'Arial', sans-serif; 
-    font-size: 15px; 
-    font-weight: bold; 
-    color: #475569; 
-    margin: 4px 0 0 0; 
+    background-color: #ffffff !important; 
+    padding: 14px 16px !important; 
+    border-radius: 10px !important; 
+    text-align: center !important; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04) !important; 
+    margin: 10px auto 20px auto !important; 
+    border: 1px solid #e2e8f0 !important; 
+    max-width: 550px !important; 
 }
 
-# 🛠️ توحيد وتناظر الأزرار الحمراء ميدانياً
+/* 🛑 فرض اللون الأحمر الميداني الفاخر للأزرار التشغيلية الحالية ومقاومة اللون الأبيض الافتراضي */
 div[data-testid="stColumn"] button, 
 div[data-testid="stColumn"] button[type="button"],
-div[data-testid="stColumn"] a {
-    background-color: #EF4444 !important;
+div[data-testid="stElementContainer"] button[data-testid="baseButton-secondary"],
+div[data-testid="stElementContainer"] button[data-testid="baseButton-primary"] {
+    background: #EF4444 !important;
     color: white !important;
     border: 1px solid #DC2626 !important;
     font-weight: 700 !important;
-    font-size: 15px !important;
-    height: 46px !important;
+    font-size: 16px !important;
+    height: 48px !important;
     border-radius: 8px !important;
     box-shadow: 0 4px 6px rgba(239, 68, 68, 0.25) !important;
     width: 100% !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    text-decoration: none !important;
 }
-div[data-testid="stColumn"] button:hover, 
-div[data-testid="stColumn"] a:hover {
-    background-color: #DC2626 !important;
+div[data-testid="stColumn"] button:hover {
+    background: #DC2626 !important;
     box-shadow: 0 6px 10px rgba(220, 38, 38, 0.4) !important;
 }
 
-# 📊 ستايل المربع الأزرق الكلي الكبير الأساسي
+/* 📊 تثبيت خلفية المربع الأزرق الكبير للمجموع الكلي وضمان ظهور ألوان الكتابة البيضاء بوضوح */
 div[data-testid="stMetric"] {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
-    padding: 15px !important;
+    padding: 18px !important;
     border-radius: 12px !important;
     text-align: center !important;
     box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
+    border: none !important;
 }
-div[data-testid="stMetric"] * { color: white !important; }
+div[data-testid="stMetric"] [data-testid="stMetricLabel"],
+div[data-testid="stMetric"] [data-testid="stMetricValue"] {
+    color: white !important;
+}
 
-# 🎯 الميزة الجديدة: مطابقة خلفية كبسة إحصاء المنطقة التفاعلية مع خلفية مجموع العقارات تماماً
-.midan-metric-btn button {
+/* 🔵 فرض الخلفية الزرقاء المتدرجة والمطابقة تماماً لزر عدد عقارات المنطقة التفاعلي الجديد */
+div.midan-metric-btn button {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
     border: none !important;
     color: white !important;
     border-radius: 12px !important;
     padding: 15px !important;
     height: auto !important;
-    min-height: 82px !important;
+    min-height: 84px !important;
     box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
+    font-size: 15px !important;
+    font-weight: bold !important;
     display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
+    white-space: pre-line !important;
 }
-.midan-metric-btn button:hover {
+div.midan-metric-btn button:hover {
     background: linear-gradient(135deg, #172554 0%, #1D4ED8 100%) !important;
     box-shadow: 0 8px 16px rgba(29, 78, 216, 0.35) !important;
 }
@@ -182,24 +162,6 @@ with col2:
     
     # بطاقة التوقيع
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
-    
-    # مركز التحويل الفوري للصورة لملف ICO رسمي
-    with st.expander("🖼️ مركز تحويل الصورة الميدانية الفاخرة إلى أيقونة مجلد (.ico)", expanded=False):
-        target_img_name = "Gemini_Generated_Image_.jpg"
-        if os.path.exists(target_img_name):
-            try:
-                img_pil = Image.open(target_img_name)
-                import io
-                ico_buf = io.BytesIO()
-                img_pil.save(ico_buf, format="ICO", sizes=[(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
-                ico_bytes = ico_buf.getvalue()
-                with open("K_and_A_icon.ico", "wb") as f: f.write(ico_bytes)
-                c_preview, c_action = st.columns([3, 9])
-                with c_preview: st.image(img_pil, width=140)
-                with c_action:
-                    st.success("🎯 تم التحويل بنجاح إلى ملف أيقونة جاهز.")
-                    st.download_button(label="📥 تنزيل ملف الأيقونة لجهازك (K_and_A_icon.ico)", data=ico_bytes, file_name="K_and_A_icon.ico", mime="image/x-icon", use_container_width=True)
-            except Exception as ex: st.error(f"⚠️ مشكلة بالمعالجة: {ex}")
 
     # نافذة الرفع الاحتياطي للملف القديم
     with st.expander("📥 خطوة 1: رفع ملف البيانات الاحتياطي (إذا وجد)", expanded=not st.session_state.file_uploaded):
@@ -226,25 +188,24 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # الأزرار الحمراء المتناظرة تماماً أفقيّاً
+    # الأزرار الحمراء العملياتية المتناظرة تحت الحقول مباشرة
     action_col1, action_col2 = st.columns(2)
     with action_col1:
-        btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", type="primary", use_container_width=True)
+        btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main")
     with action_col2:
-        btn_download = st.button("📥 تحميل وتنزيل سجل CSV ومزامنته", use_container_width=True)
+        btn_download = st.button("📥 تحميل وتنزيل سجل CSV ومزامنته", key="download_btn_main")
         if btn_download:
             if not df.empty:
                 if GITHUB_TOKEN != "ضع_هنا_رمز_الوصول_الخاص_بك_YOUR_GITHUB_TOKEN":
-                    with st.spinner("🔄 جاري رفع وتأمين السجل احتياطياً على منصة GitHub..."):
+                    with st.spinner("🔄 جاري المزامنة..."):
                         success = upload_to_github(df)
-                        if success: st.success("☁️ تم رفع وتأمين النسخة الاحتياطية على GitHub بنجاح!")
-                        else: st.error("⚠️ لم نتمكن من الاتصال بـ GitHub.")
+                        if success: st.success("☁️ تم تأمين النسخة على GitHub!")
                 sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
-                st.download_button(label="💾 اضغط هنا لتأكيد التنزيل على جهازك", data=csv_data, file_name=GITHUB_FILENAME, mime="text/csv", use_container_width=True)
+                st.download_button(label="💾 اضغط هنا لتأكيد التنزيل لجهازك", data=csv_data, file_name=GITHUB_FILENAME, mime="text/csv", key="confirm_dl_btn")
             else: st.warning("⚠️ السجل فارغ حالياً!")
 
-    # حساب الإحصائيات الفورية لعرضها
+    # حساب الإحصائيات الفورية
     total_count = len(df)
     region_count = 0
     if region_input:
@@ -252,16 +213,16 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 قسم المربعات الإحصائية المتطابقة والمتناظرة تماماً في الألوان والخلفيات
+    # 📊 قسم المربعات الإحصائية الكبيرة (الأزرق المتطابق تماماً لمنع الاختلال)
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1: 
         st.metric(label="🗄️ مجموع عدد العقارات الكلي في الملف", value=total_count)
     with stat_col2: 
-        # وضع الزر التفاعلي داخل حاوية الستايل الأزرق المتطابق تماماً
+        # الحاوية المخصصة لإجبار الكبسة التفاعلية على أخذ نفس مظهر المربع الجانبي بالضبط
         st.markdown("<div class='midan-metric-btn'>", unsafe_allow_html=True)
         display_label = f"📍 عدد عقارات منطقة ({region_input if region_input else '...'})"
         
-        if st.button(label=f"{display_label}\n\n{region_count}", key="go_to_region_btn", use_container_width=True):
+        if st.button(label=f"{display_label}\n{region_count}", key="go_to_region_btn"):
             st.session_state.focus_on_region = True
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
