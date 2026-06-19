@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 🔑 إعدادات الحساب والمستودع الخاص بك على GitHub (يرجى ملء البيانات هنا لتفعيل الربط التلقائي)
+# 🔑 إعدادات الحساب والمستودع الخاص بك على GitHub (يرجى وضع بياناتك هنا لتفعيل المزامنة)
 GITHUB_TOKEN = "ضع_هنا_رمز_الوصول_الخاص_بك_YOUR_GITHUB_TOKEN"
 GITHUB_REPO = "اسم_حسابك/اسم_المستودع_YOUR_USERNAME/YOUR_REPO"
 GITHUB_FILENAME = "KhatibAlami_Midan_Data.csv"
@@ -37,12 +37,14 @@ def upload_to_github(dataframe):
 
 # دالة التحميل التلقائي للملف عند بدء تشغيل البرنامج
 def load_initial_data():
+    # 1. أولاً: محاولة القراءة من الجهاز محلياً
     if os.path.exists(GITHUB_FILENAME):
         try:
             return pd.read_csv(GITHUB_FILENAME, dtype={"المنطقة": str, "رقم العقار": str})
         except:
             pass
             
+    # 2. ثانياً: إذا لم يجد الملف محلياً، يسحبه تلقائياً من GitHub
     if GITHUB_TOKEN != "ضع_هنا_رمز_الوصول_الخاص_بك_YOUR_GITHUB_TOKEN":
         try:
             url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_FILENAME}"
@@ -56,9 +58,10 @@ def load_initial_data():
         except:
             pass
             
+    # 3. ثالثاً: إذا كان التشغيل لأول مرة تماماً، ينشئ جدولاً فارغاً
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيق الهندسي النظيف والمحمي من أخطاء الـ Syntax تماماً
+# 🎨 التنسيق الهندسي المستقر والآمن تماماً لحماية ألوان الواجهة والتوازي الأفقي
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -176,7 +179,7 @@ div.midan-interactive-box button:hover {
 """
 st.markdown(ultimate_css, unsafe_allow_html=True)
 
-# إدارة الذاكرة المحلية وتحميل البيانات تلقائياً عند التشغيل
+# 🔒 [التصحيح الجذري] تثبيت وتحميل البيانات تلقائياً داخل الذاكرة المستمرة للجلسة لحمايتها من الضياع
 if "local_db" not in st.session_state: 
     st.session_state.local_db = load_initial_data()
 if "last_region" not in st.session_state: st.session_state.last_region = ""
@@ -186,13 +189,14 @@ if "focus_on_region" not in st.session_state: st.session_state.focus_on_region =
 
 col1, col2, col3 = st.columns([0.5, 11, 0.5])
 with col2:
+    # هيدر الشركة والتوقيع الرسمي
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
     
     df = st.session_state.local_db
     st.markdown("---")
     
-    # 📋 حقول الإدخال
+    # 📋 حقول الإدخال المستقرة
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -202,7 +206,7 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # 🟥 الأزرار الحمراء الكبيرة
+    # 🟥 الأزرار التشغيلية الحمراء الكبيرة
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
@@ -215,7 +219,7 @@ with col2:
                 st.download_button(label="💾 اضغط هنا لتأكيد التنزيل لجهازك", data=csv_data, file_name=GITHUB_FILENAME, mime="text/csv", key="confirm_dl_btn", use_container_width=True)
             else: st.warning("⚠️ السجل فارغ حالياً!")
 
-    # تنفيذ الحفظ والتزامن المزدوج تلقائياً
+    # تنفيذ الحفظ والتزامن المزدوج تلقائياً (محلياً وعلى السحابة فوراً)
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
@@ -226,18 +230,18 @@ with col2:
                 st.session_state.last_region = region_input
                 st.session_state.clear_trigger = True
                 
-                # 1. تحديث الملف المحلي على الجهاز فوراً
+                # 1. تحديث وحفظ الملف الاحتياطي على الجهاز فوراً في نفس الثانية
                 sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 sorted_df.to_csv(GITHUB_FILENAME, index=False, encoding='utf-8-sig')
                 
-                # 2. الرفع التلقائي إلى GitHub
+                # 2. الرفع التلقائي الفوري كنسخة آمنة ومحمية على GitHub
                 upload_to_github(st.session_state.local_db)
                 
-                st.success(f"✅ تم حفظ وتأمين العقار رقم ({property_number}) بنجاح!")
+                st.success(f"✅ تم حفظ وتأمين العقار رقم ({property_number}) تلقائياً محلياً وعلى GitHub!")
                 st.rerun()
         else: st.warning("⚠️ فضلاً، يرجى ملء حقول المنطقة ورقم العقار أولاً.")
 
-    # حساب الإحصائيات
+    # حساب الإحصائيات الفورية
     total_count = len(st.session_state.local_db)
     region_count = 0
     if region_input:
@@ -245,7 +249,7 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 المربعات الإحصائية (متوازية تماماً وعلى نفس الخط الأفقي وبالمظهر الأصلي المستقر)
+    # 📊 المربعات الإحصائية الموازية تماماً على نفس الخط الأفقي وبنفس المظهر واللون المعتمد
     stat_col1, stat_col2 = st.columns(2)
     
     with stat_col1:
@@ -265,6 +269,7 @@ with col2:
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
+    # جدول السجلات الحالية للمنطقة
     if region_input:
         st.markdown(f"### 📊 ملف العقارات الجاري العمل عليها في منطقة: ({region_input})")
         filtered_df = st.session_state.local_db[st.session_state.local_db["المنطقة"].str.strip().str.lower() == region_input.lower()]
@@ -276,7 +281,7 @@ with col2:
 
     st.markdown("---")
 
-    # محرك البحث الفوري والتصحيح
+    # محرك البحث والتصحيح الفوري والسريع
     search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", value=st.session_state.search_val, placeholder="اكتب اسم المنطقة أو رقم العقار للبحث السريع والتعديل...", key="search_modify_field").strip()
     st.session_state.search_val = search_query
 
@@ -294,6 +299,7 @@ with col2:
                             st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
                             st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
                             
+                            # حفظ ومزامنة فورية للتعديلات
                             sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                             sorted_df.to_csv(GITHUB_FILENAME, index=False, encoding='utf-8-sig')
                             upload_to_github(st.session_state.local_db)
@@ -302,7 +308,7 @@ with col2:
                             st.success("✅ تم تحديث وتصحيح السجل ومزامنته بنجاح!")
                             st.rerun()
 
-    # أتمتة جافا سكربت للتنقل الذكي والسريع
+    # أتمتة جافا سكربت للتنقل السريع وحفظ توازن الحقول
     focus_script = "true" if st.session_state.focus_on_region else "false"
     st.session_state.focus_on_region = False
     js_code = [
