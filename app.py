@@ -32,7 +32,7 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# 🎨 ستايل هندسي نظيف وقوي لتكبير الأزرار الحمراء وتوحيد المربعين باللون الأزرق 100%
+# 🎨 ستايل عام لتوحيد الخطوط والاتجاهات والخلفية المريحة للعين
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -83,66 +83,27 @@ header[data-testid='stHeader'] {
     max-width: 550px !important; 
 }
 
-/* 🛑 تكبير الأزرار التشغيلية الحمراء بشكل كامل لتملأ الأعمدة */
-div[data-testid="stColumn"] button {
-    background-color: #EF4444 !important;
-    color: white !important;
-    border: 1px solid #DC2626 !important;
-    font-weight: 700 !important;
-    font-size: 16px !important;
-    height: 54px !important;
-    border-radius: 10px !important;
-    box-shadow: 0 4px 6px rgba(239, 68, 68, 0.25) !important;
-    width: 100% !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-div[data-testid="stColumn"] button:hover {
-    background-color: #DC2626 !important;
-    box-shadow: 0 6px 12px rgba(220, 38, 38, 0.4) !important;
-}
-
-/* 🔵 توحيد المربع الإحصائي الأزرق الكبير */
-div[data-testid="stMetric"], [data-testid="metric-container"] {
+/* كروت مخصصة للمربعات الإحصائية الزرقاء الموحدة */
+.blue-stat-box {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
-    padding: 20px !important;
+    padding: 22px 15px !important;
     border-radius: 12px !important;
     text-align: center !important;
     box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
-    border: none !important;
-    height: 110px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-}
-div[data-testid="stMetric"] *, [data-testid="metric-container"] * {
     color: white !important;
+    height: 115px !important;
 }
-
-/* 🔵 توحيد زر إحصاء المنطقة ليكون أزرق متطابقاً هندسياً وموازياً تماماً للمربع الكبير */
-div.midan-blue-container button {
-    background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
-    border: none !important;
-    color: white !important;
-    border-radius: 12px !important;
-    padding: 20px !important;
-    height: 110px !important;
-    width: 100% !important;
-    box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
-    font-size: 16px !important;
+.blue-stat-title {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    margin-bottom: 8px !important;
+    opacity: 0.95;
+}
+.blue-stat-value {
+    font-size: 32px !important;
     font-weight: 700 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    white-space: pre-line !important;
-}
-div.midan-blue-container button:hover {
-    background: linear-gradient(135deg, #172554 0%, #1D4ED8 100%) !important;
 }
 
-div[data-testid='stHorizontalBlock'] { gap: 16px !important; }
 [data-testid='stInputInstructions'] { display: none !important; visibility: hidden !important; }
 </style>
 """
@@ -156,7 +117,6 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 if "search_val" not in st.session_state: st.session_state.search_val = ""
 if "focus_on_region" not in st.session_state: st.session_state.focus_on_region = False
 
-# تم التعديل والتنظيف هنا بشكل صارم لإنهاء خطأ الـ SyntaxError 
 col1, col2, col3 = st.columns([0.5, 11, 0.5])
 with col2:
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
@@ -176,7 +136,7 @@ with col2:
     df = st.session_state.local_db
     st.markdown("---")
     
-    # حقول الإدخال الجانبية
+    # حقول الإدخال
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -186,12 +146,12 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # أزرار العمليات الحمراء المتناسقة
+    # تمديد الأزرار لملء الأعمدة بالتساوي واستخدام ميزة استخدام كامل العرض المتاحة افتراضياً
     action_col1, action_col2 = st.columns(2)
     with action_col1:
-        btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main")
+        btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
     with action_col2:
-        btn_download = st.button("📥 تحميل وتنزيل سجل CSV ومزامنته", key="download_btn_main")
+        btn_download = st.button("📥 تحميل وتنزيل سجل CSV ومزامنته", key="download_btn_main", use_container_width=True)
         if btn_download:
             if not df.empty:
                 if GITHUB_TOKEN != "ضع_هنا_رمز_الوصول_الخاص_بك_YOUR_GITHUB_TOKEN":
@@ -200,7 +160,7 @@ with col2:
                         if success: st.success("☁️ تم تأمين النسخة على GitHub!")
                 sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
-                st.download_button(label="💾 اضغط هنا لتأكيد التنزيل لجهازك", data=csv_data, file_name=GITHUB_FILENAME, mime="text/csv", key="confirm_dl_btn")
+                st.download_button(label="💾 اضغط هنا لتأكيد التنزيل لجهازك", data=csv_data, file_name=GITHUB_FILENAME, mime="text/csv", key="confirm_dl_btn", use_container_width=True)
             else: st.warning("⚠️ السجل فارغ حالياً!")
 
     total_count = len(df)
@@ -210,17 +170,23 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 المربعات الإحصائية الزرقاء الموحدة هندسياً
+    # 📊 إعادة بناء المربعات الإحصائية الزرقاء برموز مخصصة لتكون متوازية ومطابقة 100% في الحجم واللون
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1: 
-        st.metric(label="🗄️ مجموع عدد العقارات الكلي في الملف", value=total_count)
+        st.markdown(f"""
+        <div class='blue-stat-box'>
+            <div class='blue-stat-title'>🗄️ مجموع عدد العقارات الكلي في الملف</div>
+            <div class='blue-stat-value'>{total_count}</div>
+        </div>
+        """, unsafe_allow_html=True)
     with stat_col2: 
-        st.markdown("<div class='midan-blue-container'>", unsafe_allow_html=True)
-        display_label = f"📍 عدد عقارات منطقة ({region_input if region_input else '...'})"
-        if st.button(label=f"{display_label}\n{region_count}", key="go_to_region_btn"):
-            st.session_state.focus_on_region = True
-            st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
+        display_name = region_input if region_input else "..."
+        st.markdown(f"""
+        <div class='blue-stat-box'>
+            <div class='blue-stat-title'>📍 عدد عقارات منطقة ({display_name})</div>
+            <div class='blue-stat-value'>{region_count}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
     if region_input:
         st.markdown(f"### 📊 ملف العقارات الجاري العمل عليها في منطقة: ({region_input})")
@@ -258,7 +224,7 @@ with col2:
                     edit_c1, edit_c2 = st.columns(2)
                     with edit_c1: new_edit_region = st.text_input("تعديل اسم المنطقة", value=row['المنطقة'], key=f"edit_reg_{idx}").strip()
                     with edit_c2: new_edit_prop = st.text_input("تعديل رقم العقار", value=row['رقم العقار'], key=f"edit_prop_{idx}").strip()
-                    if st.button("💾 حفظ تعديلات السجل", key=f"save_edit_{idx}"):
+                    if st.button("💾 حفظ تعديلات السجل", key=f"save_edit_{idx}", use_container_width=True):
                         if new_edit_region and new_edit_prop:
                             st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
                             st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
