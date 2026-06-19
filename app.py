@@ -32,7 +32,7 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# 🎨 ستايل عام متناسق لتوحيد تدرجات الأزرق وتصميم الكبسة الإحصائية التفاعلية لتطابق المربع الكلي 100%
+# 🎨 ستايل هندسي دقيق يطابق لقطة الشاشة الأخيرة (image_4b547e.jpg) تماماً في الألوان والأحجام
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -83,53 +83,51 @@ header[data-testid='stHeader'] {
     max-width: 550px !important; 
 }
 
-/* كرت مخصص للمربع الإحصائي الكلي الثابت */
-.blue-stat-box {
+/* 🔵 المربع الأزرق العريض الكلي (الجهة اليمنى) مطابق تماماً للصورة الأخيرة */
+.blue-stat-box-main {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
-    padding: 22px 15px !important;
+    padding: 22px 20px !important;
     border-radius: 12px !important;
     text-align: center !important;
     box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
     color: white !important;
-    height: 115px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    align-items: center !important;
+    height: 125px !important;
 }
-.blue-stat-title {
+.blue-stat-title-main {
     font-size: 14px !important;
     font-weight: 500 !important;
-    margin-bottom: 8px !important;
+    margin-bottom: 6px !important;
     opacity: 0.95;
+    text-align: center !important;
 }
-.blue-stat-value {
-    font-size: 32px !important;
+.blue-stat-value-main {
+    font-size: 38px !important;
     font-weight: 700 !important;
+    text-align: center !important;
 }
 
-/* 🔵 ستايل هندسي لجعل كبسة إحصاء المنطقة زرقاء ومطابقة 100% للمربع الكلي المجاور */
-div.midan-interactive-box button {
-    background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
-    border: none !important;
-    color: white !important;
-    border-radius: 12px !important;
-    padding: 22px 15px !important;
-    height: 115px !important;
-    width: 100% !important;
-    box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
+/* ⚪ زر مربع المنطقة المحلي (الجهة اليسرى) ليطابق شكل الكرت الأبيض الصغير في صورتك تماماً ويكون تفاعلياً */
+div.midan-interactive-white-box button {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #2d3748 !important;
+    border-radius: 10px !important;
+    padding: 12px 15px !important;
+    height: 75px !important;
+    width: auto !important;
+    min-width: 170px !important;
+    max-width: 260px !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+    margin-top: 25px !important;
+    margin-right: auto !important; /* محاذاة لليمين والوسط الهندسي للمظهر الأصلي */
+    display: block !important;
     white-space: pre-line !important;
+    text-align: center !important;
 }
-div.midan-interactive-box button:hover {
-    background: linear-gradient(135deg, #172554 0%, #1D4ED8 100%) !important;
-    box-shadow: 0 8px 16px rgba(30, 58, 138, 0.3) !important;
-}
-div.midan-interactive-box button div p {
-    color: white !important;
+div.midan-interactive-white-box button:hover {
+    background-color: #f7fafc !important;
+    border-color: #cbd5e0 !important;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.08) !important;
 }
 
 [data-testid='stInputInstructions'] { display: none !important; visibility: hidden !important; }
@@ -164,7 +162,7 @@ with col2:
     df = st.session_state.local_db
     st.markdown("---")
     
-    # حقول الإدخال
+    # حقول الإدخال للأجهزة والميدان
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -174,7 +172,7 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # الأزرار التشغيلية الممتدة بعرض العمود بالتساوي ومتجانسة باللون الأزرق الموحد
+    # الأزرار التشغيلية الممتدة والمنسقة بالكامل بدون ألوان حمراء
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True, type="primary")
@@ -198,22 +196,22 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 المربعات الإحصائية: اليمين مربع ثابت واليسار كبسة زرقاء تفاعلية ذكية متطابقة 100%
-    stat_col1, stat_col2 = st.columns(2)
+    # 📊 المربعات الإحصائية المحدثة بالمقاس والمظهر المطابق تماماً لطلبك
+    stat_col1, stat_col2 = st.columns([7, 5]) # توزيع هندسي يعطي المربع الكلي مساحته الكبيرة الأصلية
     with stat_col1: 
         st.markdown(f"""
-        <div class='blue-stat-box'>
-            <div class='blue-stat-title'>🗄️ مجموع عدد العقارات الكلي في الملف</div>
-            <div class='blue-stat-value'>{total_count}</div>
+        <div class='blue-stat-box-main'>
+            <div class='blue-stat-title-main'>🗄️ مجموع عدد العقارات الكلي في الملف</div>
+            <div class='blue-stat-value-main'>{total_count}</div>
         </div>
         """, unsafe_allow_html=True)
         
     with stat_col2: 
-        st.markdown("<div class='midan-interactive-box'>", unsafe_allow_html=True)
+        st.markdown("<div class='midan-interactive-white-box'>", unsafe_allow_html=True)
         display_name = region_input if region_input else "..."
-        # جعل النص يظهر بوضوح كعنوان وقيمة داخل الكبسة
-        button_text = f"📍 عدد عقارات منطقة ({display_name})\n\n{region_count}"
-        if st.button(label=button_text, key="interactive_region_stat_btn"):
+        # عرض البيانات بنفس هيكلية المربع الأبيض الصغير الكلاسيكي الأصلي ليكون تفاعلياً
+        button_text = f"📍 عدد عقارات منطقة ({display_name})\n{region_count}"
+        if st.button(label=button_text, key="interactive_white_stat_btn"):
             st.session_state.focus_on_region = True
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
