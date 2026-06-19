@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 import base64
 import os
+import glob
 
 # 🌐 1. إعدادات الصفحة الرسمية للشركة
 st.set_page_config(
@@ -15,7 +16,7 @@ st.set_page_config(
 # 🔑 إعدادات الحساب والمستودع الخاص بك على GitHub
 GITHUB_TOKEN = "ضع_هنا_رمز_الوصول_الخاص_بك_YOUR_GITHUB_TOKEN"
 GITHUB_REPO = "اسم_حسابك/اسم_المستودع_YOUR_USERNAME/YOUR_REPO"
-GITHUB_FILENAME = "KhatibAlami_Midan_Data.csv"
+OUTPUT_FILENAME = "KhatibAlami_Midan_Data.csv"
 
 # دالة الرفع والمزامنة التلقائية على GitHub
 def upload_to_github(dataframe):
@@ -24,7 +25,7 @@ def upload_to_github(dataframe):
     try:
         csv_content = dataframe.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True).to_csv(index=False).encode('utf-8-sig')
         encoded_content = base64.b64encode(csv_content).decode('utf-8')
-        url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_FILENAME}"
+        url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{OUTPUT_FILENAME}"
         headers = {"Authorization": f"token {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
         res = requests.get(url, headers=headers)
         sha = res.json().get("sha") if res.status_code == 200 else None
@@ -35,31 +36,32 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# 🛠️ دالة الفحص والتحميل الذكي الشامل للملف بجانب الكود
-def load_initial_data_smart():
-    # قائمة بجميع المسميات المحتملة للملف بجانب البرنامج لحل مشكلة عدم القراءة
-    possible_files = [
-        GITHUB_FILENAME,
-        GITHUB_FILENAME.lower(),
-        "KhatibAlami_Midan_Data.xlsx",
-        "KhatibAlami_Midan_Data.XLSX",
-        "KhatibAlami_Midan_Data.CSV"
-    ]
+# 🛠️ [تحديث ذكي جداً] دالة قراءة أي ملف إكسيل أو CSV بجانب الكود مهما كان اسمه
+def load_any_local_file():
+    # البحث عن أي ملف ينتهي بـ csv أو xlsx أو xls في مجلد البرنامج
+    local_files = glob.glob("*.csv") + glob.glob("*.xlsx") + glob.glob("*.xls") + glob.glob("*.CSV") + glob.glob("*.XLSX")
     
-    for f_name in possible_files:
-        if os.path.exists(f_name):
-            try:
-                if f_name.lower().endswith('.csv'):
-                    return pd.read_csv(f_name, dtype={"المنطقة": str, "رقم العقار": str})
-                elif f_name.lower().endswith('.xlsx'):
-                    return pd.read_excel(f_name, dtype={"المنطقة": str, "رقم العقار": str})
-            except:
-                pass
+    for f_path in local_files:
+        # تجنب قراءة ملفات النظام المؤقتة
+        if "~$" in f_path:
+            continue
+        try:
+            if f_path.lower().endswith('.csv'):
+                df_loaded = pd.read_csv(f_path, dtype={"المنطقة": str, "رقم العقار": str})
+                # التأكد من احتواء الملف على الأعمدة المطلوبة
+                if "المنطقة" in df_loaded.columns and "رقم العقار" in df_loaded.columns:
+                    return df_loaded[["المنطقة", "رقم العقار"]]
+            elif f_path.lower().endswith(('.xlsx', '.xls')):
+                df_loaded = pd.read_excel(f_path, dtype={"المنطقة": str, "رقم العقار": str})
+                if "المنطقة" in df_loaded.columns and "رقم العقار" in df_loaded.columns:
+                    return df_loaded[["المنطقة", "رقم العقار"]]
+        except:
+            pass
 
-    # 2. إذا لم يجد أي ملف محلي، يحاول سحبه تلقائياً من سحابة GitHub
+    # 2. إذا لم يجد أي ملف محلي على الجهاز، يحاول سحبه من GitHub
     if GITHUB_TOKEN != "ضع_هنا_رمز_الوصول_الخاص_بك_YOUR_GITHUB_TOKEN":
         try:
-            url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{GITHUB_FILENAME}"
+            url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{OUTPUT_FILENAME}"
             headers = {"Authorization": f"token {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
             res = requests.get(url, headers=headers)
             if res.status_code == 200:
@@ -70,10 +72,10 @@ def load_initial_data_smart():
         except:
             pass
             
-    # 3. إذا لم يجد شيئاً، ينشئ جدولاً فارغاً جديداً
+    # 3. إذا لم يجد شيئاً إطلاقاً، يبدأ بجدول فارغ
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيق الهندسي المستقر والآمن لحماية الألوان والتوازي الأفقي
+# 🎨 التنسيق الهندسي المستقر والآمن تماماً لحماية ألوان الواجهة والتوازي الأفقي
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -191,9 +193,9 @@ div.midan-interactive-box button:hover {
 """
 st.markdown(ultimate_css, unsafe_allow_html=True)
 
-# 🔒 تفعيل الفحص الذكي الفوري وتثبيت البيانات في ذاكرة الجلسة
+# 🔒 إدارة الذاكرة وتحميل البيانات تلقائياً بالاعتماد على البحث الشامل والذكي
 if "local_db" not in st.session_state: 
-    st.session_state.local_db = load_initial_data_smart()
+    st.session_state.local_db = load_any_local_file()
 if "last_region" not in st.session_state: st.session_state.last_region = ""
 if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = False
 if "search_val" not in st.session_state: st.session_state.search_val = ""
@@ -217,7 +219,7 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # 🟥 الأزرار التشغيلية الحمراء الكبيرة بملء الشاشة
+    # 🟥 الأزرار الحمراء الكبيرة
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
@@ -227,10 +229,10 @@ with col2:
             if not df.empty:
                 sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
-                st.download_button(label="💾 اضغط هنا لتأكيد التنزيل لجهازك", data=csv_data, file_name=GITHUB_FILENAME, mime="text/csv", key="confirm_dl_btn", use_container_width=True)
+                st.download_button(label="💾 اضغط هنا لتأكيد التنزيل لجهازك", data=csv_data, file_name=OUTPUT_FILENAME, mime="text/csv", key="confirm_dl_btn", use_container_width=True)
             else: st.warning("⚠️ السجل فارغ حالياً!")
 
-    # عند كبس زر الحفظ، يتم الحفظ محلياً وبثه فوراً إلى سحابة GitHub تلقائياً
+    # تنفيذ الحفظ والتزامن المزدوج تلقائياً عند كبس الزر
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
@@ -241,18 +243,18 @@ with col2:
                 st.session_state.last_region = region_input
                 st.session_state.clear_trigger = True
                 
-                # 1. تحديث وحفظ فوري للملف بجانب الكود مباشرة
+                # تحديث وحفظ فوري للملف الاحتياطي على جهازك (باسم موحد للبرنامج)
                 sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-                sorted_df.to_csv(GITHUB_FILENAME, index=False, encoding='utf-8-sig')
+                sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                 
-                # 2. المزامنة التلقائية مع GitHub في نفس اللحظة بالخلفية
+                # المزامنة التلقائية مع حساب GitHub الخاص بك
                 upload_to_github(st.session_state.local_db)
                 
-                st.success(f"✅ تم حفظ وتأمين العقار رقم ({property_number}) تلقائياً!")
+                st.success(f"✅ تم حفظ العقار رقم ({property_number}) وتحديث الملف التلقائي بنجاح!")
                 st.rerun()
         else: st.warning("⚠️ فضلاً، يرجى ملء حقول المنطقة ورقم العقار أولاً.")
 
-    # الإحصائيات الفورية
+    # حساب الإحصائيات الفورية لعرضها
     total_count = len(st.session_state.local_db)
     region_count = 0
     if region_input:
@@ -260,7 +262,7 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 المربعات الإحصائية (متوازية تماماً على خط أفقي واحد باللون الأزرق المعتمد)
+    # 📊 المربعات الإحصائية الموازية تماماً
     stat_col1, stat_col2 = st.columns(2)
     
     with stat_col1:
@@ -280,7 +282,7 @@ with col2:
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # السجلات الحالية للمنطقة
+    # جدول السجلات الحالية للمنطقة
     if region_input:
         st.markdown(f"### 📊 ملف العقارات الجاري العمل عليها في منطقة: ({region_input})")
         filtered_df = st.session_state.local_db[st.session_state.local_db["المنطقة"].str.strip().str.lower() == region_input.lower()]
@@ -310,9 +312,8 @@ with col2:
                             st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
                             st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
                             
-                            # حفظ ومزامنة تلقائية فورية عند التعديل
                             sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-                            sorted_df.to_csv(GITHUB_FILENAME, index=False, encoding='utf-8-sig')
+                            sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                             upload_to_github(st.session_state.local_db)
                             
                             st.session_state.search_val = ""         
