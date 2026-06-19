@@ -32,7 +32,7 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# 🎨 ستايل هندسي دقيق يطابق لقطة الشاشة الأخيرة (image_4b547e.jpg) تماماً في الألوان والأحجام
+# 🎨 ستايل هندسي متطابق يجعل المربعين نسخة طبق الأصل باللون الأزرق الملكي
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -83,51 +83,56 @@ header[data-testid='stHeader'] {
     max-width: 550px !important; 
 }
 
-/* 🔵 المربع الأزرق العريض الكلي (الجهة اليمنى) مطابق تماماً للصورة الأخيرة */
+/* 🔵 المربع الأزرق العريض الرئيسي (الجهة اليمنى) */
 .blue-stat-box-main {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
-    padding: 22px 20px !important;
+    padding: 20px 20px !important;
     border-radius: 12px !important;
     text-align: center !important;
     box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
     color: white !important;
     height: 125px !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 .blue-stat-title-main {
-    font-size: 14px !important;
+    font-size: 15px !important;
     font-weight: 500 !important;
-    margin-bottom: 6px !important;
+    margin-bottom: 4px !important;
     opacity: 0.95;
-    text-align: center !important;
 }
 .blue-stat-value-main {
     font-size: 38px !important;
     font-weight: 700 !important;
-    text-align: center !important;
 }
 
-/* ⚪ زر مربع المنطقة المحلي (الجهة اليسرى) ليطابق شكل الكرت الأبيض الصغير في صورتك تماماً ويكون تفاعلياً */
-div.midan-interactive-white-box button {
-    background-color: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #2d3748 !important;
-    border-radius: 10px !important;
-    padding: 12px 15px !important;
-    height: 75px !important;
-    width: auto !important;
-    min-width: 170px !important;
-    max-width: 260px !important;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
-    margin-top: 25px !important;
-    margin-right: auto !important; /* محاذاة لليمين والوسط الهندسي للمظهر الأصلي */
-    display: block !important;
+/* 🔵 المربع الأزرق العريض المحدث ليكون خلفية لزر المنطقة (الجهة اليسرى) - نسخة طبق الأصل */
+div.midan-interactive-blue-box button {
+    background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
+    border: none !important;
+    color: white !important;
+    border-radius: 12px !important;
+    padding: 20px 20px !important;
+    height: 125px !important;
+    width: 100% !important;
+    box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
     white-space: pre-line !important;
     text-align: center !important;
+    font-family: 'Tajawal', sans-serif !important;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
-div.midan-interactive-white-box button:hover {
-    background-color: #f7fafc !important;
-    border-color: #cbd5e0 !important;
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.08) !important;
+
+div.midan-interactive-blue-box button:hover {
+    background: linear-gradient(135deg, #1A337A 0%, #2563EB 100%) !important;
+    box-shadow: 0 8px 16px rgba(30, 58, 138, 0.3) !important;
+    border: none !important;
+    color: white !important;
+}
+
+div.midan-interactive-blue-box button p {
+    color: white !important;
 }
 
 [data-testid='stInputInstructions'] { display: none !important; visibility: hidden !important; }
@@ -172,7 +177,7 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # الأزرار التشغيلية الممتدة والمنسقة بالكامل بدون ألوان حمراء
+    # الأزرار التشغيلية
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True, type="primary")
@@ -196,8 +201,8 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 المربعات الإحصائية المحدثة بالمقاس والمظهر المطابق تماماً لطلبك
-    stat_col1, stat_col2 = st.columns([7, 5]) # توزيع هندسي يعطي المربع الكلي مساحته الكبيرة الأصلية
+    # 📊 المربعات الإحصائية المحدثة: متساوية بالكامل في الحجم واللون والخلفية الزرقاء
+    stat_col1, stat_col2 = st.columns(2)
     with stat_col1: 
         st.markdown(f"""
         <div class='blue-stat-box-main'>
@@ -207,11 +212,11 @@ with col2:
         """, unsafe_allow_html=True)
         
     with stat_col2: 
-        st.markdown("<div class='midan-interactive-white-box'>", unsafe_allow_html=True)
+        st.markdown("<div class='midan-interactive-blue-box'>", unsafe_allow_html=True)
         display_name = region_input if region_input else "..."
-        # عرض البيانات بنفس هيكلية المربع الأبيض الصغير الكلاسيكي الأصلي ليكون تفاعلياً
-        button_text = f"📍 عدد عقارات منطقة ({display_name})\n{region_count}"
-        if st.button(label=button_text, key="interactive_white_stat_btn"):
+        # جعل الزر يحتوي على النص والرقم بنفس تصميم المربع الأزرق الكلي
+        button_text = f"📍 عدد عقارات منطقة ({display_name})\n\n{region_count}"
+        if st.button(label=button_text, key="interactive_blue_stat_btn"):
             st.session_state.focus_on_region = True
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
