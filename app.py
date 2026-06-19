@@ -36,21 +36,25 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# 🛠️ [تحديث ذكي جداً] دالة قراءة أي ملف إكسيل أو CSV بجانب الكود مهما كان اسمه
+# 🛠️ [إصلاح جذري للترميز العربي] دالة قراءة الملف بجانب الكود بأي صيغة وترميز عربي
 def load_any_local_file():
-    # البحث عن أي ملف ينتهي بـ csv أو xlsx أو xls في مجلد البرنامج
+    # البحث عن أي ملف ينتهي بـ csv أو xlsx في مجلد البرنامج
     local_files = glob.glob("*.csv") + glob.glob("*.xlsx") + glob.glob("*.xls") + glob.glob("*.CSV") + glob.glob("*.XLSX")
     
     for f_path in local_files:
-        # تجنب قراءة ملفات النظام المؤقتة
         if "~$" in f_path:
             continue
         try:
+            # إذا كان ملف CSV، نجرب التراميز المختلفة لحل مشكلة الأحرف العربية والملفات المحلية
             if f_path.lower().endswith('.csv'):
-                df_loaded = pd.read_csv(f_path, dtype={"المنطقة": str, "رقم العقار": str})
-                # التأكد من احتواء الملف على الأعمدة المطلوبة
-                if "المنطقة" in df_loaded.columns and "رقم العقار" in df_loaded.columns:
-                    return df_loaded[["المنطقة", "رقم العقار"]]
+                for encoding_type in ['utf-8-sig', 'utf-8', 'cp1256', 'latin-1']:
+                    try:
+                        df_loaded = pd.read_csv(f_path, encoding=encoding_type, dtype={"المنطقة": str, "رقم العقار": str})
+                        if "المنطقة" in df_loaded.columns and "رقم العقار" in df_loaded.columns:
+                            return df_loaded[["المنطقة", "رقم العقار"]]
+                    except:
+                        continue
+            # إذا كان ملف إكسيل عادي
             elif f_path.lower().endswith(('.xlsx', '.xls')):
                 df_loaded = pd.read_excel(f_path, dtype={"المنطقة": str, "رقم العقار": str})
                 if "المنطقة" in df_loaded.columns and "رقم العقار" in df_loaded.columns:
@@ -58,7 +62,7 @@ def load_any_local_file():
         except:
             pass
 
-    # 2. إذا لم يجد أي ملف محلي على الجهاز، يحاول سحبه من GitHub
+    # 2. إذا لم يجد أي ملف محلي شغال، يحاول سحبه من سحابة GitHub
     if GITHUB_TOKEN != "ضع_هنا_رمز_الوصول_الخاص_بك_YOUR_GITHUB_TOKEN":
         try:
             url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{OUTPUT_FILENAME}"
@@ -68,14 +72,14 @@ def load_any_local_file():
                 file_data = res.json()
                 csv_bytes = base64.b64decode(file_data["content"])
                 import io
-                return pd.read_csv(io.BytesIO(csv_bytes), dtype={"المنطقة": str, "رقم العقار": str})
+                return pd.read_csv(io.BytesIO(csv_bytes), encoding='utf-8-sig', dtype={"المنطقة": str, "رقم العقار": str})
         except:
             pass
             
-    # 3. إذا لم يجد شيئاً إطلاقاً، يبدأ بجدول فارغ
+    # 3. جدول فارغ كخيار أخير
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيق الهندسي المستقر والآمن تماماً لحماية ألوان الواجهة والتوازي الأفقي
+# 🎨 التنسيق الهندسي المستقر والمعتمد للواجهة والألوان والتوازي
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -193,7 +197,7 @@ div.midan-interactive-box button:hover {
 """
 st.markdown(ultimate_css, unsafe_allow_html=True)
 
-# 🔒 إدارة الذاكرة وتحميل البيانات تلقائياً بالاعتماد على البحث الشامل والذكي
+# 🔒 إدارة الذاكرة المستمرة وتفعيل دالة القراءة الذكية المحسنة
 if "local_db" not in st.session_state: 
     st.session_state.local_db = load_any_local_file()
 if "last_region" not in st.session_state: st.session_state.last_region = ""
@@ -209,7 +213,7 @@ with col2:
     df = st.session_state.local_db
     st.markdown("---")
     
-    # 📋 حقول المدخلات المستقرة
+    # 📋 حقول المدخلات
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -219,7 +223,7 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # 🟥 الأزرار الحمراء الكبيرة
+    # 🟥 الأزرار التشغيلية الحمراء الكبيرة
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
@@ -232,7 +236,7 @@ with col2:
                 st.download_button(label="💾 اضغط هنا لتأكيد التنزيل لجهازك", data=csv_data, file_name=OUTPUT_FILENAME, mime="text/csv", key="confirm_dl_btn", use_container_width=True)
             else: st.warning("⚠️ السجل فارغ حالياً!")
 
-    # تنفيذ الحفظ والتزامن المزدوج تلقائياً عند كبس الزر
+    # عند كبس زر الحفظ، يتم التحديث والمزامنة
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
@@ -243,18 +247,18 @@ with col2:
                 st.session_state.last_region = region_input
                 st.session_state.clear_trigger = True
                 
-                # تحديث وحفظ فوري للملف الاحتياطي على جهازك (باسم موحد للبرنامج)
+                # تحديث وحفظ الملف بجانب البرنامج فوراً بترميز موحد وممتاز يدعم العربي
                 sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                 
-                # المزامنة التلقائية مع حساب GitHub الخاص بك
+                # المزامنة مع سحابة GitHub
                 upload_to_github(st.session_state.local_db)
                 
-                st.success(f"✅ تم حفظ العقار رقم ({property_number}) وتحديث الملف التلقائي بنجاح!")
+                st.success(f"✅ تم حفظ وتأمين العقار رقم ({property_number}) بنجاح!")
                 st.rerun()
         else: st.warning("⚠️ فضلاً، يرجى ملء حقول المنطقة ورقم العقار أولاً.")
 
-    # حساب الإحصائيات الفورية لعرضها
+    # حساب الإحصائيات الفورية للعرض
     total_count = len(st.session_state.local_db)
     region_count = 0
     if region_input:
@@ -262,7 +266,7 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 المربعات الإحصائية الموازية تماماً
+    # 📊 المربعات الإحصائية (المظهر الأصلي المستقر والتوازي الكامل)
     stat_col1, stat_col2 = st.columns(2)
     
     with stat_col1:
@@ -282,7 +286,7 @@ with col2:
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # جدول السجلات الحالية للمنطقة
+    # جدول السجلات الحالية للمنطقة الجاري العمل عليها
     if region_input:
         st.markdown(f"### 📊 ملف العقارات الجاري العمل عليها في منطقة: ({region_input})")
         filtered_df = st.session_state.local_db[st.session_state.local_db["المنطقة"].str.strip().str.lower() == region_input.lower()]
@@ -294,7 +298,7 @@ with col2:
 
     st.markdown("---")
 
-    # محرك البحث الفوري والتصحيح
+    # محرك البحث الفوري والتصحيح والتعديل
     search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", value=st.session_state.search_val, placeholder="اكتب اسم المنطقة أو رقم العقار للبحث السريع والتعديل...", key="search_modify_field").strip()
     st.session_state.search_val = search_query
 
