@@ -36,7 +36,7 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# دالة قراءة الملف بجانب الكود بأي صيغة وترميز عربي عند بدء التشغيل لمنع الـ KeyError
+# دالة قراءة الملف بجانب الكود بأي صيغة وترميز عربي (مع ضمان بناء أعمدة افتراضية لمنع الـ KeyError)
 def load_any_local_file():
     local_files = glob.glob("*.csv") + glob.glob("*.xlsx") + glob.glob("*.xls") + glob.glob("*.CSV") + glob.glob("*.XLSX")
     for f_path in local_files:
@@ -66,9 +66,11 @@ def load_any_local_file():
                 import io
                 return pd.read_csv(io.BytesIO(csv_bytes), encoding='utf-8-sig', dtype={"المنطقة": str, "رقم العقار": str})
         except: pass
+        
+    # إرجاع جدول فارغ بأعمدة محددة مسبقاً لحماية محرك البحث من الانهيار
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيقات والواجهات الرسومية المستقرة لحماية حقول الإدخال والألوان
+# 🎨 التنسيقات والواجهات الرسومية المعتمدة للشركة
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -119,9 +121,14 @@ div.midan-interactive-box button {
 """
 st.markdown(ultimate_css, unsafe_allow_html=True)
 
-# حماية الذاكرة والبدء الآمن بقاعدة البيانات المستقرة
+# حماية الذاكرة والبدء بقاعدة بيانات مستقرة تحتفظ بالأعمدة لمنع KeyError
 if "local_db" not in st.session_state: 
     st.session_state.local_db = load_any_local_file()
+
+# تأكيد إضافي: إذا تلف الجدول أو أصبح بدون أعمدة لأي سبب، يتم إصلاحه فوراً
+if "المنطقة" not in st.session_state.local_db.columns or "رقم العقار" not in st.session_state.local_db.columns:
+    st.session_state.local_db = pd.DataFrame(columns=["المنطقة", "رقم العقار"])
+
 if "last_region" not in st.session_state: st.session_state.last_region = ""
 if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = False
 if "search_val" not in st.session_state: st.session_state.search_val = ""
@@ -134,7 +141,7 @@ with col2:
     
     st.markdown("---")
     
-    # 📥 [إصلاح آمن وحتمي لمنع KeyError] صندوق رفع الملفات الذكي المحمي
+    # 📥 صندوق رفع وتحديث ملف البيانات مباشرة للبرنامج (محمي بالكامل)
     st.markdown("### 📥 رفع وتحديث ملف البيانات مباشرة للبرنامج")
     uploaded_file = st.file_uploader("اسحب ملف الـ CSV أو الإكسيل وضعه هنا لتحديث السجل بأمان وقرائته فوراً:", type=["csv", "xlsx", "xls"])
     
@@ -151,25 +158,25 @@ with col2:
             else:
                 uploaded_df = pd.read_excel(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
             
-            # التأكد الكامل من سلامة الأعمدة قبل استبدال الذاكرة لمنع أي شاشة بيضاء
+            # فحص بنية الملف قبل اعتماده لحماية الواجهة من الانهيار
             if uploaded_df is not None and "المنطقة" in uploaded_df.columns and "رقم العقار" in uploaded_df.columns:
                 st.session_state.local_db = uploaded_df[["المنطقة", "رقم العقار"]].dropna(subset=["المنطقة", "رقم العقار"])
                 
-                # تخزين محلي آمن ومزامنة على الـ GitHub
                 sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                 upload_to_github(st.session_state.local_db)
                 st.success(f"✅ تم تحميل وتأمين قاعدة بيانات ملف '{uploaded_file.name}' بنجاح وبدون أي أخطاء برمجية!")
+                st.rerun()
             else:
                 st.error("❌ تنبيه: الملف المرفوع لا يحتوي على الأعمدة المطلوبة بالأسماء الصحيحة (المنطقة / رقم العقار).")
         except Exception as e:
             st.error(f"❌ خطأ في معالجة بنية الملف المرفوع: {str(e)}")
 
-    # حماية الجدول النهائي المعروض
-    df = st.session_state.local_db if "المنطقة" in st.session_state.local_db.columns else pd.DataFrame(columns=["المنطقة", "رقم العقار"])
+    # حماية مرجعية للمتغير المستخدم في بقية الكود
+    df = st.session_state.local_db
     st.markdown("---")
     
-    # 📋 حقول المدخلات الميدانية
+    # 📋 حقول المدخلات الميدانية السريعة
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -196,21 +203,3 @@ with col2:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
             if is_duplicate: st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
-            else:
-                new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
-                st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
-                st.session_state.last_region = region_input
-                st.session_state.clear_trigger = True
-                
-                sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-                sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
-                upload_to_github(st.session_state.local_db)
-                st.success(f"✅ تم حفظ وتأمين العقار رقم ({property_number}) بنجاح!")
-                st.rerun()
-        else: st.warning("⚠️ فضلاً، يرجى ملء حقول المنطقة ورقم العقار أولاً.")
-
-    # الإحصائيات الفورية
-    total_count = len(df)
-    region_count = 0
-    if region_input and not df.empty:
-        region_count = len(df[df["المنطقة"].str.strip().str.lower() == region
