@@ -36,7 +36,7 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# دالة قراءة الملف بجانب الكود بأي صيغة وترميز عربي عند بدء التشغيل
+# دالة قراءة الملف بجانب الكود بأي صيغة وترميز عربي عند بدء التشغيل لمنع الـ KeyError
 def load_any_local_file():
     local_files = glob.glob("*.csv") + glob.glob("*.xlsx") + glob.glob("*.xls") + glob.glob("*.CSV") + glob.glob("*.XLSX")
     for f_path in local_files:
@@ -68,7 +68,7 @@ def load_any_local_file():
         except: pass
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيقات والواجهات الرسومية المعتمدة للشركة
+# 🎨 التنسيقات والواجهات الرسومية المستقرة لحماية حقول الإدخال والألوان
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -93,7 +93,6 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 .sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
 
-/* تنسيق أزرار الحفظ والتنزيل */
 div.stButton > button {
     background-color: #EF4444 !important; color: white !important; border: 1px solid #DC2626 !important;
     font-weight: 700 !important; font-size: 16px !important; height: 50px !important; border-radius: 10px !important; width: 100% !important;
@@ -120,8 +119,9 @@ div.midan-interactive-box button {
 """
 st.markdown(ultimate_css, unsafe_allow_html=True)
 
-# إدارة الذاكرة وحفظ الجلسة
-if "local_db" not in st.session_state: st.session_state.local_db = load_any_local_file()
+# حماية الذاكرة والبدء الآمن بقاعدة البيانات المستقرة
+if "local_db" not in st.session_state: 
+    st.session_state.local_db = load_any_local_file()
 if "last_region" not in st.session_state: st.session_state.last_region = ""
 if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = False
 if "search_val" not in st.session_state: st.session_state.search_val = ""
@@ -134,15 +134,14 @@ with col2:
     
     st.markdown("---")
     
-    # 📂 [جديد] صندوق رفع وتحديث ملف المعلومات والعقارات الفوري
+    # 📥 [إصلاح آمن وحتمي لمنع KeyError] صندوق رفع الملفات الذكي المحمي
     st.markdown("### 📥 رفع وتحديث ملف البيانات مباشرة للبرنامج")
-    uploaded_file = st.file_uploader("اسحب ملف الـ CSV أو الإكسيل المعدل وضعه هنا لتحديث السجل فوراً وللقراءة المباشرة:", type=["csv", "xlsx", "xls"])
+    uploaded_file = st.file_uploader("اسحب ملف الـ CSV أو الإكسيل وضعه هنا لتحديث السجل بأمان وقرائته فوراً:", type=["csv", "xlsx", "xls"])
     
     if uploaded_file is not None:
         try:
-            # قراءة الملف المرفوع حسب نوعه وبأكثر من ترميز للأحرف العربية
+            uploaded_df = None
             if uploaded_file.name.lower().endswith('.csv'):
-                uploaded_df = None
                 for encoding_type in ['utf-8-sig', 'utf-8', 'cp1256', 'latin-1']:
                     try:
                         uploaded_df = pd.read_csv(uploaded_file, encoding=encoding_type, dtype={"المنطقة": str, "رقم العقار": str})
@@ -152,26 +151,25 @@ with col2:
             else:
                 uploaded_df = pd.read_excel(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
             
+            # التأكد الكامل من سلامة الأعمدة قبل استبدال الذاكرة لمنع أي شاشة بيضاء
             if uploaded_df is not None and "المنطقة" in uploaded_df.columns and "رقم العقار" in uploaded_df.columns:
-                # تصفية الأعمدة وتخزينها في الجلسة
                 st.session_state.local_db = uploaded_df[["المنطقة", "رقم العقار"]].dropna(subset=["المنطقة", "رقم العقار"])
                 
-                # حفظ الملف محلياً بجانب السكريبت ليثبت عند إعادة التشغيل
+                # تخزين محلي آمن ومزامنة على الـ GitHub
                 sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
-                
-                # رفع الملف فوراً ومزامنته على مستودع GitHub الخاص بك
                 upload_to_github(st.session_state.local_db)
-                st.success(f"✅ تم رفع وقراءة ملف '{uploaded_file.name}' بنجاح وحفظه وتأمين مزامنته سحابياً!")
+                st.success(f"✅ تم تحميل وتأمين قاعدة بيانات ملف '{uploaded_file.name}' بنجاح وبدون أي أخطاء برمجية!")
             else:
-                st.error("❌ خطأ: تأكد من أن الملف يحتوي على أعمدة باسم 'المنطقة' و 'رقم العقار' بشكل صحيح.")
+                st.error("❌ تنبيه: الملف المرفوع لا يحتوي على الأعمدة المطلوبة بالأسماء الصحيحة (المنطقة / رقم العقار).")
         except Exception as e:
-            st.error(f"❌ حدث خطأ أثناء معالجة الملف: {str(e)}")
+            st.error(f"❌ خطأ في معالجة بنية الملف المرفوع: {str(e)}")
 
-    df = st.session_state.local_db
+    # حماية الجدول النهائي المعروض
+    df = st.session_state.local_db if "المنطقة" in st.session_state.local_db.columns else pd.DataFrame(columns=["المنطقة", "رقم العقار"])
     st.markdown("---")
     
-    # 📋 حقول المدخلات الميدانية السريعة
+    # 📋 حقول المدخلات الميدانية
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -212,16 +210,7 @@ with col2:
         else: st.warning("⚠️ فضلاً، يرجى ملء حقول المنطقة ورقم العقار أولاً.")
 
     # الإحصائيات الفورية
-    total_count = len(st.session_state.local_db)
+    total_count = len(df)
     region_count = 0
-    if region_input:
-        region_count = len(st.session_state.local_db[st.session_state.local_db["المنطقة"].str.strip().str.lower() == region_input.lower()])
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    stat_col1, stat_col2 = st.columns(2)
-    with stat_col1:
-        st.markdown(f"<div class='blue-total-metric'><div class='blue-total-title'>🗄️ TOTAL PROPERTY COUNT IN FILE</div><div class='blue-total-value'>{total_count}</div></div>", unsafe_allow_html=True)
-    with stat_col2:
-        st.markdown("<div class='midan-interactive-box'>", unsafe_allow_html=True)
-        display_label
+    if region_input and not df.empty:
+        region_count = len(df[df["المنطقة"].str.strip().str.lower() == region
