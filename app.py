@@ -36,33 +36,25 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# 🛠️ [إصلاح جذري للترميز العربي] دالة قراءة الملف بجانب الكود بأي صيغة وترميز عربي
+# دالة قراءة الملف بجانب الكود بأي صيغة وترميز عربي
 def load_any_local_file():
-    # البحث عن أي ملف ينتهي بـ csv أو xlsx في مجلد البرنامج
     local_files = glob.glob("*.csv") + glob.glob("*.xlsx") + glob.glob("*.xls") + glob.glob("*.CSV") + glob.glob("*.XLSX")
-    
     for f_path in local_files:
-        if "~$" in f_path:
-            continue
+        if "~$" in f_path: continue
         try:
-            # إذا كان ملف CSV، نجرب التراميز المختلفة لحل مشكلة الأحرف العربية والملفات المحلية
             if f_path.lower().endswith('.csv'):
                 for encoding_type in ['utf-8-sig', 'utf-8', 'cp1256', 'latin-1']:
                     try:
                         df_loaded = pd.read_csv(f_path, encoding=encoding_type, dtype={"المنطقة": str, "رقم العقار": str})
                         if "المنطقة" in df_loaded.columns and "رقم العقار" in df_loaded.columns:
                             return df_loaded[["المنطقة", "رقم العقار"]]
-                    except:
-                        continue
-            # إذا كان ملف إكسيل عادي
+                    except: continue
             elif f_path.lower().endswith(('.xlsx', '.xls')):
                 df_loaded = pd.read_excel(f_path, dtype={"المنطقة": str, "رقم العقار": str})
                 if "المنطقة" in df_loaded.columns and "رقم العقار" in df_loaded.columns:
                     return df_loaded[["المنطقة", "رقم العقار"]]
-        except:
-            pass
+        except: pass
 
-    # 2. إذا لم يجد أي ملف محلي شغال، يحاول سحبه من سحابة GitHub
     if GITHUB_TOKEN != "ضع_هنا_رمز_الوصول_الخاص_بك_YOUR_GITHUB_TOKEN":
         try:
             url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{OUTPUT_FILENAME}"
@@ -73,13 +65,10 @@ def load_any_local_file():
                 csv_bytes = base64.b64decode(file_data["content"])
                 import io
                 return pd.read_csv(io.BytesIO(csv_bytes), encoding='utf-8-sig', dtype={"المنطقة": str, "رقم العقار": str})
-        except:
-            pass
-            
-    # 3. جدول فارغ كخيار أخير
+        except: pass
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيق الهندسي المستقر والمعتمد للواجهة والألوان والتوازي
+# 🎨 التنسيق الهندسي المستقر والمعتمد للواجهة والألوان وصناديق المعلومات الجديده
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -88,118 +77,47 @@ html, body, [class*='css'], [data-testid='stAppViewContainer'] {
     direction: rtl !important; 
     text-align: right !important; 
 }
-.stApp { 
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important; 
-}
-header[data-testid='stHeader'] { 
-    background: transparent !important; 
-    display: none !important; 
-}
-.block-container { 
-    padding-top: 1.5rem !important; 
-    padding-bottom: 1rem !important; 
-}
+.stApp { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important; }
+header[data-testid='stHeader'] { background: transparent !important; display: none !important; }
+.block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; }
 .header-card { 
-    background-color: #EBF8FF !important; 
-    padding: 20px 12px !important; 
-    border-radius: 12px !important; 
-    box-shadow: 0 6px 12px rgba(30, 58, 138, 0.08) !important; 
-    margin-bottom: 2px !important; 
-    text-align: center !important; 
-    border: 1px solid #BEE3F8 !important; 
+    background-color: #EBF8FF !important; padding: 20px 12px !important; border-radius: 12px !important; 
+    box-shadow: 0 6px 12px rgba(30, 58, 138, 0.08) !important; margin-bottom: 2px !important; text-align: center !important; border: 1px solid #BEE3F8 !important; 
 }
-.company-header { 
-    color: #1E3A8A !important; 
-    font-family: 'Arial', sans-serif !important; 
-    font-size: 28px !important; 
-    font-weight: bold !important; 
-}
-.company-subtitle { 
-    color: #2D3748 !important; 
-    font-size: 15px !important; 
-    font-weight: 500 !important; 
-    margin-top: 4px !important; 
-}
+.company-header { color: #1E3A8A !important; font-family: 'Arial', sans-serif !important; font-size: 28px !important; font-weight: bold !important; }
+.company-subtitle { color: #2D3748 !important; font-size: 15px !important; font-weight: 500 !important; margin-top: 4px !important; }
 .main-signature-card { 
-    background-color: #ffffff !important; 
-    padding: 14px 16px !important; 
-    border-radius: 10px !important; 
-    text-align: center !important; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04) !important; 
-    margin: 10px auto 20px auto !important; 
-    border: 1px solid #e2e8f0 !important; 
-    max-width: 550px !important; 
+    background-color: #ffffff !important; padding: 14px 16px !important; border-radius: 10px !important; text-align: center !important; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04) !important; margin: 10px auto 20px auto !important; border: 1px solid #e2e8f0 !important; max-width: 550px !important; 
 }
-.sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; letter-spacing: 1px; }
+.sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
 div.stButton > button {
-    background-color: #EF4444 !important;
-    color: white !important;
-    border: 1px solid #DC2626 !important;
-    font-weight: 700 !important;
-    font-size: 16px !important;
-    height: 50px !important;
-    border-radius: 10px !important;
-    box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2) !important;
-    width: 100% !important;
-}
-div.stButton > button:hover {
-    background-color: #DC2626 !important;
-    box-shadow: 0 6px 12px rgba(220, 38, 38, 0.3) !important;
+    background-color: #EF4444 !important; color: white !important; border: 1px solid #DC2626 !important;
+    font-weight: 700 !important; font-size: 16px !important; height: 50px !important; border-radius: 10px !important; width: 100% !important;
 }
 .blue-total-metric {
-    background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
-    padding: 20px !important;
-    border-radius: 12px !important;
-    text-align: center !important;
-    box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
-    height: 125px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    align-items: center !important;
-    border: none !important;
+    background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important; padding: 20px !important; border-radius: 12px !important;
+    text-align: center !important; height: 125px !important; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important;
 }
-.blue-total-title {
-    font-size: 15px !important;
-    font-weight: bold !important;
-    color: #ffffff !important;
-    margin-bottom: 6px !important;
-}
-.blue-total-value {
-    font-size: 36px !important;
-    font-weight: 700 !important;
-    color: #ffffff !important;
-}
+.blue-total-title { font-size: 15px !important; font-weight: bold !important; color: #ffffff !important; margin-bottom: 6px !important; }
+.blue-total-value { font-size: 36px !important; font-weight: 700 !important; color: #ffffff !important; }
 div.midan-interactive-box button {
-    background: #ffffff !important;
-    color: #2d3748 !important;
-    border: 1px solid #cbd5e0 !important;
-    border-radius: 12px !important;
-    height: 125px !important;
-    width: 100% !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05) !important;
-    font-size: 16px !important;
-    font-weight: bold !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    white-space: pre-line !important;
+    background: #ffffff !important; color: #2d3748 !important; border: 1px solid #cbd5e0 !important; border-radius: 12px !important;
+    height: 125px !important; width: 100% !important; font-size: 16px !important; font-weight: bold; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; white-space: pre-line !important;
 }
-div.midan-interactive-box button:hover {
-    background: #f7fafc !important;
-    border-color: #a0aec0 !important;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08) !important;
+/* 📚 تنسيق صندوق ملف المعلومات الميدانية */
+.info-file-card {
+    background-color: #FFFAF0 !important; border: 1px solid #FEEBC8 !important; border-radius: 12px !important;
+    padding: 20px !important; margin-top: 25px !important; box-shadow: 0 4px 6px rgba(0,0,0,0.02) !important;
 }
-[data-testid='stInputInstructions'] { display: none !important; visibility: hidden !important; }
+.info-file-title { color: #DD6B20 !important; font-size: 18px !important; font-weight: bold !important; margin-bottom: 10px !important; border-bottom: 2px solid #FEEBC8; padding-bottom: 5px; }
+.info-file-text { color: #4A5568 !important; font-size: 14.5px !important; line-height: 1.7 !important; }
 </style>
 """
 st.markdown(ultimate_css, unsafe_allow_html=True)
 
-# 🔒 إدارة الذاكرة المستمرة وتفعيل دالة القراءة الذكية المحسنة
-if "local_db" not in st.session_state: 
-    st.session_state.local_db = load_any_local_file()
+if "local_db" not in st.session_state: st.session_state.local_db = load_any_local_file()
 if "last_region" not in st.session_state: st.session_state.last_region = ""
 if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = False
 if "search_val" not in st.session_state: st.session_state.search_val = ""
@@ -223,7 +141,7 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # 🟥 الأزرار التشغيلية الحمراء الكبيرة
+    # 🟥 الأزرار التشغيلية
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
@@ -233,10 +151,9 @@ with col2:
             if not df.empty:
                 sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
-                st.download_button(label="💾 اضغط هنا لتأكيد التنزيل لجهازك", data=csv_data, file_name=OUTPUT_FILENAME, mime="text/csv", key="confirm_dl_btn", use_container_width=True)
+                st.download_button(label="💾 اضغط هنا لتأكيد التنزيل", data=csv_data, file_name=OUTPUT_FILENAME, mime="text/csv", key="confirm_dl_btn", use_container_width=True)
             else: st.warning("⚠️ السجل فارغ حالياً!")
 
-    # عند كبس زر الحفظ، يتم التحديث والمزامنة
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
@@ -247,18 +164,14 @@ with col2:
                 st.session_state.last_region = region_input
                 st.session_state.clear_trigger = True
                 
-                # تحديث وحفظ الملف بجانب البرنامج فوراً بترميز موحد وممتاز يدعم العربي
                 sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
-                
-                # المزامنة مع سحابة GitHub
                 upload_to_github(st.session_state.local_db)
-                
                 st.success(f"✅ تم حفظ وتأمين العقار رقم ({property_number}) بنجاح!")
                 st.rerun()
         else: st.warning("⚠️ فضلاً، يرجى ملء حقول المنطقة ورقم العقار أولاً.")
 
-    # حساب الإحصائيات الفورية للعرض
+    # الإحصائيات
     total_count = len(st.session_state.local_db)
     region_count = 0
     if region_input:
@@ -266,27 +179,17 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 المربعات الإحصائية (المظهر الأصلي المستقر والتوازي الكامل)
     stat_col1, stat_col2 = st.columns(2)
-    
     with stat_col1:
-        st.markdown(f"""
-        <div class='blue-total-metric'>
-            <div class='blue-total-title'>🗄️ TOTAL PROPERTY COUNT IN FILE</div>
-            <div class='blue-total-value'>{total_count}</div>
-        </div>
-        """, unsafe_allow_html=True)
-        
+        st.markdown(f"<div class='blue-total-metric'><div class='blue-total-title'>🗄️ TOTAL PROPERTY COUNT IN FILE</div><div class='blue-total-value'>{total_count}</div></div>", unsafe_allow_html=True)
     with stat_col2:
         st.markdown("<div class='midan-interactive-box'>", unsafe_allow_html=True)
         display_label = f"🔸 عدد عقارات منطقة ({region_input if region_input else '...'})"
-        
         if st.button(label=f"{display_label}\n{region_count}", key="go_to_region_btn", use_container_width=True):
             st.session_state.focus_on_region = True
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # جدول السجلات الحالية للمنطقة الجاري العمل عليها
     if region_input:
         st.markdown(f"### 📊 ملف العقارات الجاري العمل عليها في منطقة: ({region_input})")
         filtered_df = st.session_state.local_db[st.session_state.local_db["المنطقة"].str.strip().str.lower() == region_input.lower()]
@@ -298,7 +201,7 @@ with col2:
 
     st.markdown("---")
 
-    # محرك البحث الفوري والتصحيح والتعديل
+    # محرك البحث الفوري والتصحيح
     search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", value=st.session_state.search_val, placeholder="اكتب اسم المنطقة أو رقم العقار للبحث السريع والتعديل...", key="search_modify_field").strip()
     st.session_state.search_val = search_query
 
@@ -315,16 +218,28 @@ with col2:
                         if new_edit_region and new_edit_prop:
                             st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
                             st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
-                            
                             sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                             sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                             upload_to_github(st.session_state.local_db)
-                            
                             st.session_state.search_val = ""         
                             st.success("✅ تم تحديث وتصحيح السجل ومزامنته بنجاح!")
                             st.rerun()
 
-    # أتمتة جافا سكربت للتنقل السريع وحفظ توازن الحقول
+    # 📚 📄 [ملف المعلومات الميدانية والتعليمات الثابت تلقائياً]
+    st.markdown("""
+    <div class='info-file-card'>
+        <div class='info-file-title'>📖 ملف معلومات البرنامج وإرشادات الميدان</div>
+        <div class='info-file-text'>
+            مرحباً بك في نظام حصر الأضرار والطباعة الميداني لشركة <b>Khatib & Alami</b>.<br>
+            • <b>إدخال البيانات:</b> اكتب اسم المنطقة، واضغط <b>Enter</b> لينتقل المؤشر تلقائياً لحقل رقم العقار.<br>
+            • <b>الحفظ الفوري السريع:</b> بعد كتابة رقم العقار، اضغط <b>Enter</b> مرة أخرى ليتم تفعيل زر الرفع والحفظ التلقائي.<br>
+            • <b>منع التكرار:</b> يقوم البرنامج تلقائياً بفحص السجلات لمنع تكرار أي رقم عقار داخل نفس المنطقة لتجنب الأخطاء الميدانية.<br>
+            • <b>المزامنة السحابية:</b> بمجرد الحفظ، يُحدث البرنامج الملف المحلي وبث نسخة احتياطية مباشرة إلى مستودع <b>GitHub</b> الخاص بالقسم.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # أتمتة جافا سكربت للتنقل السريع
     focus_script = "true" if st.session_state.focus_on_region else "false"
     st.session_state.focus_on_region = False
     js_code = [
