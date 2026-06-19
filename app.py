@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 import base64
 import os
+from PIL import Image
 
 # 🌐 1. إعدادات الصفحة الرسمية للشركة
 st.set_page_config(
@@ -32,7 +33,7 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# 🎨 الـ CSS المحدث والمحصن لمنع اختفاء الألوان وتحولها للأبيض
+# 🎨 ستايل هندسي ميداني شامل يعيد الأزرار الحمراء ومظهر الكرت الأبيض التفاعلي للمنطقة
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -48,6 +49,10 @@ html, body, [class*='css'], [data-testid="stAppViewContainer"] {
 header[data-testid='stHeader'] { 
     background: transparent !important; 
     display: none !important; 
+}
+.block-container { 
+    padding-top: 1.5rem !important; 
+    padding-bottom: 1rem !important; 
 }
 
 /* هيدر الشركة والموقع */
@@ -72,64 +77,80 @@ header[data-testid='stHeader'] {
     font-weight: 500 !important; 
     margin-top: 4px !important; 
 }
-.main-signature-card { 
-    background-color: #ffffff !important; 
-    padding: 14px 16px !important; 
-    border-radius: 10px !important; 
-    text-align: center !important; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04) !important; 
-    margin: 10px auto 20px auto !important; 
-    border: 1px solid #e2e8f0 !important; 
-    max-width: 550px !important; 
+
+/* 🟥 استعادة الأزرار التشغيلية الحمراء بشكل كامل لتملأ الأعمدة بحجم كبير ومتناسق */
+div[data-testid="stColumn"] button, 
+div[data-testid="element-container"] button,
+button[data-testid*="baseButton"] {
+    background-color: #EF4444 !important;
+    color: white !important;
+    border: 1px solid #DC2626 !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
+    height: 54px !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 6px rgba(239, 68, 68, 0.25) !important;
+    width: 100% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+div[data-testid="stColumn"] button:hover,
+button[data-testid*="baseButton"]:hover {
+    background-color: #DC2626 !important;
+    box-shadow: 0 6px 12px rgba(220, 38, 38, 0.4) !important;
 }
 
-/* 🔵 تثبيت الصناديق المتناظرة باللون الأزرق الملكي اللامع ومنع تحولها للون الأبيض */
-.blue-stat-box-unified {
+/* 🔵 تثبيت خلفية المربع الإحصائي الأزرق الكبير (مجموع العقارات) */
+div[data-testid="stMetric"], 
+[data-testid="metric-container"] {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
-    padding: 20px 20px !important;
+    padding: 20px !important;
     border-radius: 12px !important;
     text-align: center !important;
     box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
-    color: #ffffff !important;
-    height: 125px !important;
+    border: none !important;
+    height: 110px !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
-    align-items: center !important;
-    border: none !important;
 }
-.blue-stat-title-unified {
-    font-size: 16px !important;
-    font-weight: 500 !important;
-    margin-bottom: 6px !important;
-    color: #ffffff !important;
-}
-.blue-stat-value-unified {
-    font-size: 38px !important;
-    font-weight: 700 !important;
-    color: #ffffff !important;
+div[data-testid="stMetric"] *, 
+[data-testid="metric-container"] * {
+    color: white !important;
 }
 
-/* 🟥 تثبيت ألوان أزرار الحفظ والتحميل لمنع تحولها للأبيض أو تداخلها */
-div.stButton > button {
-    background-color: #1E3A8A !important;
-    color: white !important;
-    border-radius: 8px !important;
-    border: none !important;
-    padding: 10px 20px !important;
+/* ⚪ استهداف زر إحصاء المنطقة التفاعلي ليعود كـ "كرت أبيض صغير" مثل صورتك، مع الحفاظ على وظيفته */
+div.midan-interactive-box button {
+    background: #ffffff !important;
+    color: #2d3748 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 15px !important;
+    height: auto !important;
+    min-height: 84px !important;
+    min-width: 200px !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05) !important;
+    font-size: 15px !important;
     font-weight: bold !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: pre-line !important;
 }
-div.stButton > button:hover {
-    background-color: #3B82F6 !important;
-    color: white !important;
+div.midan-interactive-box button:hover {
+    background: #f7fafc !important;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08) !important;
 }
 
+div[data-testid='stHorizontalBlock'] { gap: 16px !important; }
 [data-testid='stInputInstructions'] { display: none !important; visibility: hidden !important; }
 </style>
 """
 st.markdown(ultimate_css, unsafe_allow_html=True)
 
-# إدارة الجلسة المحلية
+# إدارة الذاكرة المحلية للجلسة
 if "local_db" not in st.session_state: st.session_state.local_db = pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 if "file_uploaded" not in st.session_state: st.session_state.file_uploaded = False
 if "last_region" not in st.session_state: st.session_state.last_region = ""
@@ -139,9 +160,31 @@ if "focus_on_region" not in st.session_state: st.session_state.focus_on_region =
 
 col1, col2, col3 = st.columns([0.5, 11, 0.5])
 with col2:
+    # هيدر الشركة الرئيسي وموقع الأرشفة والطباعة المدمج
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
+    
+    # دمج كرت التوقيع ليبقى دائماً ظاهراً بشكل أنيق تحت الهيدر
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
 
+    # مركز التحويل الفوري للصورة الميدانية لملف ICO رسمي
+    with st.expander("🖼️ مركز تحويل الصورة الميدانية الفاخرة إلى أيقونة مجلد (.ico)", expanded=False):
+        target_img_name = "Gemini_Generated_Image_.jpg"
+        if os.path.exists(target_img_name):
+            try:
+                img_pil = Image.open(target_img_name)
+                import io
+                ico_buf = io.BytesIO()
+                img_pil.save(ico_buf, format="ICO", sizes=[(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
+                ico_bytes = ico_buf.getvalue()
+                with open("K_and_A_icon.ico", "wb") as f: f.write(ico_bytes)
+                c_preview, c_action = st.columns([3, 9])
+                with c_preview: st.image(img_pil, width=140)
+                with c_action:
+                    st.success("🎯 تم التحويل بنجاح إلى ملف أيقونة جاهز.")
+                    st.download_button(label="📥 تنزيل ملف الأيقونة لجهازك (K_and_A_icon.ico)", data=ico_bytes, file_name="K_and_A_icon.ico", mime="image/x-icon", use_container_width=True)
+            except Exception as ex: st.error(f"⚠️ مشكلة بالمعالجة: {ex}")
+
+    # نافذة الرفع الاحتياطي للملف القديم
     with st.expander("📥 خطوة 1: رفع ملف البيانات الاحتياطي (إذا وجد)", expanded=not st.session_state.file_uploaded):
         uploaded_file = st.file_uploader("اختر ملف الإكسيل (CSV) المستخرج سابقاً لمتابعة العمل على البيانات:", type=["csv"])
         if uploaded_file is not None and not st.session_state.file_uploaded:
@@ -156,7 +199,7 @@ with col2:
     df = st.session_state.local_db
     st.markdown("---")
     
-    # حقول الإدخال للأجهزة والميدان
+    # حقول إدخال البيانات الميدانية الجانبية
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -166,7 +209,7 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # الأزرار التشغيلية (تم عزلها وحمايتها من التغير للأبيض)
+    # الأزرار التشغيلية (تم استعادتها باللون الأحمر والقياس الكبير لملء الأعمدة)
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
@@ -180,9 +223,10 @@ with col2:
                         if success: st.success("☁️ تم تأمين النسخة على GitHub!")
                 sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
-                st.download_button(label="💾 اضغط هنا لتأكيد التنزيل לגهازك", data=csv_data, file_name=GITHUB_FILENAME, mime="text/csv", key="confirm_dl_btn", use_container_width=True)
+                st.download_button(label="💾 اضغط هنا لتأكيد التنزيل لجهازك", data=csv_data, file_name=GITHUB_FILENAME, mime="text/csv", key="confirm_dl_btn", use_container_width=True)
             else: st.warning("⚠️ السجل فارغ حالياً!")
 
+    # حساب الإحصائيات الفورية لعرضها
     total_count = len(df)
     region_count = 0
     if region_input:
@@ -190,50 +234,21 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 المربعات الإحصائية الثابتة الآن باللون الأزرق الملكي بالكامل والمحاطة بحماية العزل
+    # 📊 قسم المربعات الإحصائية (تم استعادة مظهر الكرت الأبيض التفاعلي للمنطقة)
     stat_col1, stat_col2 = st.columns(2)
-    
-    with stat_col1:
-        st.markdown(f"""
-        <div class='blue-stat-box-unified'>
-            <div class='blue-stat-title-unified'>🗄️ مجموع عدد العقارات الكلي في الملف</div>
-            <div class='blue-stat-value-unified'>{total_count}</div>
-        </div>
-        """, unsafe_allow_html=True)
+    with stat_col1: 
+        st.metric(label="🗄️ مجموع عدد العقارات الكلي في الملف", value=total_count)
+    with stat_col2: 
+        # الحاوية المخصصة لإجبار الكبسة التفاعلية على أخذ مظهر الكرت الأبيض الأنيق
+        st.markdown("<div class='midan-interactive-box'>", unsafe_allow_html=True)
+        display_label = f"📍 عدد عقارات منطقة ({region_input if region_input else '...'})"
         
-    with stat_col2:
-        display_name = region_input if region_input else "..."
-        st.markdown(f"""
-        <div style="position: relative; width: 100%;">
-            <div class='blue-stat-box-unified'>
-                <div class='blue-stat-title-unified'>📍 عدد عقارات منطقة ({display_name})</div>
-                <div class='blue-stat-value-unified'>{region_count}</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # زر شفاف تماماً ومستقل فوق الصندوق لإعطاء التأثير التفاعلي دون كسر الستيل
-        if st.button("", key="hidden_blue_trigger_btn", use_container_width=True):
+        if st.button(label=f"{display_label}\n{region_count}", key="go_to_region_btn"):
             st.session_state.focus_on_region = True
             st.rerun()
-            
-    # كود تمديد وعزل الزر التفاعلي ليكون مخفياً فوق الصندوق بدون التأثير على بقية الأزرار
-    st.markdown("""
-    <style>
-    div[data-testid="stHorizontalBlock"] > div:nth-child(2) button[key="hidden_blue_trigger_btn"] {
-        position: absolute !important;
-        top: -125px !important;
-        left: 0 !important;
-        width: 100% !important;
-        height: 125px !important;
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        z-index: 9999 !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
+    # جدول مراجعة السجلات الحالية للمنطقة
     if region_input:
         st.markdown(f"### 📊 ملف العقارات الجاري العمل عليها في منطقة: ({region_input})")
         filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
@@ -245,13 +260,14 @@ with col2:
 
     st.markdown("---")
 
+    # محرك البحث الفوري والتصحيح
     search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", value=st.session_state.search_val, placeholder="اكتب اسم المنطقة أو رقم العقار للبحث السريع والتعديل...", key="search_modify_field").strip()
     st.session_state.search_val = search_query
 
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
-            if is_duplicate: st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
+            if is_duplicate: st.error("❌ إلغاء: هذا العقار مسجل سابقاً in هذه المنطقة!")
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
@@ -262,7 +278,7 @@ with col2:
         else: st.warning("⚠️ فضلاً، يرجى ملء حقول المنطقة ورقم العقار أولاً.")
 
     if search_query:
-        matched_records = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | df["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
+        matched_records = df[df["المنطقة"].str.contains(search_query, case=False, Na=False) | df["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
         if not matched_records.empty:
             st.info(f"📋 تم العثور على ({len(matched_records)}) سجل متطابق:")
             for idx, row in matched_records.iterrows():
@@ -278,29 +294,33 @@ with col2:
                             st.success("✅ تم تحديث وتصحيح السجل بنجاح!")
                             st.rerun()
 
-    # 🖥️ كود الـ JS المحمي والمستقل لضمان عدم كسر التصميم والألوان مرة أخرى
+    # نص أتمتة جافا سكربت للقفز الفوري وتحديد حقل المنطقة دغري عند كبس الزر التفاعلي
     focus_script = "true" if st.session_state.focus_on_region else "false"
     st.session_state.focus_on_region = False
-    js_code = f"""
-    <script>
-    function setupMidanFocus() {{
-        try {{
-            var doc = window.parent.document;
-            var inputs = doc.getElementsByTagName('input');
-            var regInput = null;
-            for (var i = 0; i < inputs.length; i++) {{
-                if (inputs[i].getAttribute('placeholder') === 'النبطية، صور، صيدا...') {{
-                    regInput = inputs[i];
-                    break;
-                }}
-            }}
-            if ({focus_script} && regInput) {{
-                regInput.focus();
-                regInput.select();
-            }}
-        }} catch(e) {{}}
-    }}
-    setTimeout(setupMidanFocus, 300);
-    </script>
-    """
-    st.components.v1.html(js_code, height=0)
+    js_code = [
+        "<script>",
+        "var attachMidanEvents = function() {",
+        "var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');",
+        "var regInput = null; var propInput = null; var saveBtn = null;",
+        "for (var i = 0; i < inputs.length; i++) {",
+        "if (inputs[i].getAttribute('placeholder') === 'النبطية، صور، صيدا...') regInput = inputs[i];",
+        "if (inputs[i].getAttribute('placeholder') === 'ادخل رقم العقار الحالي....') propInput = inputs[i];",
+        "}",
+        "for (var j = 0; j < buttons.length; j++) { if (buttons[j].textContent.includes('🚀')) saveBtn = buttons[j]; }",
+        "var activeInput = mainDoc.activeElement;",
+        "if (" + focus_script + " && regInput) { regInput.focus(); regInput.select(); }",
+        "else if (regInput && activeInput !== regInput && activeInput !== propInput && (!activeInput || activeInput.tagName !== 'INPUT')) { regInput.focus(); }",
+        "if (regInput && propInput) {",
+        "regInput.removeEventListener('keydown', window.regMidanHandler);",
+        "window.regMidanHandler = function(e) { if (e.key === 'Enter') { e.preventDefault(); propInput.focus(); propInput.select(); } };",
+        "regInput.addEventListener('keydown', window.regMidanHandler);",
+        "}",
+        "if (propInput && saveBtn && regInput) {",
+        "propInput.removeEventListener('keydown', window.propMidanHandler);",
+        "window.propMidanHandler = function(e) { if (e.key === 'Enter') { if (propInput.value.trim() !== '') { e.preventDefault(); saveBtn.click(); setTimeout(function() { regInput.focus(); regInput.select(); }, 100); } } };",
+        "propInput.addEventListener('keydown', window.propMidanHandler);",
+        "}",
+        "}; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);",
+        "</script>"
+    ]
+    st.components.v1.html("".join(js_code), height=0)
