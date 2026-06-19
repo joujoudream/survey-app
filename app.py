@@ -33,7 +33,7 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# 🎨 الستايل الهندسي الميداني المتناظر والمطابق للأزرار والمقاييس
+# 🎨 الستايل الهندسي الميداني المتناظر والمطابق تماماً للألوان والأزرار المحدثة
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -107,7 +107,7 @@ header[data-testid='stHeader'] {
     margin: 4px 0 0 0; 
 }
 
-/* توحيد وتناظر الأزرار الحمراء ميدانياً */
+# 🛠️ توحيد وتناظر الأزرار الحمراء ميدانياً
 div[data-testid="stColumn"] button, 
 div[data-testid="stColumn"] button[type="button"],
 div[data-testid="stColumn"] a {
@@ -131,7 +131,7 @@ div[data-testid="stColumn"] a:hover {
     box-shadow: 0 6px 10px rgba(220, 38, 38, 0.4) !important;
 }
 
-/* ستايل المربع الأزرق الكلي الكبير */
+# 📊 ستايل المربع الأزرق الكلي الكبير الأساسي
 div[data-testid="stMetric"] {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
     padding: 15px !important;
@@ -141,16 +141,16 @@ div[data-testid="stMetric"] {
 }
 div[data-testid="stMetric"] * { color: white !important; }
 
-/* الستايل المخصص لكبسة إحصاء المنطقة التفاعلية الكبيرة */
+# 🎯 الميزة الجديدة: مطابقة خلفية كبسة إحصاء المنطقة التفاعلية مع خلفية مجموع العقارات تماماً
 .midan-metric-btn button {
-    background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%) !important;
-    border: 2px solid #3B82F6 !important;
+    background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
+    border: none !important;
     color: white !important;
     border-radius: 12px !important;
-    padding: 12px !important;
+    padding: 15px !important;
     height: auto !important;
     min-height: 82px !important;
-    box-shadow: 0 6px 12px rgba(37, 99, 235, 0.2) !important;
+    box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -159,10 +159,7 @@ div[data-testid="stMetric"] * { color: white !important; }
 .midan-metric-btn button:hover {
     background: linear-gradient(135deg, #172554 0%, #1D4ED8 100%) !important;
     box-shadow: 0 8px 16px rgba(29, 78, 216, 0.35) !important;
-    border-color: #60A5FA !important;
 }
-.metric-btn-label { font-size: 14px; opacity: 0.95; font-weight: 500; margin-bottom: 2px; }
-.metric-btn-value { font-size: 24px; font-weight: bold; }
 
 div[data-testid='stHorizontalBlock'] { gap: 12px !important; }
 [data-testid='stInputInstructions'] { display: none !important; visibility: hidden !important; }
@@ -183,7 +180,7 @@ with col2:
     # هيدر الشركة الرئيسي
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     
-    # بطاقة التوقيع النظيفة والمختصرة
+    # بطاقة التوقيع
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
     
     # مركز التحويل الفوري للصورة لملف ICO رسمي
@@ -255,17 +252,16 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 قسم المربعات الإحصائية (تحويل إحصاء المنطقة إلى كبسة دغري بناءً على طلبك)
+    # 📊 قسم المربعات الإحصائية المتطابقة والمتناظرة تماماً في الألوان والخلفيات
     stat_col1, stat_col2 = st.columns(2)
     with stat_col1: 
         st.metric(label="🗄️ مجموع عدد العقارات الكلي في الملف", value=total_count)
     with stat_col2: 
-        # وضع الزر داخل حاوية ستايل زرقاء مخصصة
+        # وضع الزر التفاعلي داخل حاوية الستايل الأزرق المتطابق تماماً
         st.markdown("<div class='midan-metric-btn'>", unsafe_allow_html=True)
         display_label = f"📍 عدد عقارات منطقة ({region_input if region_input else '...'})"
         
-        # عند الضغط على الكبسة، يتم تفعيل مؤشر التوجيه الفوري للحقل
-        if st.button(label=f"📊 {display_label}\n\n{region_count}", key="go_to_region_btn", use_container_width=True):
+        if st.button(label=f"{display_label}\n\n{region_count}", key="go_to_region_btn", use_container_width=True):
             st.session_state.focus_on_region = True
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
