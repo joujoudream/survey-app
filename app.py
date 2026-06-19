@@ -33,7 +33,7 @@ def upload_to_github(dataframe):
     except Exception as e:
         return False
 
-# 🎨 ستايل هندسي ميداني شامل يعيد الأزرار الحمراء ومظهر الكرت الأبيض التفاعلي للمنطقة
+# 🎨 الـ CSS الهندسي لتوحيد محاذاة المربعات بالأسفل والحفاظ على الألوان الحمراء والزرقاء
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -78,60 +78,73 @@ header[data-testid='stHeader'] {
     margin-top: 4px !important; 
 }
 
-/* 🟥 استعادة الأزرار التشغيلية الحمراء بشكل كامل لتملأ الأعمدة بحجم كبير ومتناسق */
-div[data-testid="stColumn"] button, 
-div[data-testid="element-container"] button,
-button[data-testid*="baseButton"] {
+/* التوقيع الفاخر لقسم الأرشفة والطباعة */
+.main-signature-card { 
+    background-color: #ffffff !important; 
+    padding: 14px 16px !important; 
+    border-radius: 10px !important; 
+    text-align: center !important; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04) !important; 
+    margin: 10px auto 20px auto !important; 
+    border: 1px solid #e2e8f0 !important; 
+    max-width: 550px !important; 
+}
+.sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; letter-spacing: 1px; }
+.sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
+
+/* 🟥 الحفاظ على الأزرار التشغيلية الحمراء بشكل كامل وكبير وملء العمود */
+div.stButton > button {
     background-color: #EF4444 !important;
     color: white !important;
     border: 1px solid #DC2626 !important;
     font-weight: 700 !important;
     font-size: 16px !important;
-    height: 54px !important;
+    height: 50px !important;
     border-radius: 10px !important;
-    box-shadow: 0 4px 6px rgba(239, 68, 68, 0.25) !important;
+    box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2) !important;
     width: 100% !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
 }
-div[data-testid="stColumn"] button:hover,
-button[data-testid*="baseButton"]:hover {
+div.stButton > button:hover {
     background-color: #DC2626 !important;
-    box-shadow: 0 6px 12px rgba(220, 38, 38, 0.4) !important;
+    box-shadow: 0 6px 12px rgba(220, 38, 38, 0.3) !important;
 }
 
-/* 🔵 تثبيت خلفية المربع الإحصائي الأزرق الكبير (مجموع العقارات) */
-div[data-testid="stMetric"], 
-[data-testid="metric-container"] {
+/* 🔵 صندوق إحصاء إجمالي العقارات الأزرق الملكي */
+.blue-total-metric {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
     padding: 20px !important;
     border-radius: 12px !important;
     text-align: center !important;
     box-shadow: 0 6px 12px rgba(30, 58, 138, 0.2) !important;
-    border: none !important;
-    height: 110px !important;
+    height: 125px !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
+    align-items: center !important;
+    border: none !important;
 }
-div[data-testid="stMetric"] *, 
-[data-testid="metric-container"] * {
-    color: white !important;
+.blue-total-title {
+    font-size: 15px !important;
+    font-weight: bold !important;
+    color: #ffffff !important;
+    margin-bottom: 6px !important;
+}
+.blue-total-value {
+    font-size: 36px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
 }
 
-/* ⚪ استهداف زر إحصاء المنطقة التفاعلي ليعود كـ "كرت أبيض صغير" مثل صورتك، مع الحفاظ على وظيفته */
+/* ⚪ تخصيص زر المنطقة التفاعلي ليكون بمظهر كرت أبيض ومحاذاة أفقية متناسقة تماماً */
 div.midan-interactive-box button {
     background: #ffffff !important;
     color: #2d3748 !important;
-    border: 1px solid #e2e8f0 !important;
+    border: 1px solid #cbd5e0 !important;
     border-radius: 12px !important;
-    padding: 15px !important;
-    height: auto !important;
-    min-height: 84px !important;
-    min-width: 200px !important;
+    height: 125px !important;
+    width: 100% !important;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05) !important;
-    font-size: 15px !important;
+    font-size: 16px !important;
     font-weight: bold !important;
     display: flex !important;
     flex-direction: column !important;
@@ -141,10 +154,10 @@ div.midan-interactive-box button {
 }
 div.midan-interactive-box button:hover {
     background: #f7fafc !important;
+    border-color: #a0aec0 !important;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08) !important;
 }
 
-div[data-testid='stHorizontalBlock'] { gap: 16px !important; }
 [data-testid='stInputInstructions'] { display: none !important; visibility: hidden !important; }
 </style>
 """
@@ -160,29 +173,9 @@ if "focus_on_region" not in st.session_state: st.session_state.focus_on_region =
 
 col1, col2, col3 = st.columns([0.5, 11, 0.5])
 with col2:
-    # هيدر الشركة الرئيسي وموقع الأرشفة والطباعة المدمج
+    # هيدر الشركة والتوقيع المعتمد للريس وليد
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
-    
-    # دمج كرت التوقيع ليبقى دائماً ظاهراً بشكل أنيق تحت الهيدر
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
-
-    # مركز التحويل الفوري للصورة الميدانية لملف ICO رسمي
-    with st.expander("🖼️ مركز تحويل الصورة الميدانية الفاخرة إلى أيقونة مجلد (.ico)", expanded=False):
-        target_img_name = "Gemini_Generated_Image_.jpg"
-        if os.path.exists(target_img_name):
-            try:
-                img_pil = Image.open(target_img_name)
-                import io
-                ico_buf = io.BytesIO()
-                img_pil.save(ico_buf, format="ICO", sizes=[(16, 16), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
-                ico_bytes = ico_buf.getvalue()
-                with open("K_and_A_icon.ico", "wb") as f: f.write(ico_bytes)
-                c_preview, c_action = st.columns([3, 9])
-                with c_preview: st.image(img_pil, width=140)
-                with c_action:
-                    st.success("🎯 تم التحويل بنجاح إلى ملف أيقونة جاهز.")
-                    st.download_button(label="📥 تنزيل ملف الأيقونة لجهازك (K_and_A_icon.ico)", data=ico_bytes, file_name="K_and_A_icon.ico", mime="image/x-icon", use_container_width=True)
-            except Exception as ex: st.error(f"⚠️ مشكلة بالمعالجة: {ex}")
 
     # نافذة الرفع الاحتياطي للملف القديم
     with st.expander("📥 خطوة 1: رفع ملف البيانات الاحتياطي (إذا وجد)", expanded=not st.session_state.file_uploaded):
@@ -199,7 +192,7 @@ with col2:
     df = st.session_state.local_db
     st.markdown("---")
     
-    # حقول إدخال البيانات الميدانية الجانبية
+    # 📋 السطر الأول: حقول الإدخال الجانبية المنظمة والمستقرة تماماً
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -209,7 +202,7 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # الأزرار التشغيلية (تم استعادتها باللون الأحمر والقياس الكبير لملء الأعمدة)
+    # 🟥 السطر الثاني: الأزرار التشغيلية الحمراء (حفظ وتحميل ومزامنة) بملء الحاوية
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
@@ -234,21 +227,29 @@ with col2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 📊 قسم المربعات الإحصائية (تم استعادة مظهر الكرت الأبيض التفاعلي للمنطقة)
+    # 📊 السطر الثالث: المربعات الإحصائية (متوازية تماماً وعلى نفس الخط الأفقي) كما طلبت
     stat_col1, stat_col2 = st.columns(2)
-    with stat_col1: 
-        st.metric(label="🗄️ مجموع عدد العقارات الكلي في الملف", value=total_count)
-    with stat_col2: 
-        # الحاوية المخصصة لإجبار الكبسة التفاعلية على أخذ مظهر الكرت الأبيض الأنيق
-        st.markdown("<div class='midan-interactive-box'>", unsafe_allow_html=True)
-        display_label = f"📍 عدد عقارات منطقة ({region_input if region_input else '...'})"
+    
+    with stat_col1:
+        # المربع الأيمن: إجمالي عدد العقارات باللون الأزرق الملكي والارتفاع الموحد
+        st.markdown(f"""
+        <div class='blue-total-metric'>
+            <div class='blue-total-title'>🗄️ TOTAL PROPERTY COUNT IN FILE</div>
+            <div class='blue-total-value'>{total_count}</div>
+        </div>
+        """, unsafe_allow_html=True)
         
-        if st.button(label=f"{display_label}\n{region_count}", key="go_to_region_btn"):
+    with stat_col2:
+        # المربع الأيسر: زر تفاعلي بمظهر كرت أبيض أنيق وبارتفاع مطابق تماماً للمربع الأزرق
+        st.markdown("<div class='midan-interactive-box'>", unsafe_allow_html=True)
+        display_label = f"🔸 عدد عقارات منطقة ({region_input if region_input else '...'})"
+        
+        if st.button(label=f"{display_label}\n{region_count}", key="go_to_region_btn", use_container_width=True):
             st.session_state.focus_on_region = True
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # جدول مراجعة السجلات الحالية للمنطقة
+    # جدول مراجعة السجلات الحالية للمنطقة الجاري كتابتها
     if region_input:
         st.markdown(f"### 📊 ملف العقارات الجاري العمل عليها في منطقة: ({region_input})")
         filtered_df = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()]
@@ -260,14 +261,14 @@ with col2:
 
     st.markdown("---")
 
-    # محرك البحث الفوري والتصحيح
+    # محرك البحث الفوري والتصحيح الميداني السريع
     search_query = st.text_input("🔍 البحث الفوري عن عقار وتعديله:", value=st.session_state.search_val, placeholder="اكتب اسم المنطقة أو رقم العقار للبحث السريع والتعديل...", key="search_modify_field").strip()
     st.session_state.search_val = search_query
 
     if btn_save:
         if region_input and property_number:
             is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
-            if is_duplicate: st.error("❌ إلغاء: هذا العقار مسجل سابقاً in هذه المنطقة!")
+            if is_duplicate: st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
@@ -278,7 +279,7 @@ with col2:
         else: st.warning("⚠️ فضلاً، يرجى ملء حقول المنطقة ورقم العقار أولاً.")
 
     if search_query:
-        matched_records = df[df["المنطقة"].str.contains(search_query, case=False, Na=False) | df["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
+        matched_records = df[df["المنطقة"].str.contains(search_query, case=False, na=False) | df["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
         if not matched_records.empty:
             st.info(f"📋 تم العثور على ({len(matched_records)}) سجل متطابق:")
             for idx, row in matched_records.iterrows():
@@ -294,7 +295,7 @@ with col2:
                             st.success("✅ تم تحديث وتصحيح السجل بنجاح!")
                             st.rerun()
 
-    # نص أتمتة جافا سكربت للقفز الفوري وتحديد حقل المنطقة دغري عند كبس الزر التفاعلي
+    # أتمتة جافا سكربت للتركيز الفوري (Focus) والتنقل التلقائي السريع بين الحقول بدون كسر التصميم
     focus_script = "true" if st.session_state.focus_on_region else "false"
     st.session_state.focus_on_region = False
     js_code = [
