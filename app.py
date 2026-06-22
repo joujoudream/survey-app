@@ -237,14 +237,17 @@ with col2:
 
     st.markdown("---")
 
-    # محرك البحث والتصحيح والتعديل الفوري
+    # 🔨 محرك البحث الفوري المعدل والمؤمن تماماً ضد أخطاء التعريف
     search_query = st.text_input(label="", value=st.session_state.search_val, placeholder="اكتب اسم المنطقة أو رقم العقار للبحث السريع والتعديل...", key="search_modify_field").strip()
     st.session_state.search_val = search_query
 
-    if search_query:
-        matched_records = st.session_state.local_db[st.session_state.local_db["المنطقة"].str.contains(search_query, case=False, na=False) | st.session_state.local_db["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
+    if search_query and not st.session_state.local_db.empty:
+        matched_records = st.session_state.local_db[
+            st.session_state.local_db["المنطقة"].str.contains(search_query, case=False, na=False) | 
+            st.session_state.local_db["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)
+        ]
+        
         if not matched_records.empty:
-            # 🔨 [تم الحذف بنجاح] هنا تم إلغاء السطر التوضيحي الأخضر أيضاً بناءً على طلبك الثاني لتبدو الواجهة بأعلى درجات البساطة
             for idx, row in matched_records.iterrows():
                 with st.expander(f"⚙️ تعديل العقار رقم {row['رقم العقار']} في {row['المنطقة']}", expanded=True):
                     edit_c1, edit_c2 = st.columns(2)
@@ -272,3 +275,36 @@ with col2:
             • <b>منع التكرار:</b> يفحص البرنامج التكرار آلياً ويمنع إدخال نفس العقار مرتين بالخطأ في نفس المنطقة الجغرافية.<br>
             • <b>المزامنة السحابية الفورية:</b> كل عقار جديد تحفظه أو ملف ترفعه، يتم بث نسخه منه مباشرة لمستودع <b>GitHub</b> لضمان عدم ضياع أي بيانات.
         </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # أتمتة جافا سكربت للتنقل السريع
+    focus_script = "true" if st.session_state.focus_on_region else "false"
+    st.session_state.focus_on_region = False
+    js_code = [
+        "<script>",
+        "var attachMidanEvents = function() {",
+        "var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');",
+        "var regInput = null; var propInput = null; var saveBtn = null;",
+        "for (var i = 0; i < inputs.length; i++) {",
+        "if (inputs[i].getAttribute('placeholder') === 'النبطية، صور، صيدا...') regInput = inputs[i];",
+        "if (inputs[i].getAttribute('placeholder') === 'ادخل رقم العقار الحالي....') propInput = inputs[i];",
+        "}",
+        "for (var j = 0; j < buttons.length; j++) { if (buttons[j].textContent.includes('🚀')) saveBtn = buttons[j]; }",
+        "var activeInput = mainDoc.activeElement;",
+        "if (" + focus_script + " && regInput) { regInput.focus(); regInput.select(); }",
+        "else if (regInput && activeInput !== regInput && activeInput !== propInput && (!activeInput || activeInput.tagName !== 'INPUT')) { regInput.focus(); }",
+        "if (regInput && propInput) {",
+        "regInput.removeEventListener('keydown', window.regMidanHandler);",
+        "window.regMidanHandler = function(e) { if (e.key === 'Enter') { e.preventDefault(); propInput.focus(); propInput.select(); } };",
+        "regInput.addEventListener('keydown', window.regMidanHandler);",
+        "}",
+        "if (propInput && saveBtn && regInput) {",
+        "propInput.removeEventListener('keydown', window.propMidanHandler);",
+        "window.propMidanHandler = function(e) { if (e.key === 'Enter') { if (propInput.value.trim() !== '') { e.preventDefault(); saveBtn.click(); setTimeout(function() { regInput.focus(); regInput.select(); }, 100); } } };",
+        "propInput.addEventListener('keydown', window.propMidanHandler);",
+        "}",
+        "}; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);",
+        "</script>"
+    ]
+    st.components.v1.html("".join(js_code), height=0)
