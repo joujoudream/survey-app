@@ -134,13 +134,12 @@ with col2:
     
     st.markdown("---")
     
-    # 📂 [جديد] صندوق رفع وتحديث ملف المعلومات والعقارات الفوري
+    # 📂 صندوق رفع وتحديث ملف المعلومات والعقارات الفوري
     st.markdown("### 📥 رفع وتحديث ملف البيانات مباشرة للبرنامج")
     uploaded_file = st.file_uploader("اسحب ملف الـ CSV أو الإكسيل المعدل وضعه هنا لتحديث السجل فوراً وللقراءة المباشرة:", type=["csv", "xlsx", "xls"])
     
     if uploaded_file is not None:
         try:
-            # قراءة الملف المرفوع حسب نوعه وبأكثر من ترميز للأحرف العربية
             if uploaded_file.name.lower().endswith('.csv'):
                 uploaded_df = None
                 for encoding_type in ['utf-8-sig', 'utf-8', 'cp1256', 'latin-1']:
@@ -153,14 +152,11 @@ with col2:
                 uploaded_df = pd.read_excel(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
             
             if uploaded_df is not None and "المنطقة" in uploaded_df.columns and "رقم العقار" in uploaded_df.columns:
-                # تصفية الأعمدة وتخزينها في الجلسة
                 st.session_state.local_db = uploaded_df[["المنطقة", "رقم العقار"]].dropna(subset=["المنطقة", "رقم العقار"])
                 
-                # حفظ الملف محلياً بجانب السكريبت ليثبت عند إعادة التشغيل
                 sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                 
-                # رفع الملف فوراً ومزامنته على مستودع GitHub الخاص بك
                 upload_to_github(st.session_state.local_db)
                 st.success(f"✅ تم رفع وقراءة ملف '{uploaded_file.name}' بنجاح وحفظه وتأمين مزامنته سحابياً!")
             else:
@@ -234,7 +230,7 @@ with col2:
         st.markdown(f"### 📊 ملف العقارات الجاري العمل عليها في منطقة: ({region_input})")
         filtered_df = st.session_state.local_db[st.session_state.local_db["المنطقة"].str.strip().str.lower() == region_input.lower()]
         if not filtered_df.empty:
-            display_sheet = pd.DataFrame(filtered_df["رقم العقار"].values, columns=["رقم العقار"]).sort_values(by="رقم العقار").reset_index(drop=True)
+            display_sheet = pd.DataFrame(filtered_df["رقم العقار"].values, columns=["رقم العقar"]).sort_values(by="رقم العقار").reset_index(drop=True)
             display_sheet.index += 1
             st.dataframe(display_sheet, use_container_width=True, height=200)
         else: st.info("ℹ️ لا توجد عقارات مسجلة لهذه المنطقة حالياً.")
@@ -248,7 +244,7 @@ with col2:
     if search_query:
         matched_records = st.session_state.local_db[st.session_state.local_db["المنطقة"].str.contains(search_query, case=False, na=False) | st.session_state.local_db["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)]
         if not matched_records.empty:
-            st.info(f"📋 تم العثور على ({len(matched_records)}) سجل متطابق:")
+            # 🔨 [تم الحذف بنجاح] هنا تم إلغاء السطر التوضيحي الأزرق بناءً على طلبك لتظهر الصناديق مباشرة
             for idx, row in matched_records.iterrows():
                 with st.expander(f"⚙️ تعديل العقار رقم {row['رقم العقار']} في {row['المنطقة']}", expanded=True):
                     edit_c1, edit_c2 = st.columns(2)
