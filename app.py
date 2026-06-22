@@ -127,7 +127,7 @@ div.midan-interactive-box button {
 """
 st.markdown(ultimate_css, unsafe_allow_html=True)
 
-# 🛡️ الحماية الأساسية: التحقق الصارم من حالة الجلسة ومنع الـ KeyError نهائياً
+# 🛡️ الحماية الأساسية وإدارة الجلسة
 if "local_db" not in st.session_state or st.session_state.local_db is None: 
     st.session_state.local_db = load_any_local_file()
 
@@ -168,13 +168,19 @@ with col2:
                 sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                 upload_to_github(st.session_state.local_db)
-                st.success(f"✅ تم رفع وقراءة ملف '{uploaded_file.name}' بنجاح وحفظه وتأمين مزامنته سحابياً!")
+                
+                # 🌟 [تم الإضافة هنا] تفريغ الواجهة بالكامل فور رفع البيانات بنجاح لتبدأ على نظافة
+                st.session_state.last_region = ""
+                st.session_state.clear_trigger = True
+                st.session_state.search_val = ""
+                
+                st.success(f"✅ تم رفع وقراءة ملف '{uploaded_file.name}' بنجاح، وتم تنظيف مدخلات الواجهة لبدء عمل ميداني جديد!")
+                st.rerun()
             else:
                 st.error("❌ خطأ: تأكد من أن الملف يحتوي على أعمدة باسم 'المنطقة' و 'رقم العقار' بشكل صحيح.")
         except Exception as e:
             st.error(f"❌ حدث خطأ أثناء معالجة الملف: {str(e)}")
 
-    # قراءة آمنة للمصفوفة الحالية
     df = st.session_state.local_db
     st.markdown("---")
     
@@ -224,7 +230,7 @@ with col2:
         else: 
             st.warning("⚠️ فضلاً، يرجى ملء حقول المنطقة ورقم العقار أولاً.")
 
-    # الإحصائيات الفورية المؤمنة ضد الخلايا الفارغة
+    # الإحصائيات الفورية
     total_count = len(st.session_state.local_db)
     region_count = 0
     if region_input and not st.session_state.local_db.empty:
@@ -243,7 +249,7 @@ with col2:
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # 🔨 عرض الجدول مباشرة ونظيفاً جداً وبشكل مؤمن تماماً لمنع أي KeyError
+    # عرض الجدول مباشرة ونظيفاً جداً وبشكل مؤمن تماماً
     if region_input and not st.session_state.local_db.empty:
         filtered_df = st.session_state.local_db[st.session_state.local_db["المنطقة"].str.strip().str.lower() == region_input.lower()]
         if not filtered_df.empty:
@@ -255,7 +261,7 @@ with col2:
 
     st.markdown("---")
 
-    # محرك البحث والتصحيح والتعديل الفوري المؤمن
+    # محرك البحث والتصحيح والتعديل الفوري
     search_query = st.text_input(label="", value=st.session_state.search_val, placeholder="اكتب اسم المنطقة أو رقم العقار للبحث السريع والتعديل...", key="search_modify_field").strip()
     st.session_state.search_val = search_query
 
