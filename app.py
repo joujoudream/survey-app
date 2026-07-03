@@ -95,7 +95,7 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 .company-subtitle { color: #2D3748 !important; font-size: 15px !important; font-weight: 500 !important; margin-top: 4px !important; }
 .main-signature-card { 
     background-color: #ffffff !important; padding: 14px 16px !important; border-radius: 10px !important; text-align: center !important; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04) !important; margin: 10px auto 20px auto !important; border: 1px solid #e2e8f0 !important; max-width: 550px !important; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04) !important; margin: 10px auto 15px auto !important; border: 1px solid #e2e8f0 !important; max-width: 550px !important; 
 }
 .sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
@@ -145,9 +145,7 @@ with col2:
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
     
-    st.markdown("---")
-    
-    # 🌟 تم إلغاء زر الإظهار مجدداً بالكامل، بمجرد القراءة يختفي صندوق الرفع نهائياً بدون رجعة
+    # 📥 رفع وتحديث ملف البيانات مباشرة للبرنامج (يظهر فقط إذا لم يتم الرفع بعد)
     if not st.session_state.hide_uploader:
         st.markdown("### 📥 رفع وتحديث ملف البيانات مباشرة للبرنامج")
         uploaded_file = st.file_uploader("اسحب ملف الـ CSV أو الإكسيل المعدل وضعه هنا لتحديث السجل فوراً وللقراءة المباشرة:", type=["csv", "xlsx", "xls"])
@@ -182,9 +180,8 @@ with col2:
                 st.error(f"❌ حدث خطأ أثناء معالجة الملف: {str(e)}")
 
     df = st.session_state.local_db
-    st.markdown("---")
     
-    # 📋 حقول المدخلات الميدانية السريعة
+    # 📋 حقول المدخلات الميدانية السريعة (تظهر مباشرة ومكتملة تحت البطاقة الشخصية بدون فراغات)
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
