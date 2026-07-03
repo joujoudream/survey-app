@@ -100,12 +100,24 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 .sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
 
-/* تنسيق أزرار الحفظ والتنزيل */
+/* تنسيق الأزرار الحمراء الأساسية لحفظ العقار وتنزيل الملف */
 div.stButton > button {
     background-color: #EF4444 !important; color: white !important; border: 1px solid #DC2626 !important;
     font-weight: 700 !important; font-size: 16px !important; height: 50px !important; border-radius: 10px !important; width: 100% !important;
 }
 div.stButton > button:hover { background-color: #DC2626 !important; }
+
+/* تنسيق مخصص لزر الحفظ داخل صندوق التعديل ليصبح أخضر ومميز */
+div.btn-save-edit button {
+    background-color: #10B981 !important; border: 1px solid #059669 !important; height: 42px !important; font-size: 15px !important;
+}
+div.btn-save-edit button:hover { background-color: #059669 !important; }
+
+/* تنسيق مخصص لزر الحذف داخل صندوق التعديل ليظل أحمر داكن وعريض */
+div.btn-delete-edit button {
+    background-color: #DC2626 !important; border: 1px solid #B91C1C !important; height: 42px !important; font-size: 15px !important;
+}
+div.btn-delete-edit button:hover { background-color: #B91C1C !important; }
 
 .blue-total-metric {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important; padding: 20px !important; border-radius: 12px !important;
@@ -181,7 +193,7 @@ with col2:
 
     df = st.session_state.local_db
     
-    # 📋 حقول المدخلات الميدانية السريعة (تظهر مباشرة ومكتملة تحت البطاقة الشخصية بدون فراغات)
+    # 📋 حقول المدخلات الميدانية السريعة
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -258,8 +270,8 @@ with col2:
 
     st.markdown("---")
 
-    # محرك البحث والتصحيح والتعديل الفوري
-    search_query = st.text_input(label="", value=st.session_state.search_val, placeholder="اكتب اسم المنطقة أو رقم العقار للبحث السريع والتعديل...", key="search_modify_field").strip()
+    # 🔍 محرك البحث والتصحيح والتعديل والحذف الفوري
+    search_query = st.text_input(label="", value=st.session_state.search_val, placeholder="اكتب اسم المنطقة أو رقم العقار للبحث السريع والتعديل أو الحذف...", key="search_modify_field").strip()
     st.session_state.search_val = search_query
 
     if search_query and not st.session_state.local_db.empty:
@@ -270,19 +282,41 @@ with col2:
         
         if not matched_records.empty:
             for idx, row in matched_records.iterrows():
-                with st.expander(f"⚙️ تعديل العقار رقم {row['رقم العقار']} في {row['المنطقة']}", expanded=True):
+                with st.expander(f"⚙️ إدارة العقار رقم {row['رقم العقار']} في {row['المنطقة']}", expanded=True):
                     edit_c1, edit_c2 = st.columns(2)
                     with edit_c1: new_edit_region = st.text_input("تعديل اسم المنطقة", value=row['المنطقة'], key=f"edit_reg_{idx}").strip()
                     with edit_c2: new_edit_prop = st.text_input("تعديل رقم العقار", value=row['رقم العقار'], key=f"edit_prop_{idx}").strip()
-                    if st.button("💾 حفظ تعديلات السجل", key=f"save_edit_{idx}", use_container_width=True):
-                        if new_edit_region and new_edit_prop:
-                            st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
-                            st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
+                    
+                    # إنشاء عمودين منفصلين داخل الصندوق للأزرار لتنظيم المظهر
+                    btn_col1, btn_col2 = st.columns(2)
+                    
+                    with btn_col1:
+                        st.markdown("<div class='btn-save-edit'>", unsafe_allow_html=True)
+                        save_clicked = st.button("💾 حفظ تعديلات السجل", key=f"save_edit_{idx}", use_container_width=True)
+                        st.markdown("</div>", unsafe_allow_html=True)
+                        if save_clicked:
+                            if new_edit_region and new_edit_prop:
+                                st.session_state.local_db.at[idx, "المنطقة"] = new_edit_region
+                                st.session_state.local_db.at[idx, "رقم العقار"] = new_edit_prop
+                                sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
+                                sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
+                                upload_to_github(st.session_state.local_db)
+                                st.session_state.search_val = ""         
+                                st.success("✅ تم تحديث وتصحيح السجل ومزامنته بنجاح!")
+                                st.rerun()
+                                
+                    with btn_col2:
+                        st.markdown("<div class='btn-delete-edit'>", unsafe_allow_html=True)
+                        delete_clicked = st.button("🗑️ حذف هذا العقار نهائياً", key=f"delete_btn_{idx}", use_container_width=True)
+                        st.markdown("</div>", unsafe_allow_html=True)
+                        if delete_clicked:
+                            # حذف السطر بناءً على الفهرس الحالي
+                            st.session_state.local_db = st.session_state.local_db.drop(idx).reset_index(drop=True)
                             sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                             sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                             upload_to_github(st.session_state.local_db)
-                            st.session_state.search_val = ""         
-                            st.success("✅ تم تحديث وتصحيح السجل ومزامنته بنجاح!")
+                            st.session_state.search_val = ""
+                            st.success("🗑️ تم حذف العقار بالكامل من السجل وتحديث المستودع!")
                             st.rerun()
 
     # 📖 ملف معلومات وإرشادات البرنامج الثابتة
@@ -293,7 +327,8 @@ with col2:
             مرحباً بك في نظام حصر الأضرار والطباعة الميداني لشركة <b>Khatib & Alami</b>.<br>
             • <b>إدخال البيانات الحرة:</b> اكتب اسم المنطقة، واضغط <b>Enter</b> لينتقل المؤشر تلقائياً لحقل رقم العقار لبدء العمل المباشر.<br>
             • <b>منع التكرار:</b> يفحص البرنامج التكرار آلياً ويمنع إدخال نفس العقار مرتين بالخطأ في نفس المنطقة الجغرافية.<br>
-            • <b>المزامنة السحابية الفورية:</b> كل عقار جديد تحفظه أو ملف ترفعه، يتم بث نسخه منه مباشرة لمستودع <b>GitHub</b> لضمان عدم ضياع أي بيانات.
+            • <b>التعديل والحذف السريع:</b> اكتب أي جزء من رقم العقار أو المنطقة في مربع البحث السفلي لتعديلها أو لحذفها نهائياً بضغطة زر.<br>
+            • <b>المزامنة السحابية الفورية:</b> كل عقار جديد تحفظه، تعدّله، أو تحذفه، يتم بث تحديثه مباشرة لمستودع <b>GitHub</b> لضمان سلامة العمل.
         </div>
     </div>
     """, unsafe_allow_html=True)
