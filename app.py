@@ -151,7 +151,6 @@ if "last_region" not in st.session_state: st.session_state.last_region = ""
 if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = False
 if "search_val" not in st.session_state: st.session_state.search_val = ""
 if "focus_on_region" not in st.session_state: st.session_state.focus_on_region = False
-if "hide_uploader" not in st.session_state: st.session_state.hide_uploader = False
 
 col1, col2, col3 = st.columns([0.5, 11, 0.5])
 with col2:
@@ -170,29 +169,26 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # 🚀 الأزرار الأساسية: زر حفظ سريع (ضغطة واحدة) + زر تنزيل إكسيل رسمي ومباشر
+    # 🚀 الأزرار الأساسية: زر حفظ سريع (ضغطة واحدة) + زر تنزيل يدوي بصيغة CSV المتوافقة تماماً مع الإكسيل العربي
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
     with action_col2:
         if not df.empty:
             sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-            # تحويل البيانات مباشرة إلى ملف إكسيل حقيقي للتنزيل المباشر
-            buffer = io.BytesIO()
-            with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
-                sorted_df.to_excel(writer, index=False, sheet_name="Midan_Data")
-            excel_bytes = buffer.getvalue()
+            # توليد ملف CSV بترميز utf-8-sig ليفتح مباشرة على الإكسيل بدون أخطاء في اللغة العربية
+            csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
             
             st.download_button(
-                label="📥 تنزيل سجل الإكسيل على الكمبيوتر",
-                data=excel_bytes,
-                file_name="KhatibAlami_Midan_Data.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                key="download_btn_excel_direct",
+                label="📥 تنزيل سجل البيانات يدوياً (مباشر)",
+                data=csv_data,
+                file_name="KhatibAlami_Midan_Data.csv",
+                mime="text/csv",
+                key="download_btn_csv_direct",
                 use_container_width=True
             )
         else:
-            st.button("📥 تنزيل سجل الإكسيل (السجل فارغ)", disabled=True, use_container_width=True)
+            st.button("📥 تنزيل سجل البيانات (السجل فارغ)", disabled=True, use_container_width=True)
 
     if btn_save:
         if region_input and property_number:
@@ -201,14 +197,14 @@ with col2:
                 is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
             
             if is_duplicate: 
-                st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
+                st.error("❌ إلغاء: هذا العقار مسجل سابقاً in هذه المنطقة!")
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
                 st.session_state.last_region = region_input
                 st.session_state.clear_trigger = True
                 
-                # حفظ فوري كامل من أول نقرة ومزامنة سحابية
+                # حفظ فوري متكامل ومزامنة سحابية
                 sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                 upload_to_github(st.session_state.local_db)
