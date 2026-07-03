@@ -129,12 +129,6 @@ div.midan-interactive-box button {
     background: #ffffff !important; color: #2d3748 !important; border: 1px solid #cbd5e0 !important; border-radius: 12px !important;
     height: 125px !important; width: 100% !important; font-size: 16px !important; font-weight: bold; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; white-space: pre-line !important;
 }
-.info-file-card {
-    background-color: #FFFAF0 !important; border: 1px solid #FEEBC8 !important; border-radius: 12px !important;
-    padding: 20px !important; margin-top: 25px !important; box-shadow: 0 4px 6px rgba(0,0,0,0.02) !important;
-}
-.info-file-title { color: #DD6B20 !important; font-size: 18px !important; font-weight: bold !important; margin-bottom: 10px !important; border-bottom: 2px solid #FEEBC8; padding-bottom: 5px; }
-.info-file-text { color: #4A5568 !important; font-size: 14.5px !important; line-height: 1.7 !important; }
 </style>
 """
 st.markdown(ultimate_css, unsafe_allow_html=True)
@@ -319,21 +313,7 @@ with col2:
                             st.success("🗑️ تم حذف العقار بالكامل من السجل وتحديث المستودع!")
                             st.rerun()
 
-    # 📖 ملف معلومات وإرشادات البرنامج الثابتة
-    st.markdown("""
-    <div class='info-file-card'>
-        <div class='info-file-title'>📖 ملف معلومات البرنامج وإرشادات الميدان</div>
-        <div class='info-file-text'>
-            مرحباً بك في نظام حصر الأضرار والطباعة الميداني لشركة <b>Khatib & Alami</b>.<br>
-            • <b>إدخال البيانات الحرة:</b> اكتب اسم المنطقة، واضغط <b>Enter</b> لينتقل المؤشر تلقائياً لحقل رقم العقار لبدء العمل المباشر.<br>
-            • <b>منع التكرار:</b> يفحص البرنامج التكرار آلياً ويمنع إدخال نفس العقار مرتين بالخطأ في نفس المنطقة الجغرافية.<br>
-            • <b>التعديل والحذف السريع:</b> اكتب أي جزء من رقم العقار أو المنطقة في مربع البحث السفلي لتعديلها أو لحذفها نهائياً بضغطة زر.<br>
-            • <b>المزامنة السحابية الفورية:</b> كل عقار جديد تحفظه، تعدّله، أو تحذفه، يتم بث تحديثه مباشرة لمستودع <b>GitHub</b> لضمان سلامة العمل.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # أتمتة جافا سكربت للتنقل السريع
+    # أتمتة جافا سكربت للتنقل السريع والتفاعل الفوري الميداني
     focus_script = "true" if st.session_state.focus_on_region else "false"
     st.session_state.focus_on_region = False
     js_code = [
