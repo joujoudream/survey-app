@@ -138,7 +138,6 @@ if "last_region" not in st.session_state: st.session_state.last_region = ""
 if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = False
 if "search_val" not in st.session_state: st.session_state.search_val = ""
 if "focus_on_region" not in st.session_state: st.session_state.focus_on_region = False
-# علم تتبع حالة إخفاء صندوق الرفع
 if "hide_uploader" not in st.session_state: st.session_state.hide_uploader = False
 
 col1, col2, col3 = st.columns([0.5, 11, 0.5])
@@ -148,7 +147,7 @@ with col2:
     
     st.markdown("---")
     
-    # 🌟 تحسين الاختفاء الذكي: يختفي صندوق الرفع تماماً فور قراءة البيانات بنجاح لعدم شغل مساحة في الشاشة
+    # 🌟 إخفاء مطلق: يختفي صندوق الرفع تماماً فور التحميل ولن يظهر أي زر مكانه إطلاقاً
     if not st.session_state.hide_uploader:
         st.markdown("### 📥 رفع وتحديث ملف البيانات مباشرة للبرنامج")
         uploaded_file = st.file_uploader("اسحب ملف الـ CSV أو الإكسيل المعدل وضعه هنا لتحديث السجل فوراً وللقراءة المباشرة:", type=["csv", "xlsx", "xls"])
@@ -172,7 +171,6 @@ with col2:
                     sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                     upload_to_github(st.session_state.local_db)
                     
-                    # تفعيل إخفاء الصندوق وتفريغ الواجهة لبدء الإدخال النظيف
                     st.session_state.hide_uploader = True
                     st.session_state.last_region = ""
                     st.session_state.clear_trigger = True
@@ -182,11 +180,6 @@ with col2:
                     st.error("❌ خطأ: تأكد من أن الملف يحتوي على أعمدة باسم 'المنطقة' و 'رقم العقار' بشكل صحيح.")
             except Exception as e:
                 st.error(f"❌ حدث خطأ أثناء معالجة الملف: {str(e)}")
-    else:
-        # زر خفيف وصغير يظهر فقط في حال أردت إعادة رفع ملف آخر لاحقاً دون إزعاج واجهة العمل المباشر
-        if st.button("🔄 إظهار صندوق رفع الملفات مجدداً", key="show_uploader_again"):
-            st.session_state.hide_uploader = False
-            st.rerun()
 
     df = st.session_state.local_db
     st.markdown("---")
@@ -260,7 +253,7 @@ with col2:
     if region_input and not st.session_state.local_db.empty:
         filtered_df = st.session_state.local_db[st.session_state.local_db["المنطقة"].str.strip().str.lower() == region_input.lower()]
         if not filtered_df.empty:
-            display_sheet = pd.DataFrame(filtered_df["رقم العقار"].values, columns=["رقم العقار"]).sort_values(by="رقم العقار").reset_index(drop=True)
+            display_sheet = pd.DataFrame(filtered_df["رقم العقار"].values, columns=["رقم العقar"]).sort_values(by="رقم العقار").reset_index(drop=True)
             display_sheet.index += 1
             st.dataframe(display_sheet, use_container_width=True, height=200)
         else: 
@@ -301,7 +294,6 @@ with col2:
         <div class='info-file-title'>📖 ملف معلومات البرنامج وإرشادات الميدان</div>
         <div class='info-file-text'>
             مرحباً بك في نظام حصر الأضرار والطباعة الميداني لشركة <b>Khatib & Alami</b>.<br>
-            • <b>ميزة الرفع الجديدة:</b> يمكنك الآن استخدام الصندوق العلوي لرفع ملف عقارات كامل ومعدل من جهازك مباشرة.<br>
             • <b>إدخال البيانات الحرة:</b> اكتب اسم المنطقة، واضغط <b>Enter</b> لينتقل المؤشر تلقائياً لحقل رقم العقار لبدء العمل المباشر.<br>
             • <b>منع التكرار:</b> يفحص البرنامج التكرار آلياً ويمنع إدخال نفس العقار مرتين بالخطأ في نفس المنطقة الجغرافية.<br>
             • <b>المزامنة السحابية الفورية:</b> كل عقار جديد تحفظه أو ملف ترفعه، يتم بث نسخه منه مباشرة لمستودع <b>GitHub</b> لضمان عدم ضياع أي بيانات.
