@@ -4,6 +4,7 @@ import requests
 import base64
 import os
 import glob
+import io
 
 # 🌐 1. إعدادات الصفحة الرسمية للشركة
 st.set_page_config(
@@ -68,7 +69,6 @@ def load_any_local_file():
             if res.status_code == 200:
                 file_data = res.json()
                 csv_bytes = base64.b64decode(file_data["content"])
-                import io
                 df_git = pd.read_csv(io.BytesIO(csv_bytes), encoding='utf-8-sig', dtype={"المنطقة": str, "رقم العقار": str})
                 if "المنطقة" in df_git.columns and "رقم العقار" in df_git.columns:
                     return df_git[["المنطقة", "رقم العقار"]]
@@ -107,27 +107,26 @@ div[data-testid="stTextInput"] input {
     color: #1E3A8A !important;
     height: 48px !important;
 }
-/* تكبير عناوين حقول الإدخال لتتناسق مع النص الداخلي */
 div[data-testid="stTextInput"] label p {
     font-size: 16px !important;
     font-weight: bold !important;
     color: #2D3748 !important;
 }
 
-/* تنسيق الأزرار الحمراء الأساسية لحفظ العقار وتنزيل الملف */
-div.stButton > button {
+/* تنسيق الأزرار الأساسية */
+div.stButton > button, div.stDownloadButton > button {
     background-color: #EF4444 !important; color: white !important; border: 1px solid #DC2626 !important;
     font-weight: 700 !important; font-size: 16px !important; height: 50px !important; border-radius: 10px !important; width: 100% !important;
 }
-div.stButton > button:hover { background-color: #DC2626 !important; }
+div.stButton > button:hover, div.stDownloadButton > button:hover { background-color: #DC2626 !important; }
 
-/* تنسيق مخصص لزر الحفظ داخل صندوق التعديل ليصبح أخضر ومميز */
+/* تنسيق مخصص لزر الحفظ الأخضر داخل صندوق التعديل */
 div.btn-save-edit button {
     background-color: #10B981 !important; border: 1px solid #059669 !important; height: 42px !important; font-size: 15px !important;
 }
 div.btn-save-edit button:hover { background-color: #059669 !important; }
 
-/* تنسيق مخصص لزر الحذف داخل صندوق التعديل ليظل أحمر داكن وعريض */
+/* تنسيق مخصص لزر الحذف الأحمر */
 div.btn-delete-edit button {
     background-color: #DC2626 !important; border: 1px solid #B91C1C !important; height: 42px !important; font-size: 15px !important;
 }
@@ -165,7 +164,6 @@ with col2:
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
     
-    # 📥 رفع وتحديث ملف البيانات مباشرة للبرنامج (يظهر فقط إذا لم يتم الرفع بعد)
     if not st.session_state.hide_uploader:
         st.markdown("### 📥 رفع وتحديث ملف البيانات مباشرة للبرنامج")
         uploaded_file = st.file_uploader("اسحب ملف الـ CSV أو الإكسيل المعدل وضعه هنا لتحديث السجل فوراً وللقراءة المباشرة:", type=["csv", "xlsx", "xls"])
@@ -201,7 +199,7 @@ with col2:
 
     df = st.session_state.local_db
     
-    # 📋 حقول المدخلات الميدانية السريعة (تظهر الآن بخط كبير جداً وواضح)
+    # 📋 حقول المدخلات الميدانية السريعة
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -211,19 +209,30 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # 🟥 أزرار الحفظ والتنزيل اليدوي
+    # 🟥 أزرار الحفظ والتنزيل اليدوي المحدث للإكسيل
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
     with action_col2:
-        btn_download = st.button("📥 تنزيل يدوي إضافي للسجل (نسخة مؤكدة)", key="download_btn_main", use_container_width=True)
-        if btn_download:
-            if not df.empty:
-                sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-                csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
-                st.download_button(label="💾 اضغط هنا لتأكيد التنزيل", data=csv_data, file_name=OUTPUT_FILENAME, mime="text/csv", key="confirm_dl_btn", use_container_width=True)
-            else: 
-                st.warning("⚠️ السجل فارغ حالياً!")
+        if not df.empty:
+            sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
+            
+            # تحويل البيانات إلى صيغة إكسيل حقيقية (Excel .xlsx) في الذاكرة لتنزيلها مباشرة
+            buffer = io.BytesIO()
+            with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+                sorted_df.to_excel(writer, index=False, sheet_name="Midan Data")
+            excel_data = buffer.getvalue()
+            
+            st.download_button(
+                label="📥 تنزيل سجل الإكسيل على الكمبيوتر (قبل الإغلاق)", 
+                data=excel_data, 
+                file_name="KhatibAlami_Midan_Data.xlsx", 
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                key="download_btn_excel", 
+                use_container_width=True
+            )
+        else:
+            st.button("📥 تنزيل سجل الإكسيل على الكمبيوتر (السجل فارغ)", disabled=True, use_container_width=True)
 
     if btn_save:
         if region_input and property_number:
@@ -239,10 +248,11 @@ with col2:
                 st.session_state.last_region = region_input
                 st.session_state.clear_trigger = True
                 
+                # حفظ فوري تلقائي داخل ملف محلي على الكمبيوتر بجانب الكود مباشرة لضمان الأمان
                 sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                 upload_to_github(st.session_state.local_db)
-                st.success(f"✅ تم حفظ وتأمين العقار رقم ({property_number}) بنجاح!")
+                st.success(f"✅ تم حفظ وتأمين العقار رقم ({property_number}) ومزامنته محلياً وسحابياً!")
                 st.rerun()
         else: 
             st.warning("⚠️ فضلاً، يرجى ملء حقول المنطقة ورقم العقار أولاً.")
@@ -266,7 +276,7 @@ with col2:
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # عرض الجدول مباشرة ونظيفاً جداً وبشكل مؤمن تماماً
+    # عرض الجدول
     if region_input and not st.session_state.local_db.empty:
         filtered_df = st.session_state.local_db[st.session_state.local_db["المنطقة"].str.strip().str.lower() == region_input.lower()]
         if not filtered_df.empty:
@@ -278,7 +288,7 @@ with col2:
 
     st.markdown("---")
 
-    # 🔍 محرك البحث والتصحيح والتعديل والحذف الفوري (يظهر خطه كبيراً أيضاً)
+    # 🔍 محرك البحث والتصحيح
     search_query = st.text_input(label="", value=st.session_state.search_val, placeholder="اكتب اسم المنطقة أو رقم العقار للبحث السريع والتعديل أو الحذف...", key="search_modify_field").strip()
     st.session_state.search_val = search_query
 
@@ -295,9 +305,7 @@ with col2:
                     with edit_c1: new_edit_region = st.text_input("تعديل اسم المنطقة", value=row['المنطقة'], key=f"edit_reg_{idx}").strip()
                     with edit_c2: new_edit_prop = st.text_input("تعديل رقم العقار", value=row['رقم العقار'], key=f"edit_prop_{idx}").strip()
                     
-                    # إنشاء عمودين منفصلين داخل الصندوق للأزرار لتنظيم المظهر
                     btn_col1, btn_col2 = st.columns(2)
-                    
                     with btn_col1:
                         st.markdown("<div class='btn-save-edit'>", unsafe_allow_html=True)
                         save_clicked = st.button("💾 حفظ تعديلات السجل", key=f"save_edit_{idx}", use_container_width=True)
