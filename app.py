@@ -114,11 +114,11 @@ div[data-testid="stTextInput"] label p {
 }
 
 /* تنسيق الأزرار الأساسية عريضة وحمراء */
-div.stButton > button {
+div.stButton > button, div.stDownloadButton > button {
     background-color: #EF4444 !important; color: white !important; border: 1px solid #DC2626 !important;
     font-weight: 700 !important; font-size: 16px !important; height: 50px !important; border-radius: 10px !important; width: 100% !important;
 }
-div.stButton > button:hover { background-color: #DC2626 !important; }
+div.stButton > button:hover, div.stDownloadButton > button:hover { background-color: #DC2626 !important; }
 
 /* تنسيق مخصص لزر التعديل والحذف */
 div.btn-save-edit button { background-color: #10B981 !important; border: 1px solid #059669 !important; height: 42px !important; font-size: 15px !important; }
@@ -158,40 +158,6 @@ with col2:
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
     
-    # 📥 رفع الملف
-    if not st.session_state.hide_uploader:
-        st.markdown("### 📥 رفع وتحديث ملف البيانات مباشرة للبرنامج")
-        uploaded_file = st.file_uploader("اسحب ملف الـ CSV أو الإكسيل المعدل وضعه هنا لتحديث السجل فوراً وللقراءة المباشرة:", type=["csv", "xlsx", "xls"])
-        
-        if uploaded_file is not None:
-            try:
-                if uploaded_file.name.lower().endswith('.csv'):
-                    uploaded_df = None
-                    for encoding_type in ['utf-8-sig', 'utf-8', 'cp1256', 'latin-1']:
-                        try:
-                            uploaded_df = pd.read_csv(uploaded_file, encoding=encoding_type, dtype={"المنطقة": str, "رقم العقار": str})
-                            if "المنطقة" in uploaded_df.columns and "رقم العقار" in uploaded_df.columns:
-                                break
-                        except: continue
-                else:
-                    uploaded_df = pd.read_excel(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
-                
-                if uploaded_df is not None and "المنطقة" in uploaded_df.columns and "رقم العقار" in uploaded_df.columns:
-                    st.session_state.local_db = uploaded_df[["المنطقة", "رقم العقار"]].dropna(subset=["المنطقة", "رقم العقار"])
-                    sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-                    sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
-                    upload_to_github(st.session_state.local_db)
-                    
-                    st.session_state.hide_uploader = True
-                    st.session_state.last_region = ""
-                    st.session_state.clear_trigger = True
-                    st.session_state.search_val = ""
-                    st.rerun()
-                else:
-                    st.error("❌ خطأ: تأكد من أن الملف يحتوي على أعمدة باسم 'المنطقة' و 'رقم العقار' بشكل صحيح.")
-            except Exception as e:
-                st.error(f"❌ حدث خطأ أثناء معالجة الملف: {str(e)}")
-
     df = st.session_state.local_db
     
     # 📋 حقول المدخلات الميدانية السريعة بخط كبير
@@ -204,8 +170,29 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # 🚀 زر الحفظ الفوري الموحد (ضغطة واحدة فقط تكفي الآن للعمل الفوري)
-    btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
+    # 🚀 الأزرار الأساسية: زر حفظ سريع (ضغطة واحدة) + زر تنزيل إكسيل رسمي ومباشر
+    action_col1, action_col2 = st.columns(2)
+    with action_col1:
+        btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
+    with action_col2:
+        if not df.empty:
+            sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
+            # تحويل البيانات مباشرة إلى ملف إكسيل حقيقي للتنزيل المباشر
+            buffer = io.BytesIO()
+            with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+                sorted_df.to_excel(writer, index=False, sheet_name="Midan_Data")
+            excel_bytes = buffer.getvalue()
+            
+            st.download_button(
+                label="📥 تنزيل سجل الإكسيل على الكمبيوتر",
+                data=excel_bytes,
+                file_name="KhatibAlami_Midan_Data.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                key="download_btn_excel_direct",
+                use_container_width=True
+            )
+        else:
+            st.button("📥 تنزيل سجل الإكسيل (السجل فارغ)", disabled=True, use_container_width=True)
 
     if btn_save:
         if region_input and property_number:
@@ -221,7 +208,7 @@ with col2:
                 st.session_state.last_region = region_input
                 st.session_state.clear_trigger = True
                 
-                # حفظ فوري كامل من أول نقرة
+                # حفظ فوري كامل من أول نقرة ومزامنة سحابية
                 sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                 upload_to_github(st.session_state.local_db)
