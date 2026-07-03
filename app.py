@@ -147,7 +147,7 @@ with col2:
     
     st.markdown("---")
     
-    # 🌟 إخفاء مطلق: يختفي صندوق الرفع تماماً فور التحميل ولن يظهر أي زر مكانه إطلاقاً
+    # 🌟 تم إلغاء زر الإظهار مجدداً بالكامل، بمجرد القراءة يختفي صندوق الرفع نهائياً بدون رجعة
     if not st.session_state.hide_uploader:
         st.markdown("### 📥 رفع وتحديث ملف البيانات مباشرة للبرنامج")
         uploaded_file = st.file_uploader("اسحب ملف الـ CSV أو الإكسيل المعدل وضعه هنا لتحديث السجل فوراً وللقراءة المباشرة:", type=["csv", "xlsx", "xls"])
@@ -253,7 +253,7 @@ with col2:
     if region_input and not st.session_state.local_db.empty:
         filtered_df = st.session_state.local_db[st.session_state.local_db["المنطقة"].str.strip().str.lower() == region_input.lower()]
         if not filtered_df.empty:
-            display_sheet = pd.DataFrame(filtered_df["رقم العقار"].values, columns=["رقم العقar"]).sort_values(by="رقم العقار").reset_index(drop=True)
+            display_sheet = pd.DataFrame(filtered_df["رقم العقار"].values, columns=["رقم العقار"]).sort_values(by="رقم العقار").reset_index(drop=True)
             display_sheet.index += 1
             st.dataframe(display_sheet, use_container_width=True, height=200)
         else: 
