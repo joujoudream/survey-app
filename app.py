@@ -127,7 +127,7 @@ div.midan-interactive-box button {
 """
 st.markdown(ultimate_css, unsafe_allow_html=True)
 
-# 🛡️ الحماية الأساسية وإدارة الجلسة
+# 🛡️ إدارة حالة الجلسة والتحقق من الاستقرار
 if "local_db" not in st.session_state or st.session_state.local_db is None: 
     st.session_state.local_db = load_any_local_file()
 
@@ -138,6 +138,8 @@ if "last_region" not in st.session_state: st.session_state.last_region = ""
 if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = False
 if "search_val" not in st.session_state: st.session_state.search_val = ""
 if "focus_on_region" not in st.session_state: st.session_state.focus_on_region = False
+# علم تتبع حالة إخفاء صندوق الرفع
+if "hide_uploader" not in st.session_state: st.session_state.hide_uploader = False
 
 col1, col2, col3 = st.columns([0.5, 11, 0.5])
 with col2:
@@ -146,40 +148,45 @@ with col2:
     
     st.markdown("---")
     
-    # 📂 صندوق رفع وتحديث ملف المعلومات والعقارات الفوري
-    st.markdown("### 📥 رفع وتحديث ملف البيانات مباشرة للبرنامج")
-    uploaded_file = st.file_uploader("اسحب ملف الـ CSV أو الإكسيل المعدل وضعه هنا لتحديث السجل فوراً وللقراءة المباشرة:", type=["csv", "xlsx", "xls"])
-    
-    if uploaded_file is not None:
-        try:
-            if uploaded_file.name.lower().endswith('.csv'):
-                uploaded_df = None
-                for encoding_type in ['utf-8-sig', 'utf-8', 'cp1256', 'latin-1']:
-                    try:
-                        uploaded_df = pd.read_csv(uploaded_file, encoding=encoding_type, dtype={"المنطقة": str, "رقم العقار": str})
-                        if "المنطقة" in uploaded_df.columns and "رقم العقار" in uploaded_df.columns:
-                            break
-                    except: continue
-            else:
-                uploaded_df = pd.read_excel(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
-            
-            if uploaded_df is not None and "المنطقة" in uploaded_df.columns and "رقم العقار" in uploaded_df.columns:
-                st.session_state.local_db = uploaded_df[["المنطقة", "رقم العقار"]].dropna(subset=["المنطقة", "رقم العقار"])
-                sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-                sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
-                upload_to_github(st.session_state.local_db)
+    # 🌟 تحسين الاختفاء الذكي: يختفي صندوق الرفع تماماً فور قراءة البيانات بنجاح لعدم شغل مساحة في الشاشة
+    if not st.session_state.hide_uploader:
+        st.markdown("### 📥 رفع وتحديث ملف البيانات مباشرة للبرنامج")
+        uploaded_file = st.file_uploader("اسحب ملف الـ CSV أو الإكسيل المعدل وضعه هنا لتحديث السجل فوراً وللقراءة المباشرة:", type=["csv", "xlsx", "xls"])
+        
+        if uploaded_file is not None:
+            try:
+                if uploaded_file.name.lower().endswith('.csv'):
+                    uploaded_df = None
+                    for encoding_type in ['utf-8-sig', 'utf-8', 'cp1256', 'latin-1']:
+                        try:
+                            uploaded_df = pd.read_csv(uploaded_file, encoding=encoding_type, dtype={"المنطقة": str, "رقم العقار": str})
+                            if "المنطقة" in uploaded_df.columns and "رقم العقار" in uploaded_df.columns:
+                                break
+                        except: continue
+                else:
+                    uploaded_df = pd.read_excel(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
                 
-                # 🌟 [تم الإضافة هنا] تفريغ الواجهة بالكامل فور رفع البيانات بنجاح لتبدأ على نظافة
-                st.session_state.last_region = ""
-                st.session_state.clear_trigger = True
-                st.session_state.search_val = ""
-                
-                st.success(f"✅ تم رفع وقراءة ملف '{uploaded_file.name}' بنجاح، وتم تنظيف مدخلات الواجهة لبدء عمل ميداني جديد!")
-                st.rerun()
-            else:
-                st.error("❌ خطأ: تأكد من أن الملف يحتوي على أعمدة باسم 'المنطقة' و 'رقم العقار' بشكل صحيح.")
-        except Exception as e:
-            st.error(f"❌ حدث خطأ أثناء معالجة الملف: {str(e)}")
+                if uploaded_df is not None and "المنطقة" in uploaded_df.columns and "رقم العقار" in uploaded_df.columns:
+                    st.session_state.local_db = uploaded_df[["المنطقة", "رقم العقار"]].dropna(subset=["المنطقة", "رقم العقار"])
+                    sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
+                    sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
+                    upload_to_github(st.session_state.local_db)
+                    
+                    # تفعيل إخفاء الصندوق وتفريغ الواجهة لبدء الإدخال النظيف
+                    st.session_state.hide_uploader = True
+                    st.session_state.last_region = ""
+                    st.session_state.clear_trigger = True
+                    st.session_state.search_val = ""
+                    st.rerun()
+                else:
+                    st.error("❌ خطأ: تأكد من أن الملف يحتوي على أعمدة باسم 'المنطقة' و 'رقم العقار' بشكل صحيح.")
+            except Exception as e:
+                st.error(f"❌ حدث خطأ أثناء معالجة الملف: {str(e)}")
+    else:
+        # زر خفيف وصغير يظهر فقط في حال أردت إعادة رفع ملف آخر لاحقاً دون إزعاج واجهة العمل المباشر
+        if st.button("🔄 إظهار صندوق رفع الملفات مجدداً", key="show_uploader_again"):
+            st.session_state.hide_uploader = False
+            st.rerun()
 
     df = st.session_state.local_db
     st.markdown("---")
