@@ -100,6 +100,20 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 .sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
 
+/* 🌟 تكبير وتوضيح الخطوط داخل مربعات إدخال النصوص والبحث */
+div[data-testid="stTextInput"] input {
+    font-size: 20px !important;
+    font-weight: bold !important;
+    color: #1E3A8A !important;
+    height: 48px !important;
+}
+/* تكبير عناوين حقول الإدخال لتتناسق مع النص الداخلي */
+div[data-testid="stTextInput"] label p {
+    font-size: 16px !important;
+    font-weight: bold !important;
+    color: #2D3748 !important;
+}
+
 /* تنسيق الأزرار الحمراء الأساسية لحفظ العقار وتنزيل الملف */
 div.stButton > button {
     background-color: #EF4444 !important; color: white !important; border: 1px solid #DC2626 !important;
@@ -187,7 +201,7 @@ with col2:
 
     df = st.session_state.local_db
     
-    # 📋 حقول المدخلات الميدانية السريعة
+    # 📋 حقول المدخلات الميدانية السريعة (تظهر الآن بخط كبير جداً وواضح)
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -264,7 +278,7 @@ with col2:
 
     st.markdown("---")
 
-    # 🔍 محرك البحث والتصحيح والتعديل والحذف الفوري
+    # 🔍 محرك البحث والتصحيح والتعديل والحذف الفوري (يظهر خطه كبيراً أيضاً)
     search_query = st.text_input(label="", value=st.session_state.search_val, placeholder="اكتب اسم المنطقة أو رقم العقار للبحث السريع والتعديل أو الحذف...", key="search_modify_field").strip()
     st.session_state.search_val = search_query
 
@@ -304,7 +318,6 @@ with col2:
                         delete_clicked = st.button("🗑️ حذف هذا العقار نهائياً", key=f"delete_btn_{idx}", use_container_width=True)
                         st.markdown("</div>", unsafe_allow_html=True)
                         if delete_clicked:
-                            # حذف السطر بناءً على الفهرس الحالي
                             st.session_state.local_db = st.session_state.local_db.drop(idx).reset_index(drop=True)
                             sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                             sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
