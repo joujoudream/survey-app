@@ -100,7 +100,15 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 .sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
 
-/* 🌟 تكبير وتوضيح الخطوط داخل مربعات إدخال النصوص والبحث */
+/* تنسيق صندوق استيراد الملفات */
+div[data-testid="stFileUploader"] {
+    background-color: #ffffff !important;
+    border: 2px dashed #3B82F6 !important;
+    border-radius: 10px !important;
+    padding: 10px !important;
+}
+
+/* تكبير وتوضيح الخطوط داخل مربعات إدخال النصوص والبحث */
 div[data-testid="stTextInput"] input {
     font-size: 20px !important;
     font-weight: bold !important;
@@ -157,6 +165,45 @@ with col2:
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
     
+    # 📂 قسم رفع واستيراد الملف الجديد (إكسيل أو CSV) بذكاء تام
+    uploaded_file = st.file_uploader("📂 رفع واستيراد ملف بيانات قائم (Excel / CSV) لتحديث السجل فوراُ", type=["xlsx", "xls", "csv"], key="excel_uploader_widget")
+    if uploaded_file is not None:
+        try:
+            if uploaded_file.name.lower().endswith('.csv'):
+                for encoding_type in ['utf-8-sig', 'utf-8', 'cp1256', 'latin-1']:
+                    try:
+                        df_uploaded = pd.read_csv(uploaded_file, encoding=encoding_type, dtype={"المنطقة": str, "رقم العقار": str})
+                        if "المنطقة" in df_uploaded.columns and "رقم العقار" in df_uploaded.columns:
+                            break
+                    except: continue
+            else:
+                df_uploaded = pd.read_excel(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
+            
+            if "المنطقة" in df_uploaded.columns and "رقم العقار" in df_uploaded.columns:
+                cleaned_uploaded = df_uploaded[["المنطقة", "رقم العقار"]].dropna().copy()
+                cleaned_uploaded["المنطقة"] = cleaned_uploaded["المنطقة"].astype(str).str.strip()
+                cleaned_uploaded["رقم العقار"] = cleaned_uploaded["رقم العقار"].astype(str).str.strip()
+                
+                # دمج الجديد مع الحالي وإزالة التكرار التام لضمان عدم تلف البيانات
+                if st.session_state.local_db.empty:
+                    st.session_state.local_db = cleaned_uploaded
+                else:
+                    st.session_state.local_db = pd.concat([st.session_state.local_db, cleaned_uploaded], ignore_index=True)
+                
+                st.session_state.local_db = st.session_state.local_db.drop_duplicates(subset=["المنطقة", "رقم العقار"]).reset_index(drop=True)
+                
+                # حفظ فوري على السيرفر وفي السحاب
+                sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
+                sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
+                upload_to_github(st.session_state.local_db)
+                
+                st.success(f"✅ تم استيراد السجل بنجاح! تم تحميل {len(cleaned_uploaded)} عقار ومزامنتهم.")
+                st.rerun()
+            else:
+                st.error("❌ خطأ: يجب أن يحتوي الملف المرفوع على أعمدة بأسماء 'المنطقة' و 'رقم العقار'.")
+        except Exception as e:
+            st.error(f"❌ فشل قراءة الملف المستورد: {str(e)}")
+
     df = st.session_state.local_db
     
     # 📋 حقول المدخلات الميدانية السريعة بخط كبير
@@ -169,14 +216,13 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # 🚀 الأزرار الأساسية: زر حفظ سريع (ضغطة واحدة) + زر تنزيل يدوي بصيغة CSV المتوافقة تماماً مع الإكسيل العربي
+    # 🚀 الأزرار الأساسية
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
     with action_col2:
         if not df.empty:
             sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-            # توليد ملف CSV بترميز utf-8-sig ليفتح مباشرة على الإكسيل بدون أخطاء في اللغة العربية
             csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
             
             st.download_button(
@@ -197,14 +243,13 @@ with col2:
                 is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
             
             if is_duplicate: 
-                st.error("❌ إلغاء: هذا العقار مسجل سابقاً in هذه المنطقة!")
+                st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
                 st.session_state.last_region = region_input
                 st.session_state.clear_trigger = True
                 
-                # حفظ فوري متكامل ومزامنة سحابية
                 sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                 upload_to_github(st.session_state.local_db)
