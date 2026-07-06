@@ -159,50 +159,53 @@ if "last_region" not in st.session_state: st.session_state.last_region = ""
 if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = False
 if "search_val" not in st.session_state: st.session_state.search_val = ""
 if "focus_on_region" not in st.session_state: st.session_state.focus_on_region = False
+# حالة للتحكم في ظهور أو اختفاء صندوق الرفع
+if "show_uploader" not in st.session_state: st.session_state.show_uploader = True
 
 col1, col2, col3 = st.columns([0.5, 11, 0.5])
 with col2:
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
     
-    # 📂 قسم رفع واستيراد الملف الجديد (إكسيل أو CSV) بذكاء تام
-    uploaded_file = st.file_uploader("📂 رفع واستيراد ملف بيانات قائم (Excel / CSV) لتحديث السجل فوراُ", type=["xlsx", "xls", "csv"], key="excel_uploader_widget")
-    if uploaded_file is not None:
-        try:
-            if uploaded_file.name.lower().endswith('.csv'):
-                for encoding_type in ['utf-8-sig', 'utf-8', 'cp1256', 'latin-1']:
-                    try:
-                        df_uploaded = pd.read_csv(uploaded_file, encoding=encoding_type, dtype={"المنطقة": str, "رقم العقار": str})
-                        if "المنطقة" in df_uploaded.columns and "رقم العقار" in df_uploaded.columns:
-                            break
-                    except: continue
-            else:
-                df_uploaded = pd.read_excel(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
-            
-            if "المنطقة" in df_uploaded.columns and "رقم العقار" in df_uploaded.columns:
-                cleaned_uploaded = df_uploaded[["المنطقة", "رقم العقار"]].dropna().copy()
-                cleaned_uploaded["المنطقة"] = cleaned_uploaded["المنطقة"].astype(str).str.strip()
-                cleaned_uploaded["رقم العقار"] = cleaned_uploaded["رقم العقار"].astype(str).str.strip()
-                
-                # دمج الجديد مع الحالي وإزالة التكرار التام لضمان عدم تلف البيانات
-                if st.session_state.local_db.empty:
-                    st.session_state.local_db = cleaned_uploaded
+    # 📂 يظهر صندوق الرفع فقط إذا كانت الحالة مفعلة (ويختفي فوراً بعد معالجة الملف الناجحة)
+    if st.session_state.show_uploader:
+        uploaded_file = st.file_uploader("📂 رفع واستيراد ملف بيانات قائم (Excel / CSV) لتحديث السجل فوراُ", type=["xlsx", "xls", "csv"], key="excel_uploader_widget")
+        if uploaded_file is not None:
+            try:
+                if uploaded_file.name.lower().endswith('.csv'):
+                    for encoding_type in ['utf-8-sig', 'utf-8', 'cp1256', 'latin-1']:
+                        try:
+                            df_uploaded = pd.read_csv(uploaded_file, encoding=encoding_type, dtype={"المنطقة": str, "رقم العقار": str})
+                            if "المنطقة" in df_uploaded.columns and "رقم العقار" in df_uploaded.columns:
+                                break
+                        except: continue
                 else:
-                    st.session_state.local_db = pd.concat([st.session_state.local_db, cleaned_uploaded], ignore_index=True)
+                    df_uploaded = pd.read_excel(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
                 
-                st.session_state.local_db = st.session_state.local_db.drop_duplicates(subset=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-                
-                # حفظ فوري على السيرفر وفي السحاب
-                sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-                sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
-                upload_to_github(st.session_state.local_db)
-                
-                st.success(f"✅ تم استيراد السجل بنجاح! تم تحميل {len(cleaned_uploaded)} عقار ومزامنتهم.")
-                st.rerun()
-            else:
-                st.error("❌ خطأ: يجب أن يحتوي الملف المرفوع على أعمدة بأسماء 'المنطقة' و 'رقم العقار'.")
-        except Exception as e:
-            st.error(f"❌ فشل قراءة الملف المستورد: {str(e)}")
+                if "المنطقة" in df_uploaded.columns and "رقم العقار" in df_uploaded.columns:
+                    cleaned_uploaded = df_uploaded[["المنطقة", "رقم العقار"]].dropna().copy()
+                    cleaned_uploaded["المنطقة"] = cleaned_uploaded["المنطقة"].astype(str).str.strip()
+                    cleaned_uploaded["رقم العقار"] = cleaned_uploaded["رقم العقار"].astype(str).str.strip()
+                    
+                    if st.session_state.local_db.empty:
+                        st.session_state.local_db = cleaned_uploaded
+                    else:
+                        st.session_state.local_db = pd.concat([st.session_state.local_db, cleaned_uploaded], ignore_index=True)
+                    
+                    st.session_state.local_db = st.session_state.local_db.drop_duplicates(subset=["المنطقة", "رقم العقار"]).reset_index(drop=True)
+                    
+                    sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
+                    sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
+                    upload_to_github(st.session_state.local_db)
+                    
+                    # الرفع تم بنجاح: نخفي الصندوق ونفعل التوجيه التلقائي للمنطقة
+                    st.session_state.show_uploader = False
+                    st.session_state.focus_on_region = True
+                    st.rerun()
+                else:
+                    st.error("❌ خطأ: يجب أن يحتوي الملف المرفوع على أعمدة بأسماء 'المنطقة' و 'رقم العقار'.")
+            except Exception as e:
+                st.error(f"❌ فشل قراءة الملف المستورد: {str(e)}")
 
     df = st.session_state.local_db
     
@@ -334,7 +337,7 @@ with col2:
                             st.success("🗑️ تم حذف العقار بالكامل من السجل وتحديث المستودع!")
                             st.rerun()
 
-    # أتمتة جافا سكربت للتنقل السريع والتفاعل الفوري الميداني بضغطة واحدة
+    # أتمتة جافا سكربت للتنقل السريع والتفاعل الفوري الميداني بضغطة واحدة مع التركيز بعد الرفع
     focus_script = "true" if st.session_state.focus_on_region else "false"
     st.session_state.focus_on_region = False
     js_code = [
