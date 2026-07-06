@@ -171,6 +171,7 @@ with col2:
     if st.session_state.show_uploader:
         uploaded_file = st.file_uploader("📂 رفع واستيراد ملف بيانات قائم (Excel / CSV) لتحديث السجل فوراُ", type=["xlsx", "xls", "csv"], key="excel_uploader_widget")
         if uploaded_file is not None:
+            df_uploaded = None
             try:
                 if uploaded_file.name.lower().endswith('.csv'):
                     for encoding_type in ['utf-8-sig', 'utf-8', 'cp1256', 'latin-1']:
@@ -182,7 +183,7 @@ with col2:
                 else:
                     df_uploaded = pd.read_excel(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
                 
-                if "المنطقة" in df_uploaded.columns and "رقم العقار" in df_uploaded.columns:
+                if df_uploaded is not None and "المنطقة" in df_uploaded.columns and "رقم العقار" in df_uploaded.columns:
                     cleaned_uploaded = df_uploaded[["المنطقة", "رقم العقار"]].dropna().copy()
                     cleaned_uploaded["المنطقة"] = cleaned_uploaded["المنطقة"].astype(str).str.strip()
                     cleaned_uploaded["رقم العقار"] = cleaned_uploaded["رقم العقار"].astype(str).str.strip()
@@ -200,12 +201,14 @@ with col2:
                     st.session_state.show_uploader = False
                     st.session_state.focus_on_region = True
                     st.rerun()
-            except:
+                else:
+                    st.error("❌ خطأ: يجب أن يحتوي الملف المرفوع على أعمدة بأسماء 'المنطقة' و 'رقم العقار'.")
+            except Exception as e:
                 st.error("❌ فشل قراءة الملف المستورد.")
 
     df = st.session_state.local_db
     
-    # 📋 حقول المدخلات الميدانية السريعة بخط كبير (ثابتة تماماً ومستقرة)
+    # 📋 حقول المدخلات الميدانية السريعة بخط كبير
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -215,7 +218,7 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # الأزرار الأساسية العلوية (محمية ومستقرة بدون تغييرات ديناميكية تعيق الإدخال)
+    # الأزرار الأساسية العلوية المستقرة
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
@@ -241,7 +244,7 @@ with col2:
                 is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
             
             if is_duplicate: 
-                st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
+                st.error("❌ إلغاء: هذا العقار مسجل سابقاً in هذه المنطقة!")
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
@@ -282,13 +285,12 @@ with col2:
             display_sheet.index += 1
             st.dataframe(display_sheet, use_container_width=True, height=200)
 
-    # 🖨️ قسم فرز وطباعة التقارير المنفصل (تم وضعه بالأسفل لضمان استقرار الإدخال تماماً)
+    # 🖨️ مركز فرز وطباعة تقارير المناطق المنفصل
     st.markdown("<br>", unsafe_allow_html=True)
     with st.container():
         st.markdown("<div class='print-section-box'>", unsafe_allow_html=True)
         st.subheader("🖨️ مركز فرز وطباعة تقارير المناطق")
         
-        # قائمة منسدلة ذكية بجميع المناطق المسجلة في السجل لتسهيل الاختيار والطباعة
         if not df.empty:
             available_regions = sorted(df["المنطقة"].unique())
             selected_print_region = st.selectbox("اختر المنطقة المراد طباعة كشف عقاراتها الاستقصائي:", available_regions, key="print_region_select")
@@ -358,7 +360,7 @@ with col2:
                             st.session_state.search_val = ""
                             st.rerun()
 
-    # أتمتة جافا سكربت للتنقل السريع وحفظ مؤشر الكتابة في مكانه
+    # أتمتة جافا سكربت للتنقل السريع
     focus_script = "true" if st.session_state.focus_on_region else "false"
     st.session_state.focus_on_region = False
     js_code = [
