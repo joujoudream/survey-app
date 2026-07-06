@@ -5,6 +5,7 @@ import base64
 import os
 import glob
 import io
+from datetime import datetime
 
 # 🌐 1. إعدادات الصفحة الرسمية للشركة
 st.set_page_config(
@@ -128,11 +129,15 @@ div.stButton > button, div.stDownloadButton > button {
 }
 div.stButton > button:hover, div.stDownloadButton > button:hover { background-color: #DC2626 !important; }
 
-/* تنسيق مخصص لزر التعديل والحذف */
+/* تنسيق مخصص لزر التعديل والحذف والطباعة */
 div.btn-save-edit button { background-color: #10B981 !important; border: 1px solid #059669 !important; height: 42px !important; font-size: 15px !important; }
 div.btn-save-edit button:hover { background-color: #059669 !important; }
 div.btn-delete-edit button { background-color: #DC2626 !important; border: 1px solid #B91C1C !important; height: 42px !important; font-size: 15px !important; }
 div.btn-delete-edit button:hover { background-color: #B91C1C !important; }
+
+/* زر الطباعة المخصص بلون أزرق غامق رسمي */
+div.btn-print-region button { background-color: #1E3A8A !important; border: 1px solid #172554 !important; height: 52px !important; font-size: 17px !important; color: white !important; }
+div.btn-print-region button:hover { background-color: #1D4ED8 !important; }
 
 .blue-total-metric {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important; padding: 20px !important; border-radius: 12px !important;
@@ -159,15 +164,15 @@ if "last_region" not in st.session_state: st.session_state.last_region = ""
 if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = False
 if "search_val" not in st.session_state: st.session_state.search_val = ""
 if "focus_on_region" not in st.session_state: st.session_state.focus_on_region = False
-# حالة للتحكم في ظهور أو اختفاء صندوق الرفع
 if "show_uploader" not in st.session_state: st.session_state.show_uploader = True
+if "print_html_content" not in st.session_state: st.session_state.print_html_content = ""
 
 col1, col2, col3 = st.columns([0.5, 11, 0.5])
 with col2:
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
     
-    # 📂 يظهر صندوق الرفع فقط إذا كانت الحالة مفعلة (ويختفي فوراً بعد معالجة الملف الناجحة)
+    # 📂 قسم الرفع
     if st.session_state.show_uploader:
         uploaded_file = st.file_uploader("📂 رفع واستيراد ملف بيانات قائم (Excel / CSV) لتحديث السجل فوراُ", type=["xlsx", "xls", "csv"], key="excel_uploader_widget")
         if uploaded_file is not None:
@@ -198,7 +203,6 @@ with col2:
                     sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                     upload_to_github(st.session_state.local_db)
                     
-                    # الرفع تم بنجاح: نخفي الصندوق ونفعل التوجيه التلقائي للمنطقة
                     st.session_state.show_uploader = False
                     st.session_state.focus_on_region = True
                     st.rerun()
@@ -209,7 +213,7 @@ with col2:
 
     df = st.session_state.local_db
     
-    # 📋 حقول المدخلات الميدانية السريعة بخط كبير
+    # 📋 حقول المدخلات
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -227,7 +231,6 @@ with col2:
         if not df.empty:
             sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
             csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
-            
             st.download_button(
                 label="📥 تنزيل سجل البيانات يدوياً (مباشر)",
                 data=csv_data,
@@ -279,13 +282,59 @@ with col2:
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # عرض جدول المنطقة المفتوحة
+    # عرض جدول المنطقة المفتوحة مع ميزة الطباعة الفورية والمنسقة
     if region_input and not st.session_state.local_db.empty:
         filtered_df = st.session_state.local_db[st.session_state.local_db["المنطقة"].str.strip().str.lower() == region_input.lower()]
         if not filtered_df.empty:
             display_sheet = pd.DataFrame(filtered_df["رقم العقار"].values, columns=["رقم العقار"]).sort_values(by="رقم العقار").reset_index(drop=True)
             display_sheet.index += 1
-            st.dataframe(display_sheet, use_container_width=True, height=200)
+            st.dataframe(display_sheet, use_container_width=True, height=230)
+            
+            # 🖨️ زر الطباعة المخصص للمنطقة المفتوحة حالياً
+            st.markdown("<div class='btn-print-region'>", unsafe_allow_html=True)
+            print_clicked = st.button(f"🖨️ طباعة تقرير عقارات منطقة ({region_input})", use_container_width=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+            
+            if print_clicked:
+                # توليد كود HTML منسق ومجهز للطباعة الفورية بالمقاسات الرسمية
+                current_date = datetime.now().strftime("%Y-%m-%d %H:%M")
+                table_rows = "".join([f"<tr><td style='padding:8px; border:1px solid #cbd5e0; text-align:center;'>{i+1}</td><td style='padding:8px; border:1px solid #cbd5e0; text-align:center; font-weight:bold; font-size:16px;'>{num}</td></tr>" for i, num in enumerate(display_sheet["رقم العقار"])])
+                
+                html_report = f"""
+                <div id="print-report-section" style="direction: rtl; text-align: right; font-family: 'Tajawal', Arial, sans-serif; padding: 25px; background: white; border-radius: 8px;">
+                    <div style="text-align: center; border-bottom: 3px double #1E3A8A; padding-bottom: 12px; margin-bottom: 15px;">
+                        <h2 style="color: #1E3A8A; margin: 0; font-size: 26px;">Khatib & Alami Company</h2>
+                        <h4 style="color: #2D3748; margin: 5px 0 0 0; font-size: 14px;">War Damage Assessment 2006 - Printing & Archiving</h4>
+                    </div>
+                    <div style="background-color: #f7fafc; padding: 12px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #e2e8f0;">
+                        <table style="width: 100%; font-size: 14px;">
+                            <tr>
+                                <td><strong>📍 المنطقة المستهدفة:</strong> {region_input}</td>
+                                <td style="text-align: left;"><strong>📅 تاريخ الطباعة:</strong> {current_date}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>📊 إجمالي عدد عقارات المنطقة:</strong> {len(display_sheet)} عقاراً</td>
+                                <td style="text-align: left;"><strong>👤 المسؤول:</strong> وليد مراد</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                        <thead>
+                            <tr style="background-color: #1E3A8A; color: white;">
+                                <th style="padding: 10px; border: 1px solid #cbd5e0; width: 15%;">الرقم التسلسلي</th>
+                                <th style="padding: 10px; border: 1px solid #cbd5e0;">رقم العقار الموثق</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {table_rows}
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 35px; text-align: left; font-size: 12px; color: #718096; border-top: 1px solid #e2e8f0; padding-top: 8px;">
+                        نظام إدارة الجودة والأرشفة الميدانية - خطيب وعلمي.
+                    </div>
+                </div>
+                """
+                st.session_state.print_html_content = html_report
         else: 
             st.info("ℹ️ لا توجد عقارات مسجلة لهذه المنطقة حالياً.")
 
@@ -300,7 +349,6 @@ with col2:
             st.session_state.local_db["المنطقة"].str.contains(search_query, case=False, na=False) | 
             st.session_state.local_db["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)
         ]
-        
         if not matched_records.empty:
             for idx, row in matched_records.iterrows():
                 with st.expander(f"⚙️ إدارة العقار رقم {row['رقم العقار']} في {row['المنطقة']}", expanded=True):
@@ -323,7 +371,6 @@ with col2:
                                 st.session_state.search_val = ""         
                                 st.success("✅ تم تحديث وتصحيح السجل ومزامنته بنجاح!")
                                 st.rerun()
-                                
                     with btn_col2:
                         st.markdown("<div class='btn-delete-edit'>", unsafe_allow_html=True)
                         delete_clicked = st.button("🗑️ حذف هذا العقار نهائياً", key=f"delete_btn_{idx}", use_container_width=True)
@@ -337,11 +384,29 @@ with col2:
                             st.success("🗑️ تم حذف العقار بالكامل من السجل وتحديث المستودع!")
                             st.rerun()
 
-    # أتمتة جافا سكربت للتنقل السريع والتفاعل الفوري الميداني بضغطة واحدة مع التركيز بعد الرفع
+    # جافا سكربت للأتمتة والتركيز التلقائي مع استدعاء أمر الطباعة الفوري عند الضغط على الزر
     focus_script = "true" if st.session_state.focus_on_region else "false"
     st.session_state.focus_on_region = False
+    
+    # تحضير نافذة منبثقة للطباعة إذا تم تفعيل محتوى التقرير
+    trigger_print_js = ""
+    if st.session_state.print_html_content != "":
+        escaped_html = st.session_state.print_html_content.replace("'", "\\'").replace("\n", " ")
+        st.session_state.print_html_content = "" # تصفير الحالة بعد الاستخدام
+        trigger_print_js = f"""
+        var printWin = window.open('', '', 'width=900,height=800');
+        printWin.document.write('<html><head><title>Print Report</title>');
+        printWin.document.write('<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700&display=swap" rel="stylesheet">');
+        printWin.document.write('<style>body{{font-family: "Tajawal", sans-serif;}}</style></head><body>');
+        printWin.document.write('{escaped_html}');
+        printWin.document.write('</body></html>');
+        printWin.document.close();
+        setTimeout(function(){{ printWin.focus(); printWin.print(); printWin.close(); }}, 600);
+        """
+
     js_code = [
         "<script>",
+        trigger_print_js,
         "var attachMidanEvents = function() {",
         "var mainDoc = window.parent.document; var inputs = mainDoc.getElementsByTagName('input'); var buttons = mainDoc.getElementsByTagName('button');",
         "var regInput = null; var propInput = null; var saveBtn = null;",
