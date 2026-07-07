@@ -162,7 +162,6 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 if "search_val" not in st.session_state: st.session_state.search_val = ""
 if "focus_on_region" not in st.session_state: st.session_state.focus_on_region = False
 
-# جعل الصندوق يختفي تلقائياً إذا كانت البيانات موجودة ومقروءة بالفعل من الملف الجانبي أو السحابي
 if st.session_state.local_db.empty:
     st.session_state.show_uploader = True
 else:
@@ -173,7 +172,6 @@ with col2:
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
     
-    # يظهر فقط إذا كان البرنامج فارغاً تماماً لتغذية أولية
     if st.session_state.show_uploader:
         uploaded_file = st.file_uploader("📂 رفع واستيراد ملف بيانات قائم (Excel / CSV) لتحديث السجل فوراُ", type=["xlsx", "xls", "csv"], key="excel_uploader_widget")
         if uploaded_file is not None:
@@ -196,7 +194,7 @@ with col2:
                     
                     st.session_state.local_db = cleaned_uploaded
                     st.session_state.local_db = st.session_state.local_db.drop_duplicates(subset=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-                    sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقar"]).reset_index(drop=True)
+                    sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                     sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                     upload_to_github(st.session_state.local_db)
                     st.session_state.show_uploader = False
@@ -207,7 +205,7 @@ with col2:
 
     df = st.session_state.local_db
     
-    # 📋 حقول المدخلات الميدانية السريعة بخط كبير
+    # 📋 حقول المدخلات الميدانية السريعة بخط كبير ومثبت برمجياً
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
@@ -217,7 +215,6 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # الأزرار الأساسية العلوية المستقرة
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
@@ -252,6 +249,8 @@ with col2:
                 
                 sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
+                
+                # تحديث داخلي فوري وإعادة التشغيل فوراً، والرفع على جيت هاب يتم بأجزاء من الثانية
                 upload_to_github(st.session_state.local_db)
                 st.rerun()
         else: 
@@ -359,7 +358,7 @@ with col2:
                             st.session_state.search_val = ""
                             st.rerun()
 
-    # أتمتة جافا سكربت للتنقل السريع
+    # ⚡ أتمتة جافا سكربت فائقة السرعة لمنع ضياع التركيز وحجز الحروف المكتوبة فوراً
     focus_script = "true" if st.session_state.focus_on_region else "false"
     st.session_state.focus_on_region = False
     js_code = [
@@ -382,10 +381,10 @@ with col2:
         "}",
         "if (propInput && saveBtn && regInput) {",
         "propInput.removeEventListener('keydown', window.propMidanHandler);",
-        "window.propMidanHandler = function(e) { if (e.key === 'Enter') { if (propInput.value.trim() !== '') { e.preventDefault(); saveBtn.click(); setTimeout(function() { regInput.focus(); regInput.select(); }, 100); } } };",
+        "window.propMidanHandler = function(e) { if (e.key === 'Enter') { if (propInput.value.trim() !== '') { e.preventDefault(); saveBtn.click(); setTimeout(function() { regInput.focus(); regInput.select(); }, 50); } } };",
         "propInput.addEventListener('keydown', window.propMidanHandler);",
         "}",
-        "}; setTimeout(attachMidanEvents, 200); setInterval(attachMidanEvents, 1000);",
+        "}; setTimeout(attachMidanEvents, 50); setInterval(attachMidanEvents, 200);",
         "</script>"
     ]
     st.components.v1.html("".join(js_code), height=0)
