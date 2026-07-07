@@ -150,7 +150,7 @@ div.midan-interactive-box button {
 """
 st.markdown(ultimate_css, unsafe_allow_html=True)
 
-# 🛡️ إدارة حالة الجلسة وقراءة البيانات
+# 🛡️ إدارة حالة الجلسة وقراءة البيانات الأساسية عند التشغيل
 if "local_db" not in st.session_state or st.session_state.local_db is None: 
     st.session_state.local_db = load_any_local_file()
 
@@ -161,13 +161,19 @@ if "last_region" not in st.session_state: st.session_state.last_region = ""
 if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = False
 if "search_val" not in st.session_state: st.session_state.search_val = ""
 if "focus_on_region" not in st.session_state: st.session_state.focus_on_region = False
-if "show_uploader" not in st.session_state: st.session_state.show_uploader = True
+
+# جعل الصندوق يختفي تلقائياً إذا كانت البيانات موجودة ومقروءة بالفعل من الملف الجانبي أو السحابي
+if st.session_state.local_db.empty:
+    st.session_state.show_uploader = True
+else:
+    st.session_state.show_uploader = False
 
 col1, col2, col3 = st.columns([0.5, 11, 0.5])
 with col2:
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
     
+    # يظهر فقط إذا كان البرنامج فارغاً تماماً لتغذية أولية
     if st.session_state.show_uploader:
         uploaded_file = st.file_uploader("📂 رفع واستيراد ملف بيانات قائم (Excel / CSV) لتحديث السجل فوراُ", type=["xlsx", "xls", "csv"], key="excel_uploader_widget")
         if uploaded_file is not None:
@@ -188,23 +194,16 @@ with col2:
                     cleaned_uploaded["المنطقة"] = cleaned_uploaded["المنطقة"].astype(str).str.strip()
                     cleaned_uploaded["رقم العقار"] = cleaned_uploaded["رقم العقار"].astype(str).str.strip()
                     
-                    if st.session_state.local_db.empty:
-                        st.session_state.local_db = cleaned_uploaded
-                    else:
-                        st.session_state.local_db = pd.concat([st.session_state.local_db, cleaned_uploaded], ignore_index=True)
-                    
+                    st.session_state.local_db = cleaned_uploaded
                     st.session_state.local_db = st.session_state.local_db.drop_duplicates(subset=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-                    sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
+                    sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقar"]).reset_index(drop=True)
                     sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                     upload_to_github(st.session_state.local_db)
-                    
                     st.session_state.show_uploader = False
                     st.session_state.focus_on_region = True
                     st.rerun()
-                else:
-                    st.error("❌ خطأ: يجب أن يحتوي الملف المرفوع على أعمدة بأسماء 'المنطقة' و 'رقم العقار'.")
-            except Exception as e:
-                st.error("❌ فشل قراءة الملف المستورد.")
+            except:
+                st.error("❌ فشل قراءة الملف.")
 
     df = st.session_state.local_db
     
@@ -244,7 +243,7 @@ with col2:
                 is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
             
             if is_duplicate: 
-                st.error("❌ إلغاء: هذا العقار مسجل سابقاً in هذه المنطقة!")
+                st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
