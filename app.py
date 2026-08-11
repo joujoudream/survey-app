@@ -388,3 +388,110 @@ with col2:
         "</script>"
     ]
     st.components.v1.html("".join(js_code), height=0)
+import streamlit as st
+import pandas as pd
+
+# 1. الأجزاء الأولى من كودك (العنوان، إدخال البيانات الجديدة، حفظ العقار، الإحصائيات)
+# ... أترك كودك القديم هنا كما هو دون أي تغيير ...
+
+
+# ------------------------------------------------------------------
+# 2. استبدل قسم (البحث والتعديل والحذف) القديم بهذا الكود المطور:
+# ------------------------------------------------------------------
+
+# تهيئة متغيرة الجلسة لحفظ العقار المحدد
+if 'selected_property' not in st.session_state:
+    st.session_state.selected_property = None
+if 'edit_mode' not in st.session_state:
+    st.session_state.edit_mode = False
+
+search_query = st.text_input(
+    "🔍 اكتب اسم المنطقة أو رقم العقار للبحث السريع والتعديل أو الحذف...",
+    key="search_input_field"
+)
+
+if search_query:
+    # تصفية البيانات (تأكد أن اسم المتغير df يطابق اسم الجدول لديك)
+    filtered_df = df[
+        df['رقم العقار'].astype(str).str.contains(search_query, case=False, na=False) |
+        df['اسم المنطقة'].astype(str).str.contains(search_query, case=False, na=False)
+    ]
+    
+    if not filtered_df.empty:
+        st.write(f"📋 تم العثور على {len(filtered_df)} نتيجة:")
+        
+        for idx, row in filtered_df.iterrows():
+            col1, col2, col3 = st.columns([3, 1, 1])
+            with col1:
+                st.info(f"📍 المنطقة: {row['اسم المنطقة']} | 🔢 العقار: {row['رقم العقار']}")
+            with col2:
+                if st.button("✏️ تعديل", key=f"edit_btn_{idx}"):
+                    st.session_state.selected_property = row.to_dict()
+                    st.session_state.selected_index = idx
+                    st.session_state.edit_mode = True
+                    st.rerun()
+            with col3:
+                if st.button("🗑️ حذف", key=f"del_btn_{idx}"):
+                    st.session_state.selected_property = row.to_dict()
+                    st.session_state.selected_index = idx
+                    st.session_state.edit_mode = False
+                    st.rerun()
+    else:
+        st.warning("⚠️ لم يتم العثور على نتائج تطابق البحث.")
+
+# عرض نافذة التعديل أو الحذف المسبتة
+if st.session_state.selected_property is not None:
+    st.markdown("---")
+    prop = st.session_state.selected_property
+    idx = st.session_state.selected_index
+    
+    if st.session_state.edit_mode:
+        st.subheader("✏️ تعديل بيانات العقار المحدد")
+        new_region = st.text_input("اسم المنطقة الجغرافية", value=prop.get('اسم المنطقة', ''))
+        new_number = st.text_input("رقم العقار الجديد", value=prop.get('رقم العقار', ''))
+        
+        col_save, col_cancel = st.columns(2)
+        with col_save:
+            if st.button("💾 حفظ التعديلات", use_container_width=True):
+                df.at[idx, 'اسم المنطقة'] = new_region
+                df.at[idx, 'رقم العقار'] = new_number
+                
+                # إعاده حفظ البيانات في ملفك (سواء كان Excel أو CSV)
+                # df.to_excel("data.xlsx", index=False)
+                
+                st.success("✅ تم تعديل بيانات العقار بنجاح!")
+                st.session_state.selected_property = None
+                st.session_state.edit_mode = False
+                st.rerun()
+                
+        with col_cancel:
+            if st.button("❌ إلغاء", use_container_width=True):
+                st.session_state.selected_property = None
+                st.session_state.edit_mode = False
+                st.rerun()
+
+    else:
+        st.subheader("🗑️ تأكيد حذف العقار")
+        st.error(f"هل أنت تأكد من حذف العقار رقم [{prop.get('رقم العقار')}] في منطقة [{prop.get('اسم المنطقة')}]؟")
+        
+        col_confirm, col_cancel = st.columns(2)
+        with col_confirm:
+            if st.button("🔥 نعم، قم بالحذف", use_container_width=True):
+                df.drop(index=idx, inplace=True)
+                df.reset_index(drop=True, inplace=True)
+                
+                # إعاده حفظ البيانات في ملفك
+                # df.to_excel("data.xlsx", index=False)
+                
+                st.success("🗑️ تم حذف العقار بنجاح!")
+                st.session_state.selected_property = None
+                st.rerun()
+                
+        with col_cancel:
+            if st.button("❌ إلغاء", use_container_width=True):
+                st.session_state.selected_property = None
+                st.rerun()
+
+# ------------------------------------------------------------------
+# 3. الأجزاء الأخيرة من كودك (مثل خيارات طباعة التقارير الموضحة في أسفل الشاشة)
+# ... أترك كودك القديم هنا كما هو دون أي تغيير ...
