@@ -74,7 +74,7 @@ def load_any_local_file():
         except: pass
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيقات الأصلية كلياً
+# 🎨 التنسيقات الدقيقة والألوان الأصلية
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -87,6 +87,7 @@ html, body, [class*='css'], [data-testid='stAppViewContainer'] {
 header[data-testid='stHeader'] { background: transparent !important; display: none !important; }
 .block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; }
 
+/* كروت الترويسة */
 .header-card { 
     background-color: #EBF8FF !important; padding: 20px 12px !important; border-radius: 12px !important; 
     box-shadow: 0 6px 12px rgba(30, 58, 138, 0.08) !important; margin-bottom: 2px !important; text-align: center !important; border: 1px solid #BEE3F8 !important; 
@@ -101,27 +102,37 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 .sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
 
-/* أزرار الحفظ الرئيسية */
-div.stButton > button[key="save_btn_main"], div.stDownloadButton > button[key="download_btn_csv_direct"] {
-    background-color: #EF4444 !important; color: white !important; border: 1px solid #DC2626 !important;
-    font-weight: 700 !important; font-size: 16px !important; height: 50px !important; border-radius: 10px !important; width: 100% !important;
+/* تنسيق عام لكل أزرار التطبيق بالأحمر والنص الأبيض */
+div.stButton > button, div.stDownloadButton > button {
+    background-color: #EF4444 !important;
+    color: #FFFFFF !important;
+    border: 1px solid #DC2626 !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+    border-radius: 8px !important;
 }
 
-/* أزرار الحذف والتعديل داخل نتائج البحث */
-div.stButton > button[key^="edit_btn_"] {
-    background-color: #EF4444 !important; color: white !important; border-radius: 8px !important; font-weight: bold !important;
-}
-div.stButton > button[key^="del_btn_"] {
-    background-color: #EF4444 !important; color: white !important; border-radius: 8px !important; font-weight: bold !important;
+div.stButton > button p, div.stDownloadButton > button p {
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
 }
 
+div.stButton > button:hover, div.stDownloadButton > button:hover {
+    background-color: #DC2626 !important;
+    color: #FFFFFF !important;
+}
+
+/* بطاقة عرض نتائج البحث */
 .result-card {
     background-color: #DCE7F6 !important;
-    padding: 12px 18px !important;
+    padding: 10px 15px !important;
     border-radius: 8px !important;
     color: #1E3A8A !important;
     font-weight: bold !important;
-    font-size: 17px !important;
+    font-size: 16px !important;
+    text-align: right !important;
+    border: 1px solid #BEE3F8 !important;
+    height: 45px !important;
     display: flex !important;
     align-items: center !important;
 }
@@ -218,23 +229,24 @@ with col2:
         if not matched_records.empty:
             st.write(f"📋 تم العثور على {len(matched_records)} نتيجة:")
             for idx, row in matched_records.iterrows():
-                col_del, col_edit, col_info = st.columns([1, 1, 4])
-                with col_del:
-                    if st.button("🗑️ حذف", key=f"del_btn_{idx}", use_container_width=True):
-                        st.session_state.selected_property = row.to_dict()
-                        st.session_state.selected_index = idx
-                        st.session_state.edit_mode = False
-                        st.session_state.should_scroll = True
-                        st.rerun()
-                with col_edit:
+                # محاذاة العناصر من اليمين للياسار
+                c_info, c_edit, c_del = st.columns([3.5, 1, 1])
+                with c_info:
+                    st.markdown(f"<div class='result-card'>📍 المنطقة: {row['المنطقة']} | 🔢 العقار: {row['رقم العقار']}</div>", unsafe_allow_html=True)
+                with c_edit:
                     if st.button("✏️ تعديل", key=f"edit_btn_{idx}", use_container_width=True):
                         st.session_state.selected_property = row.to_dict()
                         st.session_state.selected_index = idx
                         st.session_state.edit_mode = True
                         st.session_state.should_scroll = True
                         st.rerun()
-                with col_info:
-                    st.markdown(f"<div class='result-card'>📍 المنطقة: {row['المنطقة']} | 🔢 العقار: {row['رقم العقار']}</div>", unsafe_allow_html=True)
+                with c_del:
+                    if st.button("🗑️ حذف", key=f"del_btn_{idx}", use_container_width=True):
+                        st.session_state.selected_property = row.to_dict()
+                        st.session_state.selected_index = idx
+                        st.session_state.edit_mode = False
+                        st.session_state.should_scroll = True
+                        st.rerun()
 
     # ⚙️ لوحة تنفيذ التعديل أو الحذف
     if st.session_state.selected_property is not None:
@@ -242,8 +254,9 @@ with col2:
         prop = st.session_state.selected_property
         idx = st.session_state.selected_index
         
+        st.markdown("---")
         if st.session_state.edit_mode:
-            st.markdown("### ✏️ تعديل بيانات العقار")
+            st.subheader("✏️ تعديل بيانات العقار")
             mod_region = st.text_input("اسم المنطقة الجغرافية", value=prop.get('المنطقة', ''), key="mod_reg_val")
             mod_number = st.text_input("رقم العقار الجديد", value=prop.get('رقم العقار', ''), key="mod_num_val")
             
@@ -269,7 +282,7 @@ with col2:
                     st.rerun()
 
         else:
-            st.markdown("### 🗑️ تأكيد الحذف")
+            st.subheader("🗑️ تأكيد الحذف")
             st.error(f"هل أنت تأكد من حذف العقار رقم [{prop.get('رقم العقار')}] من منطقة [{prop.get('المنطقة')}]؟")
             
             col_confirm, col_cancel = st.columns(2)
