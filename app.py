@@ -74,7 +74,7 @@ def load_any_local_file():
         except: pass
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيقات
+# 🎨 التنسيقات الأصلية كلياً
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -86,12 +86,14 @@ html, body, [class*='css'], [data-testid='stAppViewContainer'] {
 .stApp { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important; }
 header[data-testid='stHeader'] { background: transparent !important; display: none !important; }
 .block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; }
+
 .header-card { 
     background-color: #EBF8FF !important; padding: 20px 12px !important; border-radius: 12px !important; 
     box-shadow: 0 6px 12px rgba(30, 58, 138, 0.08) !important; margin-bottom: 2px !important; text-align: center !important; border: 1px solid #BEE3F8 !important; 
 }
 .company-header { color: #1E3A8A !important; font-family: 'Arial', sans-serif !important; font-size: 28px !important; font-weight: bold !important; }
 .company-subtitle { color: #2D3748 !important; font-size: 15px !important; font-weight: 500 !important; margin-top: 4px !important; }
+
 .main-signature-card { 
     background-color: #ffffff !important; padding: 14px 16px !important; border-radius: 10px !important; text-align: center !important; 
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04) !important; margin: 10px auto 15px auto !important; border: 1px solid #e2e8f0 !important; max-width: 550px !important; 
@@ -99,26 +101,32 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 .sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
 
-div[data-testid="stTextInput"] input {
-    font-size: 20px !important;
-    font-weight: bold !important;
-    color: #1E3A8A !important;
-    height: 48px !important;
-}
-
-div.stButton > button, div.stDownloadButton > button {
+/* أزرار الحفظ الرئيسية */
+div.stButton > button[key="save_btn_main"], div.stDownloadButton > button[key="download_btn_csv_direct"] {
     background-color: #EF4444 !important; color: white !important; border: 1px solid #DC2626 !important;
     font-weight: 700 !important; font-size: 16px !important; height: 50px !important; border-radius: 10px !important; width: 100% !important;
 }
 
-.action-card {
-    background-color: #ffffff !important;
-    padding: 20px !important;
-    border-radius: 12px !important;
-    border: 2px solid #3B82F6 !important;
-    margin-top: 15px !important;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1) !important;
+/* أزرار الحذف والتعديل داخل نتائج البحث */
+div.stButton > button[key^="edit_btn_"] {
+    background-color: #EF4444 !important; color: white !important; border-radius: 8px !important; font-weight: bold !important;
 }
+div.stButton > button[key^="del_btn_"] {
+    background-color: #EF4444 !important; color: white !important; border-radius: 8px !important; font-weight: bold !important;
+}
+
+.result-card {
+    background-color: #DCE7F6 !important;
+    padding: 12px 18px !important;
+    border-radius: 8px !important;
+    color: #1E3A8A !important;
+    font-weight: bold !important;
+    font-size: 17px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+iframe[title="st.iframe"] { display: none !important; }
 </style>
 """
 st.markdown(ultimate_css, unsafe_allow_html=True)
@@ -210,35 +218,32 @@ with col2:
         if not matched_records.empty:
             st.write(f"📋 تم العثور على {len(matched_records)} نتيجة:")
             for idx, row in matched_records.iterrows():
-                col_info, col_edit, col_del = st.columns([3, 1, 1])
-                with col_info:
-                    st.info(f"📍 المنطقة: {row['المنطقة']} | 🔢 العقار: {row['رقم العقار']}")
-                with col_edit:
-                    if st.button("✏️ تعديل", key=f"edit_btn_{idx}"):
-                        st.session_state.selected_property = row.to_dict()
-                        st.session_state.selected_index = idx
-                        st.session_state.edit_mode = True
-                        st.session_state.should_scroll = True
-                        st.rerun()
+                col_del, col_edit, col_info = st.columns([1, 1, 4])
                 with col_del:
-                    if st.button("🗑️ حذف", key=f"del_btn_{idx}"):
+                    if st.button("🗑️ حذف", key=f"del_btn_{idx}", use_container_width=True):
                         st.session_state.selected_property = row.to_dict()
                         st.session_state.selected_index = idx
                         st.session_state.edit_mode = False
                         st.session_state.should_scroll = True
                         st.rerun()
-
-    # 🎯 علامة التمرير التلقائي
-    st.markdown("<div id='scroll_target'></div>", unsafe_allow_html=True)
+                with col_edit:
+                    if st.button("✏️ تعديل", key=f"edit_btn_{idx}", use_container_width=True):
+                        st.session_state.selected_property = row.to_dict()
+                        st.session_state.selected_index = idx
+                        st.session_state.edit_mode = True
+                        st.session_state.should_scroll = True
+                        st.rerun()
+                with col_info:
+                    st.markdown(f"<div class='result-card'>📍 المنطقة: {row['المنطقة']} | 🔢 العقار: {row['رقم العقار']}</div>", unsafe_allow_html=True)
 
     # ⚙️ لوحة تنفيذ التعديل أو الحذف
     if st.session_state.selected_property is not None:
-        st.markdown("<div class='action-card'>", unsafe_allow_html=True)
+        st.markdown("<div id='scroll_target'></div>", unsafe_allow_html=True)
         prop = st.session_state.selected_property
         idx = st.session_state.selected_index
         
         if st.session_state.edit_mode:
-            st.subheader("✏️ تعديل بيانات العقار")
+            st.markdown("### ✏️ تعديل بيانات العقار")
             mod_region = st.text_input("اسم المنطقة الجغرافية", value=prop.get('المنطقة', ''), key="mod_reg_val")
             mod_number = st.text_input("رقم العقار الجديد", value=prop.get('رقم العقار', ''), key="mod_num_val")
             
@@ -264,7 +269,7 @@ with col2:
                     st.rerun()
 
         else:
-            st.subheader("🗑️ تأكيد الحذف")
+            st.markdown("### 🗑️ تأكيد الحذف")
             st.error(f"هل أنت تأكد من حذف العقار رقم [{prop.get('رقم العقار')}] من منطقة [{prop.get('المنطقة')}]؟")
             
             col_confirm, col_cancel = st.columns(2)
@@ -285,9 +290,8 @@ with col2:
                 if st.button("❌ إلغاء", use_container_width=True, key="cancel_del_now"):
                     st.session_state.selected_property = None
                     st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
 
-    # 📜 تنفيذ التمرير التلقائي
+    # 📜 تنفيذ التمرير التلقائي السلس
     if st.session_state.should_scroll:
         st.session_state.should_scroll = False
         js_code = """
@@ -295,9 +299,9 @@ with col2:
             setTimeout(function() {
                 var element = window.parent.document.getElementById('scroll_target');
                 if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
-            }, 300);
+            }, 200);
         </script>
         """
         st.components.v1.html(js_code, height=0)
