@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import requests
 import base64
-import os
 import glob
 import io
 
@@ -135,11 +134,10 @@ if "last_region" not in st.session_state: st.session_state.last_region = ""
 if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = False
 if "search_val" not in st.session_state: st.session_state.search_val = ""
 
-# متغيّرات إدارة التعديل والحذف
 if 'selected_property' not in st.session_state: st.session_state.selected_property = None
 if 'edit_mode' not in st.session_state: st.session_state.edit_mode = False
 if 'selected_index' not in st.session_state: st.session_state.selected_index = None
-if 'scroll_to_action' not in st.session_state: st.session_state.scroll_to_action = False
+if 'should_scroll' not in st.session_state: st.session_state.should_scroll = False
 
 col1, col2, col3 = st.columns([0.5, 11, 0.5])
 with col2:
@@ -148,7 +146,7 @@ with col2:
 
     df = st.session_state.local_db
     
-    # 📋 إدخال العقارات الجديدة
+    # 📋 الإدخال
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field_main").strip()
@@ -220,32 +218,33 @@ with col2:
                         st.session_state.selected_property = row.to_dict()
                         st.session_state.selected_index = idx
                         st.session_state.edit_mode = True
-                        st.session_state.scroll_to_action = True
+                        st.session_state.should_scroll = True
                         st.rerun()
                 with col_del:
                     if st.button("🗑️ حذف", key=f"del_btn_{idx}"):
                         st.session_state.selected_property = row.to_dict()
                         st.session_state.selected_index = idx
                         st.session_state.edit_mode = False
-                        st.session_state.scroll_to_action = True
+                        st.session_state.should_scroll = True
                         st.rerun()
 
-    # ⚙️ لوحة تنفيذ التعديل أو الحذف (تظهر بالأسفل مع التمرير التلقائي إليها)
-    st.markdown("<div id='action_target_section'></div>", unsafe_allow_html=True)
-    
+    # 🎯 علامة التمرير التلقائي
+    st.markdown("<div id='scroll_target'></div>", unsafe_allow_html=True)
+
+    # ⚙️ لوحة تنفيذ التعديل أو الحذف
     if st.session_state.selected_property is not None:
         st.markdown("<div class='action-card'>", unsafe_allow_html=True)
         prop = st.session_state.selected_property
         idx = st.session_state.selected_index
         
         if st.session_state.edit_mode:
-            st.subheader("✏️ تعديل بيانات العقار المحدد")
+            st.subheader("✏️ تعديل بيانات العقار")
             mod_region = st.text_input("اسم المنطقة الجغرافية", value=prop.get('المنطقة', ''), key="mod_reg_val")
             mod_number = st.text_input("رقم العقار الجديد", value=prop.get('رقم العقار', ''), key="mod_num_val")
             
             col_save, col_cancel = st.columns(2)
             with col_save:
-                if st.button("💾 حفظ التعديلات الان", use_container_width=True, key="save_edit_now"):
+                if st.button("💾 حفظ التعديلات الآن", use_container_width=True, key="save_edit_now"):
                     st.session_state.local_db.at[idx, 'المنطقة'] = mod_region
                     st.session_state.local_db.at[idx, 'رقم العقار'] = mod_number
                     
@@ -265,8 +264,8 @@ with col2:
                     st.rerun()
 
         else:
-            st.subheader("🗑️ تأكيد حذف العقار")
-            st.error(f"هل أنت محقق من حذف العقار رقم [{prop.get('رقم العقار')}] من منطقة [{prop.get('المنطقة')}]؟")
+            st.subheader("🗑️ تأكيد الحذف")
+            st.error(f"هل أنت تأكد من حذف العقار رقم [{prop.get('رقم العقار')}] من منطقة [{prop.get('المنطقة')}]؟")
             
             col_confirm, col_cancel = st.columns(2)
             with col_confirm:
@@ -288,20 +287,17 @@ with col2:
                     st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # 📜 سكربت التمرير التلقائي (Scroll) إلى صندوق التعديل والحذف عند الضغط
-    should_scroll = "true" if st.session_state.scroll_to_action else "false"
-    st.session_state.scroll_to_action = False
-    
-    js_scroll = f"""
-    <script>
-    if ({should_scroll}) {{
-        setTimeout(function() {{
-            var el = window.parent.document.getElementById('action_target_section');
-            if (el) {{
-                el.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
-            }}
-        }}, 150);
-    }}
-    </script>
-    """
-    st.components.v1.html(js_scroll, height=0)
+    # 📜 تنفيذ التمرير التلقائي
+    if st.session_state.should_scroll:
+        st.session_state.should_scroll = False
+        js_code = """
+        <script>
+            setTimeout(function() {
+                var element = window.parent.document.getElementById('scroll_target');
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 300);
+        </script>
+        """
+        st.components.v1.html(js_code, height=0)
