@@ -414,7 +414,31 @@ if search_query:
     # تصفية البيانات (تأكد أن اسم المتغير df يطابق اسم الجدول لديك)
     filtered_df = df[
         df['رقم العقار'].astype(str).str.contains(search_query, case=False, na=False) |
-      # استخدام اسم العمود الصحيح والتأكد من مطابقة اسم العمود تماماً
+    # كود البحث الصحيح بدون أخطاء بنيوية
+search_results = df[
+    df['اسم المنطقة']
+    .astype(str)
+    .str.contains(search_query, case=False, na=False)
+    | df['رقم العقار']
+    .astype(str)
+    .str.contains(search_query, case=False, na=False)
+]# كود البحث الصحيح بدون أخطاء بنيوية
+search_results = df[
+ # كود البحث الصحيح بدون أخطاء بنيوية
+search_results = df[
+    df['اسم المنطقة']
+    .astype(str)
+    .str.contains(search_query, case=False, na=False)
+    | df['رقم العقار']
+    .astype(str)
+    .str.contains(search_query, case=False, na=False)
+]   df['اسم المنطقة']
+    .astype(str)
+    .str.contains(search_query, case=False, na=False)
+    | df['رقم العقار']
+    .astype(str)
+    .str.contains(search_query, case=False, na=False)
+]  # استخدام اسم العمود الصحيح والتأكد من مطابقة اسم العمود تماماً
 search_results = df[
     df['اسم المنطقة']
     .astype(str)
