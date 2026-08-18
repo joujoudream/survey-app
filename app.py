@@ -495,3 +495,74 @@ if st.session_state.selected_property is not None:
 # ------------------------------------------------------------------
 # 3. الأجزاء الأخيرة من كودك (مثل خيارات طباعة التقارير الموضحة في أسفل الشاشة)
 # ... أترك كودك القديم هنا كما هو دون أي تغيير ...
+
+import pandas as pd
+import streamlit as st
+
+# 1. دالة حذف السجل بناءً على الرقم والمنطقة
+def delete_property(region, prop_number):
+    # إزالة الصف المطابق للمنطقة ورقم العقار
+    st.session_state.df = st.session_state.df[
+        ~(
+            (st.session_state.df['region'] == region)
+            & (st.session_state.df['prop_number'] == str(prop_number))
+        )
+    ]
+    # حفظ الملف فوراً (سواء كان CSV أو قاعدة بيانات)
+    st.session_state.df.to_csv('data.csv', index=False)
+    st.success(f'تم حذف العقار رقم {prop_number} في {region} بنجاح!')
+    st.rerun()
+
+
+# 2. دالة حفظ التعديل (اسم المنطقة أو رقم العقار)
+def update_property(
+    old_region, old_number, new_region, new_number, row_index
+):
+    st.session_state.df.at[row_index, 'region'] = new_region
+    st.session_state.df.at[row_index, 'prop_number'] = str(new_number)
+
+    # حفظ الملف بعد التعديل
+    st.session_state.df.to_csv('data.csv', index=False)
+    st.success('تم حفظ التعديلات بنجاح!')
+    st.rerun()
+
+
+# --- عرض السجلات في الواجهة ---
+# لنفرض أنك تعرض نتائج البحث في قائمة Expander كالموجودة بالصورة:
+
+for idx, row in search_results.iterrows():
+    with st.expander(
+        f"⚙️ إدارة العقار رقم {row['prop_number']} في {row['region']}"
+    ):
+        col1, col2 = st.columns(2)
+
+        with col1:
+            edited_region = st.text_input(
+                'تعديل اسم المنطقة',
+                value=row['region'],
+                key=f'reg_{idx}',
+            )
+        with col2:
+            edited_number = st.text_input(
+                'تعديل رقم العقار',
+                value=row['prop_number'],
+                key=f'num_{idx}',
+            )
+
+        btn_col1, btn_col2 = st.columns(2)
+
+        # زر حفظ التعديل
+        with btn_col1:
+            if st.button('💾 حفظ تعديلات السجل', key=f'save_{idx}'):
+                update_property(
+                    row['region'],
+                    row['prop_number'],
+                    edited_region,
+                    edited_number,
+                    idx,
+                )
+
+        # زر الحذف النهائياً
+        with btn_col2:
+            if st.button('🗑️ حذف هذا العقار نهائياً', key=f'del_{idx}'):
+                delete_property(row['region'], row['prop_number'])
