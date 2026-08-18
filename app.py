@@ -42,7 +42,7 @@ def upload_to_github(dataframe):
     except:
         return False
 
-# دالة قراءة الملف بجانب الكود بأي صيغة وترميز عربي عند بدء التشغيل
+# دالة قراءة الملف عند بدء التشغيل
 def load_any_local_file():
     local_files = glob.glob("*.csv") + glob.glob("*.xlsx") + glob.glob("*.xls") + glob.glob("*.CSV") + glob.glob("*.XLSX")
     for f_path in local_files:
@@ -75,7 +75,7 @@ def load_any_local_file():
         except: pass
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيقات والواجهات الرسومية المعتمدة للشركة
+# 🎨 التنسيقات والواجهات الرسومية
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -100,7 +100,6 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 .sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
 
-/* تكبير وتوضيح الخطوط داخل مربعات إدخال النصوص والبحث */
 div[data-testid="stTextInput"] input {
     font-size: 20px !important;
     font-weight: bold !important;
@@ -113,14 +112,12 @@ div[data-testid="stTextInput"] label p {
     color: #2D3748 !important;
 }
 
-/* تنسيق الأزرار الأساسية عريضة وحمراء */
 div.stButton > button, div.stDownloadButton > button {
     background-color: #EF4444 !important; color: white !important; border: 1px solid #DC2626 !important;
     font-weight: 700 !important; font-size: 16px !important; height: 50px !important; border-radius: 10px !important; width: 100% !important;
 }
 div.stButton > button:hover, div.stDownloadButton > button:hover { background-color: #DC2626 !important; }
 
-/* تنسيق خاص لقسم الطباعة مريح للعين باللون الأزرق الداكن */
 .print-section-box {
     background-color: #ffffff !important; padding: 15px !important; border-radius: 10px !important;
     border: 1px solid #cbd5e0 !important; margin-top: 20px !important;
@@ -129,12 +126,6 @@ div.print-zone-btn > div.stDownloadButton > button {
     background-color: #2563EB !important; border: 1px solid #1D4ED8 !important;
 }
 div.print-zone-btn > div.stDownloadButton > button:hover { background-color: #1D4ED8 !important; }
-
-/* تنسيق مخصص لزر التعديل والحذف */
-div.btn-save-edit button { background-color: #10B981 !important; border: 1px solid #059669 !important; height: 42px !important; font-size: 15px !important; }
-div.btn-save-edit button:hover { background-color: #059669 !important; }
-div.btn-delete-edit button { background-color: #DC2626 !important; border: 1px solid #B91C1C !important; height: 42px !important; font-size: 15px !important; }
-div.btn-delete-edit button:hover { background-color: #B91C1C !important; }
 
 .blue-total-metric {
     background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important; padding: 20px !important; border-radius: 12px !important;
@@ -150,7 +141,7 @@ div.midan-interactive-box button {
 """
 st.markdown(ultimate_css, unsafe_allow_html=True)
 
-# 🛡️ إدارة حالة الجلسة وقراءة البيانات الأساسية عند التشغيل
+# 🛡️ إدارة حالة الجلسة
 if "local_db" not in st.session_state or st.session_state.local_db is None: 
     st.session_state.local_db = load_any_local_file()
 
@@ -162,7 +153,7 @@ if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = Fal
 if "search_val" not in st.session_state: st.session_state.search_val = ""
 if "focus_on_region" not in st.session_state: st.session_state.focus_on_region = False
 
-# متغيّرات إدارة نافذة التعديل والحذف المحدد
+# متغيّرات إدارة التعديل والحذف
 if 'selected_property' not in st.session_state: st.session_state.selected_property = None
 if 'edit_mode' not in st.session_state: st.session_state.edit_mode = False
 if 'selected_index' not in st.session_state: st.session_state.selected_index = None
@@ -210,19 +201,19 @@ with col2:
 
     df = st.session_state.local_db
     
-    # 📋 حقول المدخلات الميدانية السريعة
+    # 📋 إدخال العقارات الجديدة
     input_col1, input_col2 = st.columns(2)
     with input_col1:
-        region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field").strip()
+        region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field_unique").strip()
     with input_col2:
         prop_val = "" if st.session_state.clear_trigger else ""
-        property_number = st.text_input("🔢 رقم العقار الجديد", value=prop_val, placeholder="ادخل رقم العقار الحالي....", key="property_field").strip()
+        property_number = st.text_input("🔢 رقم العقار الجديد", value=prop_val, placeholder="ادخل رقم العقار الحالي....", key="property_field_unique").strip()
     
     st.session_state.clear_trigger = False
 
     action_col1, action_col2 = st.columns(2)
     with action_col1:
-        btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
+        btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main_unique", use_container_width=True)
     with action_col2:
         if not df.empty:
             sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
@@ -232,11 +223,11 @@ with col2:
                 data=csv_data,
                 file_name="KhatibAlami_Midan_Data.csv",
                 mime="text/csv",
-                key="download_btn_csv_direct",
+                key="download_btn_csv_direct_unique",
                 use_container_width=True
             )
         else:
-            st.button("📥 تنزيل سجل البيانات (السجل فارغ)", disabled=True, use_container_width=True)
+            st.button("📥 تنزيل سجل البيانات (السجل فارغ)", disabled=True, use_container_width=True, key="download_disabled_btn")
 
     if btn_save:
         if region_input and property_number:
@@ -259,7 +250,7 @@ with col2:
         else: 
             st.warning("⚠️ فضلاً، يرجى ملء حقول المنطقة ورقم العقار أولاً.")
 
-    # الإحصائيات الفورية
+    # الإحصائيات
     total_count = len(st.session_state.local_db)
     region_count = 0
     if region_input and not st.session_state.local_db.empty:
@@ -273,12 +264,12 @@ with col2:
     with stat_col2:
         st.markdown("<div class='midan-interactive-box'>", unsafe_allow_html=True)
         display_label = f"🔸 عدد عقارات منطقة ({region_input if region_input else '...'})"
-        if st.button(label=f"{display_label}\n{region_count}", key="go_to_region_btn", use_container_width=True):
+        if st.button(label=f"{display_label}\n{region_count}", key="go_to_region_btn_unique", use_container_width=True):
             st.session_state.focus_on_region = True
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # عرض جدول المنطقة المفتوحة
+    # عرض جدول المنطقة
     if region_input and not st.session_state.local_db.empty:
         filtered_df = st.session_state.local_db[st.session_state.local_db["المنطقة"].str.strip().str.lower() == region_input.lower()]
         if not filtered_df.empty:
@@ -286,7 +277,7 @@ with col2:
             display_sheet.index += 1
             st.dataframe(display_sheet, use_container_width=True, height=200)
 
-    # 🖨️ مركز فرز وطباعة تقارير المناطق
+    # 🖨️ مركز الطباعة
     st.markdown("<br>", unsafe_allow_html=True)
     with st.container():
         st.markdown("<div class='print-section-box'>", unsafe_allow_html=True)
@@ -294,7 +285,7 @@ with col2:
         
         if not df.empty:
             available_regions = sorted(df["المنطقة"].unique())
-            selected_print_region = st.selectbox("اختر المنطقة المراد طباعة كشف عقاراتها الاستقصائي:", available_regions, key="print_region_select")
+            selected_print_region = st.selectbox("اختر المنطقة المراد طباعة كشف عقاراتها الاستقصائي:", available_regions, key="print_region_select_unique")
             
             if selected_print_region:
                 print_filtered_df = df[df["المنطقة"] == selected_print_region].sort_values(by="رقم العقار").reset_index(drop=True)
@@ -307,7 +298,7 @@ with col2:
                     data=csv_print_bytes,
                     file_name=f"كشف_عقارات_{selected_print_region}.csv",
                     mime="text/csv",
-                    key="final_print_trigger_btn",
+                    key="final_print_trigger_btn_unique",
                     use_container_width=True
                 )
                 st.markdown("</div>", unsafe_allow_html=True)
@@ -317,11 +308,11 @@ with col2:
 
     st.markdown("---")
 
-    # 🔍 محرك البحث والتصحيح
+    # 🔍 البحث والتعديل والحذف المنفصل
     search_query = st.text_input(
         label="🔍 اكتب اسم المنطقة أو رقم العقار للبحث السريع والتعديل أو الحذف...",
         value=st.session_state.search_val,
-        key="search_input_field"
+        key="search_input_field_unique"
     ).strip()
     st.session_state.search_val = search_query
 
@@ -334,16 +325,16 @@ with col2:
         if not matched_records.empty:
             st.write(f"📋 تم العثور على {len(matched_records)} نتيجة:")
             for idx, row in matched_records.iterrows():
-                col1, col2, col3 = st.columns([3, 1, 1])
-                with col1:
+                col_info, col_edit, col_del = st.columns([3, 1, 1])
+                with col_info:
                     st.info(f"📍 المنطقة: {row['المنطقة']} | 🔢 العقار: {row['رقم العقار']}")
-                with col2:
+                with col_edit:
                     if st.button("✏️ تعديل", key=f"edit_btn_{idx}"):
                         st.session_state.selected_property = row.to_dict()
                         st.session_state.selected_index = idx
                         st.session_state.edit_mode = True
                         st.rerun()
-                with col3:
+                with col_del:
                     if st.button("🗑️ حذف", key=f"del_btn_{idx}"):
                         st.session_state.selected_property = row.to_dict()
                         st.session_state.selected_index = idx
@@ -352,7 +343,7 @@ with col2:
         else:
             st.warning("⚠️ لم يتم العثور على نتائج تطابق البحث.")
 
-    # ⚙️ نافذة التعديل أو الحذف المحددة
+    # ⚙️ لوحة تنفيذ التعديل أو الحذف
     if st.session_state.selected_property is not None:
         st.markdown("---")
         prop = st.session_state.selected_property
@@ -369,7 +360,6 @@ with col2:
                     st.session_state.local_db.at[idx, 'المنطقة'] = new_region
                     st.session_state.local_db.at[idx, 'رقم العقار'] = new_number
                     
-                    # حفظ التغييرات محلياً وعبر GitHub
                     sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                     sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                     upload_to_github(st.session_state.local_db)
@@ -395,7 +385,6 @@ with col2:
                     st.session_state.local_db.drop(index=idx, inplace=True)
                     st.session_state.local_db.reset_index(drop=True, inplace=True)
                     
-                    # حفظ التغييرات محلياً وعبر GitHub
                     sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                     sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                     upload_to_github(st.session_state.local_db)
@@ -409,7 +398,7 @@ with col2:
                     st.session_state.selected_property = None
                     st.rerun()
 
-    # ⚡ جافا سكربت للتركيز التلقائي وتفعيل Enter
+    # JavaScript للتركيز والتنقل السريع
     focus_script = "true" if st.session_state.focus_on_region else "false"
     st.session_state.focus_on_region = False
     js_code = [
