@@ -406,7 +406,7 @@ if 'edit_mode' not in st.session_state:
     st.session_state.edit_mode = False
 
 search_query = st.text_input(
-    "🔍 اكتب اسم المنطقة أو رقم العقار للبحث السريع والتعديل أو الحذف...",
+    "🔍 اكتب اسم المنطقة أو رقم العقار للبحث السريع والتعديل أو الحذف..."
     key="search_input_field"
 )
 
@@ -415,16 +415,6 @@ if search_query:
     filtered_df = df[
         df['رقم العقار'].astype(str).str.contains(search_query, case=False, na=False) |
     # كود البحث الصحيح بدون أخطاء بنيوية
-search_results = df[
-    df['اسم المنطقة']
-    .astype(str)
-    .str.contains(search_query, case=False, na=False)
-    | df['رقم العقار']
-    .astype(str)
-    .str.contains(search_query, case=False, na=False)
-]# كود البحث الصحيح بدون أخطاء بنيوية
-search_results = df[
- # كود البحث الصحيح بدون أخطاء بنيوية
 search_results = df[
     df['اسم المنطقة']
     .astype(str)
