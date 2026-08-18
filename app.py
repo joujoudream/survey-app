@@ -74,7 +74,7 @@ def load_any_local_file():
         except: pass
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيقات الدقيقة والألوان الأصلية
+# 🎨 التنسيقات المطابقة للواجهة القديمة تماماً
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -110,6 +110,7 @@ div.stButton > button, div.stDownloadButton > button {
     font-weight: 700 !important;
     font-size: 15px !important;
     border-radius: 8px !important;
+    height: 48px !important;
 }
 
 div.stButton > button p, div.stDownloadButton > button p {
@@ -117,9 +118,37 @@ div.stButton > button p, div.stDownloadButton > button p {
     font-weight: 700 !important;
 }
 
-div.stButton > button:hover, div.stDownloadButton > button:hover {
-    background-color: #DC2626 !important;
+/* بطاقة العداد الأزرق الكبيرة (الإجمالي) */
+.total-count-card {
+    background-color: #2563EB !important;
     color: #FFFFFF !important;
+    padding: 15px !important;
+    border-radius: 10px !important;
+    text-align: center !important;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2) !important;
+}
+.total-count-title {
+    font-size: 12px !important;
+    font-weight: bold !important;
+    letter-spacing: 1px !important;
+    margin-bottom: 5px !important;
+}
+.total-count-number {
+    font-size: 32px !important;
+    font-weight: 900 !important;
+}
+
+/* بطاقة العداد الأحمر الصغيرة (المنطقة الحالية) */
+.region-count-card {
+    background-color: #EF4444 !important;
+    color: #FFFFFF !important;
+    padding: 14px !important;
+    border-radius: 10px !important;
+    text-align: center !important;
+    font-weight: bold !important;
+    font-size: 15px !important;
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.2) !important;
+    margin-top: 15px !important;
 }
 
 /* بطاقة عرض نتائج البحث */
@@ -165,7 +194,7 @@ with col2:
 
     df = st.session_state.local_db
     
-    # 📋 الإدخال
+    # 📋 حقول الإدخال
     input_col1, input_col2 = st.columns(2)
     with input_col1:
         region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field_main").strip()
@@ -175,6 +204,7 @@ with col2:
     
     st.session_state.clear_trigger = False
 
+    # 🚀 أزرار الإجراءات الرئيسية
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
@@ -191,6 +221,33 @@ with col2:
                 use_container_width=True
             )
 
+    # 📊 قسم العدادات المفقودة (الإجمالي + عداد المنطقة)
+    stat_col1, stat_col2 = st.columns(2)
+    
+    # حساب عدد العقارات للمنطقة المدخلة حالياً
+    region_count = 0
+    if region_input and not df.empty:
+        region_count = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()].shape[0]
+
+    with stat_col1:
+        st.markdown(
+            f"<div class='region-count-card'>📍 عدد عقارات منطقة [{region_input if region_input else '...'}] : ({region_count})</div>", 
+            unsafe_allow_html=True
+        )
+
+    with stat_col2:
+        total_count = len(df) if not df.empty else 0
+        st.markdown(
+            f"""
+            <div class='total-count-card'>
+                <div class='total-count-title'>TOTAL PROPERTY COUNT IN FILE</div>
+                <div class='total-count-number'>{total_count}</div>
+            </div>
+            """, 
+            unsafe_allow_html=True
+        )
+
+    # تنفيذ الحفظ
     if btn_save:
         if region_input and property_number:
             is_duplicate = False
@@ -229,7 +286,6 @@ with col2:
         if not matched_records.empty:
             st.write(f"📋 تم العثور على {len(matched_records)} نتيجة:")
             for idx, row in matched_records.iterrows():
-                # محاذاة العناصر من اليمين للياسار
                 c_info, c_edit, c_del = st.columns([3.5, 1, 1])
                 with c_info:
                     st.markdown(f"<div class='result-card'>📍 المنطقة: {row['المنطقة']} | 🔢 العقار: {row['رقم العقار']}</div>", unsafe_allow_html=True)
