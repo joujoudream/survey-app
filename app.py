@@ -317,12 +317,14 @@ with col2:
                 is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_val.lower()) & (df["رقم العقار"].str.strip() == prop_val)].shape[0] > 0
             
             if is_duplicate:
+                # ⚠️ إظهار إشعار التكرار فقط
                 st.session_state.notification_msg = f"⚠️ العقار رقم [{prop_val}] مكرر ومسجل سابقاً في منطقة [{region_val}]!"
                 st.session_state.notification_type = "error"
                 st.session_state.prop_key_counter += 1
                 st.session_state.region_input_val = region_val
                 st.session_state.focus_field = "region"
             else:
+                # ✅ الحفظ المباشر بدون ظهور إشعار نجاح
                 new_row = pd.DataFrame([{"المنطقة": region_val, "رقم العقار": prop_val}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
                 
@@ -330,19 +332,17 @@ with col2:
                 sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                 upload_to_github(st.session_state.local_db)
                 
-                st.session_state.notification_msg = f"✅ تم حفظ العقار [{prop_val}] بنجاح في منطقة [{region_val}]!"
-                st.session_state.notification_type = "success"
+                st.session_state.notification_msg = None
+                st.session_state.notification_type = None
                 st.session_state.prop_key_counter += 1
                 st.session_state.region_input_val = region_val
                 st.session_state.focus_field = "region"
 
             st.rerun()
 
-    if st.session_state.notification_msg:
-        if st.session_state.notification_type == "error":
-            st.error(st.session_state.notification_msg)
-        elif st.session_state.notification_type == "success":
-            st.success(st.session_state.notification_msg)
+    # عرض الإشعار فقط عند التكرار
+    if st.session_state.notification_msg and st.session_state.notification_type == "error":
+        st.error(st.session_state.notification_msg)
 
     # 🎯 سكربت التوجيه والتركيز وتحديد النص (JavaScript)
     if st.session_state.focus_field == "property":
