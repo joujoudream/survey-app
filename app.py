@@ -41,7 +41,7 @@ def upload_to_github(dataframe):
     except:
         return False
 
-# دالة تحميل البيانات
+# دالة تحميل البيانات تلقائياً
 def load_any_local_file():
     local_files = glob.glob("*.csv") + glob.glob("*.xlsx") + glob.glob("*.xls") + glob.glob("*.CSV") + glob.glob("*.XLSX")
     for f_path in local_files:
@@ -74,7 +74,7 @@ def load_any_local_file():
         except: pass
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيقات المطابقة تماماً للصورة القديمة
+# 🎨 التنسيقات المطابقة للتصميم الأصلي
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -102,6 +102,15 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 .sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
 
+/* صندوق رفع الملفات */
+.upload-box-style {
+    background-color: #ffffff !important;
+    padding: 15px !important;
+    border-radius: 10px !important;
+    border: 2px dashed #3182ce !important;
+    margin-bottom: 15px !important;
+}
+
 /* تنسيق مربعات النصوص */
 div[data-testid="stTextInput"] input {
     font-size: 18px !important;
@@ -110,7 +119,7 @@ div[data-testid="stTextInput"] input {
     height: 48px !important;
 }
 
-/* تنسيق عام للأزرار الحمراء */
+/* الأزرار */
 div.stButton > button, div.stDownloadButton > button {
     background-color: #EF4444 !important;
     color: #FFFFFF !important;
@@ -122,7 +131,7 @@ div.stButton > button, div.stDownloadButton > button {
 }
 div.stButton > button:hover, div.stDownloadButton > button:hover { background-color: #DC2626 !important; }
 
-/* العداد الأزرق الكبيرة (TOTAL PROPERTY COUNT IN FILE) */
+/* العداد الأزرق الكبيرة (على اليسار) */
 .blue-total-metric {
     background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
     padding: 15px !important;
@@ -138,7 +147,7 @@ div.stButton > button:hover, div.stDownloadButton > button:hover { background-co
 .blue-total-title { font-size: 13px !important; font-weight: bold !important; color: #ffffff !important; letter-spacing: 1px; }
 .blue-total-value { font-size: 34px !important; font-weight: 900 !important; color: #ffffff !important; }
 
-/* العداد الأحمر الخاص بالمنطقة الحالية */
+/* العداد الأحمر الخاص بالمنطقة الحالية (على اليمين) */
 .red-region-metric {
     background-color: #EF4444 !important;
     color: #ffffff !important;
@@ -162,7 +171,7 @@ div.stButton > button:hover, div.stDownloadButton > button:hover { background-co
     margin-top: 15px !important;
 }
 
-/* بطاقة نتائج البحث السريعة */
+/* بطاقات البحث */
 .result-card {
     background-color: #DCE7F6 !important;
     padding: 10px 15px !important;
@@ -203,6 +212,27 @@ with col2:
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
 
+    # 📂 1. قسم تحميل ملف إكسل / CSV لأول مرة عند فتح التطبيق
+    with st.expander("📁 رفع ملف Excel أو CSV قديم للبدء منه (اختياري)", expanded=False):
+        uploaded_file = st.file_uploader("قم بسحب وإفلات ملف البيانات هنا أو اختر الملف من جهازك:", type=["csv", "xlsx", "xls"])
+        if uploaded_file is not None:
+            try:
+                if uploaded_file.name.endswith('.csv'):
+                    df_up = pd.read_csv(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
+                else:
+                    df_up = pd.read_excel(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
+                
+                if "المنطقة" in df_up.columns and "رقم العقار" in df_up.columns:
+                    st.session_state.local_db = df_up[["المنطقة", "رقم العقار"]].dropna()
+                    st.session_state.local_db.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
+                    upload_to_github(st.session_state.local_db)
+                    st.success("✅ تم تحميل الملف بنجاح ودمجه في النظام!")
+                    st.rerun()
+                else:
+                    st.error("❌ الملف لا يحتوي على الأعمدة المطلوبة: ('المنطقة' و 'رقم العقار')")
+            except Exception as e:
+                st.error(f"❌ حدث خطأ أثناء قراءة الملف: {e}")
+
     df = st.session_state.local_db
     
     # 📋 حقول الإدخال الأساسية
@@ -215,7 +245,7 @@ with col2:
     
     st.session_state.clear_trigger = False
 
-    # 🚀 أزرار الحفظ والتنزيل
+    # 🚀 أزرار الحفظ والتنزيل اليدوي تحت الحقول مباشرة
     action_col1, action_col2 = st.columns(2)
     with action_col1:
         btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
@@ -224,15 +254,17 @@ with col2:
             sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
             csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
             st.download_button(
-                label="📥 تنزيل سجل البيانات يدوياً (مباشر)",
+                label="📥 تنزيل شيت البيانات الحالي (Excel/CSV)",
                 data=csv_data,
                 file_name="KhatibAlami_Midan_Data.csv",
                 mime="text/csv",
                 key="download_btn_csv_direct",
                 use_container_width=True
             )
+        else:
+            st.button("📥 تنزيل شيت البيانات الحالي (فارغ)", disabled=True, use_container_width=True)
 
-    # 📊 العدادات الهامة (العداد الأزرق على اليمين والعداد الأحمر على اليسار)
+    # 📊 العدادات الهامة (العداد الأحمر على اليمين والعداد الأزرق على اليسار)
     st.markdown("<br>", unsafe_allow_html=True)
     stat_col1, stat_col2 = st.columns(2)
     
@@ -240,12 +272,14 @@ with col2:
     if region_input and not df.empty:
         region_count = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()].shape[0]
 
+    # 🔴 العداد الأحمر على اليمين
     with stat_col1:
         st.markdown(
             f"<div class='red-region-metric'>🔸 عدد عقارات منطقة ({region_input if region_input else '...'}) <br> [{region_count}]</div>", 
             unsafe_allow_html=True
         )
 
+    # 🔵 العداد الأزرق الإجمالي على اليسار
     with stat_col2:
         total_count = len(df) if not df.empty else 0
         st.markdown(
