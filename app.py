@@ -102,7 +102,11 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 .sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
 
-/* إلغاء حواف وتنسيق stForm */
+/* إخفاء زر Submit الخاص بالنموذج لمنع ظهور الشريط الاحمر المستطيل */
+div[data-testid="stFormSubmitButton"] {
+    display: none !important;
+}
+
 div[data-testid="stForm"] {
     border: none !important;
     padding: 0px !important;
@@ -118,7 +122,7 @@ div[data-testid="stTextInput"] input {
 }
 
 /* الأزرار */
-div.stButton > button, div.stDownloadButton > button, div[data-testid="stFormSubmitButton"] > button {
+div.stButton > button, div.stDownloadButton > button {
     background-color: #EF4444 !important;
     color: #FFFFFF !important;
     border: 1px solid #DC2626 !important;
@@ -128,7 +132,7 @@ div.stButton > button, div.stDownloadButton > button, div[data-testid="stFormSub
     height: 48px !important;
     width: 100% !important;
 }
-div.stButton > button:hover, div.stDownloadButton > button:hover, div[data-testid="stFormSubmitButton"] > button:hover { 
+div.stButton > button:hover, div.stDownloadButton > button:hover { 
     background-color: #DC2626 !important; 
 }
 
@@ -235,7 +239,7 @@ with col2:
 
     df = st.session_state.local_db
 
-    # 📝 نموذج الإدخال
+    # 📝 نموذج الإدخال السريع عبر Enter
     with st.form("entry_form", clear_on_submit=True):
         input_col1, input_col2 = st.columns(2)
         with input_col1:
@@ -243,13 +247,12 @@ with col2:
         with input_col2:
             property_number = st.text_input("🔢 رقم العقار الجديد", value="", placeholder="ادخل رقم العقار الحالي....", key="property_field_main").strip()
 
-        # إبقاء زر الحفظ بداخل النموذج ليعمل مفتاح Enter تلقائياً
-        btn_save = st.form_submit_button("🚀 حفظ العقار والتحقق من التكرار (Enter)", use_container_width=True)
+        # زر مخفي برمجياً لتأمين العمل لمفتاح Enter
+        btn_save_hidden = st.form_submit_button("حفظ")
 
-    # 📥 الأزرار متجانسة ومتجاورة جنباً إلى جنب
+    # 📥 السطر المزدوج الموحد الموازي
     btn_row_col1, btn_row_col2 = st.columns(2)
     with btn_row_col1:
-        # زر إضافي للضغط بالماوس في السطر المجاور
         btn_save_manual = st.button("🚀 حفظ العقار والتحقق من التكرار", key="manual_save_btn", use_container_width=True)
 
     with btn_row_col2:
@@ -268,7 +271,7 @@ with col2:
             st.button("📥 تنزيل شيت البيانات الحالي (فارغ)", disabled=True, use_container_width=True)
 
     # معالجة الضغط على Enter أو زر الحفظ
-    if btn_save or btn_save_manual:
+    if btn_save_hidden or btn_save_manual:
         if region_input and property_number:
             is_duplicate = False
             if not df.empty:
