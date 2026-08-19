@@ -322,7 +322,7 @@ with col2:
             if is_duplicate:
                 st.session_state.notification_msg = f"⚠️ العقار رقم [{prop_val}] مكرر ومسجل سابقاً في منطقة [{region_val}]!"
                 st.session_state.notification_type = "error"
-                # 🎯 عند التكرار: تفريغ رقم العقار والتوجه فوراً لخانة العقار لإعادة الكتابة
+                # 🎯 تفريغ خانة رقم العقار تلقائياً والتوجيه إليها
                 st.session_state.region_input_val = region_val
                 st.session_state.prop_input_val = ""
                 st.session_state.focus_field = "property"
@@ -336,7 +336,7 @@ with col2:
                 
                 st.session_state.notification_msg = f"✅ تم حفظ العقار [{prop_val}] بنجاح في منطقة [{region_val}]!"
                 st.session_state.notification_type = "success"
-                # 🎯 عند النجاح: الاحتفاظ باسم المنطقة وتفريغ العقار والتوجه لاسم المنطقة
+                # 🎯 الاحتفاظ باسم المنطقة وتفريغ خانة العقار والتوجه لاسم المنطقة
                 st.session_state.region_input_val = region_val
                 st.session_state.prop_input_val = ""
                 st.session_state.focus_field = "region"
@@ -350,15 +350,15 @@ with col2:
         elif st.session_state.notification_type == "success":
             st.success(st.session_state.notification_msg)
 
-    # 🎯 سكربت التوجيه والتركيز (JavaScript)
+    # 🎯 سكربت التوجيه والتركيز وتفريغ الحقول الحية (JavaScript)
     if st.session_state.focus_field == "property":
         js_focus = """
         <script>
             setTimeout(function() {
                 var inputs = window.parent.document.querySelectorAll('input[type="text"]');
                 if (inputs.length >= 2) {
+                    inputs[1].value = '';
                     inputs[1].focus();
-                    inputs[1].select();
                 }
             }, 50);
         </script>
