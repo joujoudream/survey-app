@@ -74,7 +74,7 @@ def load_any_local_file():
         except: pass
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيقات المطابقة للتصميم الأصلي
+# 🎨 التنسيقات المعدلة
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -102,15 +102,6 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 .sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
 
-/* صندوق رفع الملفات */
-.upload-box-style {
-    background-color: #ffffff !important;
-    padding: 15px !important;
-    border-radius: 10px !important;
-    border: 2px dashed #3182ce !important;
-    margin-bottom: 15px !important;
-}
-
 /* تنسيق مربعات النصوص */
 div[data-testid="stTextInput"] input {
     font-size: 18px !important;
@@ -131,7 +122,7 @@ div.stButton > button, div.stDownloadButton > button {
 }
 div.stButton > button:hover, div.stDownloadButton > button:hover { background-color: #DC2626 !important; }
 
-/* العداد الأزرق الكبيرة (على اليسار) */
+/* العداد الأزرق الكبيرة */
 .blue-total-metric {
     background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
     padding: 15px !important;
@@ -147,7 +138,7 @@ div.stButton > button:hover, div.stDownloadButton > button:hover { background-co
 .blue-total-title { font-size: 13px !important; font-weight: bold !important; color: #ffffff !important; letter-spacing: 1px; }
 .blue-total-value { font-size: 34px !important; font-weight: 900 !important; color: #ffffff !important; }
 
-/* العداد الأحمر الخاص بالمنطقة الحالية (على اليمين) */
+/* العداد الأحمر الخاص بالمنطقة الحالية */
 .red-region-metric {
     background-color: #EF4444 !important;
     color: #ffffff !important;
@@ -168,7 +159,7 @@ div.stButton > button:hover, div.stDownloadButton > button:hover { background-co
     padding: 18px !important;
     border-radius: 12px !important;
     border: 1px solid #cbd5e0 !important;
-    margin-top: 15px !important;
+    margin-top: 25px !important;
 }
 
 /* بطاقات البحث */
@@ -264,23 +255,15 @@ with col2:
         else:
             st.button("📥 تنزيل شيت البيانات الحالي (فارغ)", disabled=True, use_container_width=True)
 
-    # 📊 العدادات الهامة (العداد الأحمر على اليمين والعداد الأزرق على اليسار)
-    st.markdown("<br>", unsafe_allow_html=True)
+    # 📊 العدادات الهامة (تم تبديل الأماكن: الأزرق على اليمين والأحمر على اليسار)
     stat_col1, stat_col2 = st.columns(2)
     
     region_count = 0
     if region_input and not df.empty:
         region_count = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()].shape[0]
 
-    # 🔴 العداد الأحمر على اليمين
+    # 🔵 العداد الأزرق الإجمالي (تم نقله إلى اليمين)
     with stat_col1:
-        st.markdown(
-            f"<div class='red-region-metric'>🔸 عدد عقارات منطقة ({region_input if region_input else '...'}) <br> [{region_count}]</div>", 
-            unsafe_allow_html=True
-        )
-
-    # 🔵 العداد الأزرق الإجمالي على اليسار
-    with stat_col2:
         total_count = len(df) if not df.empty else 0
         st.markdown(
             f"""
@@ -289,6 +272,13 @@ with col2:
                 <div class='blue-total-value'>{total_count}</div>
             </div>
             """, 
+            unsafe_allow_html=True
+        )
+
+    # 🔴 العداد الأحمر الخاص بالمنطقة (تم نقله إلى اليسار)
+    with stat_col2:
+        st.markdown(
+            f"<div class='red-region-metric'>🔸 عدد عقارات منطقة ({region_input if region_input else '...'}) <br> [{region_count}]</div>", 
             unsafe_allow_html=True
         )
 
