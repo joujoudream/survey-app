@@ -102,17 +102,6 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 .sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
 
-/* إخفاء زر Submit الخاص بالنموذج لمنع ظهور الشريط الاحمر المستطيل */
-div[data-testid="stFormSubmitButton"] {
-    display: none !important;
-}
-
-div[data-testid="stForm"] {
-    border: none !important;
-    padding: 0px !important;
-    background: transparent !important;
-}
-
 /* تنسيق مربعات النصوص */
 div[data-testid="stTextInput"] input {
     font-size: 18px !important;
@@ -203,9 +192,7 @@ if "local_db" not in st.session_state or st.session_state.local_db is None:
 if not isinstance(st.session_state.local_db, pd.DataFrame) or "المنطقة" not in st.session_state.local_db.columns or "رقم العقار" not in st.session_state.local_db.columns:
     st.session_state.local_db = pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-if "last_region" not in st.session_state: st.session_state.last_region = ""
 if "search_val" not in st.session_state: st.session_state.search_val = ""
-
 if 'selected_property' not in st.session_state: st.session_state.selected_property = None
 if 'edit_mode' not in st.session_state: st.session_state.edit_mode = False
 if 'selected_index' not in st.session_state: st.session_state.selected_index = None
@@ -239,21 +226,17 @@ with col2:
 
     df = st.session_state.local_db
 
-    # 📝 نموذج الإدخال السريع عبر Enter
-    with st.form("entry_form", clear_on_submit=True):
-        input_col1, input_col2 = st.columns(2)
-        with input_col1:
-            region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field_main").strip()
-        with input_col2:
-            property_number = st.text_input("🔢 رقم العقار الجديد", value="", placeholder="ادخل رقم العقار الحالي....", key="property_field_main").strip()
+    # 📝 حقول الإدخال المباشرة (تسمح بتغيير المنطقة بدون قيود)
+    input_col1, input_col2 = st.columns(2)
+    with input_col1:
+        region_input = st.text_input("📍 اسم المنطقة الجغرافية", placeholder="النبطية، صور، صيدا...", key="region_field_main").strip()
+    with input_col2:
+        property_number = st.text_input("🔢 رقم العقار الجديد", placeholder="ادخل رقم العقار الحالي....", key="property_field_main").strip()
 
-        # زر مخفي برمجياً لتأمين العمل لمفتاح Enter
-        btn_save_hidden = st.form_submit_button("حفظ")
-
-    # 📥 السطر المزدوج الموحد الموازي
+    # 📥 الأزرار متجاورة جنباً إلى جنب
     btn_row_col1, btn_row_col2 = st.columns(2)
     with btn_row_col1:
-        btn_save_manual = st.button("🚀 حفظ العقار والتحقق من التكرار", key="manual_save_btn", use_container_width=True)
+        btn_save_action = st.button("🚀 حفظ العقار والتحقق من التكرار", key="manual_save_btn", use_container_width=True)
 
     with btn_row_col2:
         if not df.empty:
@@ -270,8 +253,8 @@ with col2:
         else:
             st.button("📥 تنزيل شيت البيانات الحالي (فارغ)", disabled=True, use_container_width=True)
 
-    # معالجة الضغط على Enter أو زر الحفظ
-    if btn_save_hidden or btn_save_manual:
+    # معالجة الضغط على زر الحفظ
+    if btn_save_action:
         if region_input and property_number:
             is_duplicate = False
             if not df.empty:
@@ -282,7 +265,6 @@ with col2:
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
-                st.session_state.last_region = region_input
                 
                 sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
