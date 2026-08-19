@@ -74,7 +74,7 @@ def load_any_local_file():
         except: pass
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيقات المعدلة للتحكم بالمسافات
+# 🎨 التنسيقات المعدلة لإلغاء المسافات العمودية
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -85,30 +85,34 @@ html, body, [class*='css'], [data-testid='stAppViewContainer'] {
 }
 .stApp { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important; }
 header[data-testid='stHeader'] { background: transparent !important; display: none !important; }
-.block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; }
+.block-container { padding-top: 1rem !important; padding-bottom: 1rem !important; }
 
 /* كروت الترويسة */
 .header-card { 
-    background-color: #EBF8FF !important; padding: 20px 12px !important; border-radius: 12px !important; 
+    background-color: #EBF8FF !important; padding: 15px 12px !important; border-radius: 12px !important; 
     box-shadow: 0 6px 12px rgba(30, 58, 138, 0.08) !important; margin-bottom: 2px !important; text-align: center !important; border: 1px solid #BEE3F8 !important; 
 }
-.company-header { color: #1E3A8A !important; font-family: 'Arial', sans-serif !important; font-size: 28px !important; font-weight: bold !important; }
-.company-subtitle { color: #2D3748 !important; font-size: 15px !important; font-weight: 500 !important; margin-top: 4px !important; }
+.company-header { color: #1E3A8A !important; font-family: 'Arial', sans-serif !important; font-size: 26px !important; font-weight: bold !important; }
+.company-subtitle { color: #2D3748 !important; font-size: 14px !important; font-weight: 500 !important; margin-top: 2px !important; }
 
 .main-signature-card { 
-    background-color: #ffffff !important; padding: 14px 16px !important; border-radius: 10px !important; text-align: center !important; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04) !important; margin: 10px auto 15px auto !important; border: 1px solid #e2e8f0 !important; max-width: 550px !important; 
+    background-color: #ffffff !important; padding: 10px 14px !important; border-radius: 10px !important; text-align: center !important; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04) !important; margin: 6px auto 10px auto !important; border: 1px solid #e2e8f0 !important; max-width: 550px !important; 
 }
-.sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
-.sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
+.sig-title { color: #4A5568 !important; font-size: 12px; font-weight: bold; }
+.sig-name { color: #E53E3E !important; font-size: 17px; font-weight: 700; margin-top: 1px; }
 
-/* إلغاء المسافات بين الأعمدة في نموذج الإدخال */
+/* إلغاء المسافات بين العناصر والأعمدة */
 div[data-testid="column"] {
-    padding-left: 4px !important;
-    padding-right: 4px !important;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
 }
 
-/* إخفاء زر Submit الخاص بالنموذج */
+div[data-testid="stVerticalBlock"] {
+    gap: 0.2rem !important;
+}
+
+/* إخفاء زر Submit */
 div[data-testid="stFormSubmitButton"] button {
     opacity: 0 !important;
     height: 1px !important;
@@ -123,12 +127,12 @@ div[data-testid="stForm"] {
     background: transparent !important;
 }
 
-/* تنسيق مربعات النصوص */
+/* مربعات النصوص */
 div[data-testid="stTextInput"] input {
-    font-size: 18px !important;
+    font-size: 17px !important;
     font-weight: bold !important;
     color: #1E3A8A !important;
-    height: 48px !important;
+    height: 46px !important;
 }
 
 /* الأزرار */
@@ -139,8 +143,9 @@ div.stButton > button, div.stDownloadButton > button {
     font-weight: 700 !important;
     font-size: 15px !important;
     border-radius: 8px !important;
-    height: 48px !important;
+    height: 46px !important;
     width: 100% !important;
+    margin-bottom: 2px !important;
 }
 div.stButton > button:hover, div.stDownloadButton > button:hover { 
     background-color: #DC2626 !important; 
@@ -149,54 +154,54 @@ div.stButton > button:hover, div.stDownloadButton > button:hover {
 /* العداد الأزرق الكبير */
 .blue-total-metric {
     background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
-    padding: 15px !important;
-    border-radius: 12px !important;
+    padding: 10px !important;
+    border-radius: 10px !important;
     text-align: center !important;
-    height: 110px !important;
+    height: 100px !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
     align-items: center !important;
     box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25) !important;
 }
-.blue-total-title { font-size: 13px !important; font-weight: bold !important; color: #ffffff !important; letter-spacing: 1px; }
-.blue-total-value { font-size: 34px !important; font-weight: 900 !important; color: #ffffff !important; }
+.blue-total-title { font-size: 12px !important; font-weight: bold !important; color: #ffffff !important; }
+.blue-total-value { font-size: 32px !important; font-weight: 900 !important; color: #ffffff !important; }
 
-/* العداد الأحمر الخاص بالمنطقة الحالية */
+/* العداد الأحمر للمنطقة */
 .red-region-metric {
     background-color: #EF4444 !important;
     color: #ffffff !important;
-    border-radius: 12px !important;
-    height: 110px !important;
+    border-radius: 10px !important;
+    height: 100px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-size: 16px !important;
+    font-size: 15px !important;
     font-weight: bold !important;
     text-align: center !important;
     box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2) !important;
 }
 
-/* صندوق طباعة تقارير المناطق */
+/* صندوق الطباعة */
 .print-section-box {
     background-color: #ffffff !important;
-    padding: 18px !important;
-    border-radius: 12px !important;
+    padding: 15px !important;
+    border-radius: 10px !important;
     border: 1px solid #cbd5e0 !important;
-    margin-top: 20px !important;
+    margin-top: 10px !important;
 }
 
 /* بطاقات البحث */
 .result-card {
     background-color: #DCE7F6 !important;
-    padding: 10px 15px !important;
+    padding: 8px 12px !important;
     border-radius: 8px !important;
     color: #1E3A8A !important;
     font-weight: bold !important;
-    font-size: 16px !important;
+    font-size: 15px !important;
     text-align: right !important;
     border: 1px solid #BEE3F8 !important;
-    height: 48px !important;
+    height: 44px !important;
     display: flex !important;
     align-items: center !important;
 }
@@ -217,7 +222,8 @@ if "region_input_val" not in st.session_state: st.session_state.region_input_val
 if "prop_input_val" not in st.session_state: st.session_state.prop_input_val = ""
 if "focus_field" not in st.session_state: st.session_state.focus_field = "region"
 if "search_val" not in st.session_state: st.session_state.search_val = ""
-if "error_msg" not in st.session_state: st.session_state.error_msg = None
+if "notification_msg" not in st.session_state: st.session_state.notification_msg = None
+if "notification_type" not in st.session_state: st.session_state.notification_type = None
 
 if 'selected_property' not in st.session_state: st.session_state.selected_property = None
 if 'edit_mode' not in st.session_state: st.session_state.edit_mode = False
@@ -252,7 +258,7 @@ with col2:
 
     df = st.session_state.local_db
 
-    # 📝 نموذج الإدخال (تم تقريب الحقول بضغط الأبعاد إلى 50%-50% مع تقليل المسافة بين الحقول)
+    # 📝 نموذج الإدخال
     with st.form("entry_form"):
         input_col1, input_col2 = st.columns([1, 1], gap="small")
         with input_col1:
@@ -284,12 +290,13 @@ with col2:
 
     # معالجة الضغط على Enter أو زر الحفظ
     if submitted or btn_save_manual:
-        st.session_state.region_input_val = region_val
-        st.session_state.prop_input_val = prop_val
+        # مسح الإشعارات السابقة عند إعادة إدخال جديدة فوراً
+        st.session_state.notification_msg = None
+        st.session_state.notification_type = None
 
         if region_val and not prop_val:
+            st.session_state.region_input_val = region_val
             st.session_state.focus_field = "property"
-            st.session_state.error_msg = None
             st.rerun()
 
         elif region_val and prop_val:
@@ -298,7 +305,8 @@ with col2:
                 is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_val.lower()) & (df["رقم العقار"].str.strip() == prop_val)].shape[0] > 0
             
             if is_duplicate:
-                st.session_state.error_msg = f"⚠️ العقار رقم [{prop_val}] مكرر ومسجل سابقاً في منطقة [{region_val}]!"
+                st.session_state.notification_msg = f"⚠️ العقار رقم [{prop_val}] مكرر ومسجل سابقاً في منطقة [{region_val}]!"
+                st.session_state.notification_type = "error"
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_val, "رقم العقار": prop_val}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
@@ -306,15 +314,22 @@ with col2:
                 sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                 upload_to_github(st.session_state.local_db)
-                st.session_state.error_msg = None
+                
+                st.session_state.notification_msg = f"✅ تم حفظ العقار [{prop_val}] بنجاح في منطقة [{region_val}]!"
+                st.session_state.notification_type = "success"
 
+            # تفريغ الإدخالات بالكامل والتوجه تلقائياً لاسم منطقة جديدة عند الضغط القادم
+            st.session_state.region_input_val = ""
             st.session_state.prop_input_val = ""
-            st.session_state.focus_field = "property"
+            st.session_state.focus_field = "region"
             st.rerun()
 
-    # عرض رسالة التكرار عند حدوثه
-    if st.session_state.error_msg:
-        st.error(st.session_state.error_msg)
+    # عرض الرسالة فقط عند وجودها
+    if st.session_state.notification_msg:
+        if st.session_state.notification_type == "error":
+            st.error(st.session_state.notification_msg)
+        elif st.session_state.notification_type == "success":
+            st.success(st.session_state.notification_msg)
 
     # 🎯 سكربت التوجيه التلقائي
     if st.session_state.focus_field == "property":
@@ -336,6 +351,7 @@ with col2:
             setTimeout(function() {
                 var inputs = window.parent.document.querySelectorAll('input[type="text"]');
                 if (inputs.length >= 1) {
+                    inputs[0].value = '';
                     inputs[0].focus();
                 }
             }, 50);
@@ -343,7 +359,7 @@ with col2:
         """
         st.components.v1.html(js_focus, height=0)
 
-    # 📊 العدادات المباشرة
+    # 📊 العدادات المباشرة ملاصقة للأزرار مباشرة
     stat_col1, stat_col2 = st.columns([1, 1], gap="small")
     
     current_reg = st.session_state.region_input_val
