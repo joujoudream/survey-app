@@ -313,7 +313,7 @@ with col2:
             st.session_state.focus_field = "property"
             st.rerun()
 
-        # 🔹 الحالة 2: الضغط على Enter بعد إدخال رقم العقار (تتم المعالجة والتوجه للمنطقة مباشرة)
+        # 🔹 الحالة 2: الضغط على Enter بعد إدخال رقم العقار
         elif region_val and prop_val:
             is_duplicate = False
             if not df.empty:
@@ -322,6 +322,10 @@ with col2:
             if is_duplicate:
                 st.session_state.notification_msg = f"⚠️ العقار رقم [{prop_val}] مكرر ومسجل سابقاً في منطقة [{region_val}]!"
                 st.session_state.notification_type = "error"
+                # 🎯 عند التكرار: تفريغ رقم العقار والتوجه فوراً لخانة العقار لإعادة الكتابة
+                st.session_state.region_input_val = region_val
+                st.session_state.prop_input_val = ""
+                st.session_state.focus_field = "property"
             else:
                 new_row = pd.DataFrame([{"المنطقة": region_val, "رقم العقار": prop_val}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
@@ -332,11 +336,11 @@ with col2:
                 
                 st.session_state.notification_msg = f"✅ تم حفظ العقار [{prop_val}] بنجاح في منطقة [{region_val}]!"
                 st.session_state.notification_type = "success"
+                # 🎯 عند النجاح: الاحتفاظ باسم المنطقة وتفريغ العقار والتوجه لاسم المنطقة
+                st.session_state.region_input_val = region_val
+                st.session_state.prop_input_val = ""
+                st.session_state.focus_field = "region"
 
-            # 🎯 تجهيز الحالة: الاحتفاظ باسم المنطقة، تفريغ العقار، والتوجيه التلقائي للمنطقة
-            st.session_state.region_input_val = region_val
-            st.session_state.prop_input_val = ""
-            st.session_state.focus_field = "region"
             st.rerun()
 
     # عرض الرسالة عند التكرار أو الحفظ
