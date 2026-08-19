@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import requests
@@ -212,6 +211,7 @@ if "region_input_val" not in st.session_state: st.session_state.region_input_val
 if "prop_input_val" not in st.session_state: st.session_state.prop_input_val = ""
 if "focus_field" not in st.session_state: st.session_state.focus_field = "region"
 if "search_val" not in st.session_state: st.session_state.search_val = ""
+if "error_msg" not in st.session_state: st.session_state.error_msg = None
 
 if 'selected_property' not in st.session_state: st.session_state.selected_property = None
 if 'edit_mode' not in st.session_state: st.session_state.edit_mode = False
@@ -276,13 +276,14 @@ with col2:
         else:
             st.button("📥 تنزيل شيت البيانات الحالي (فارغ)", disabled=True, use_container_width=True)
 
-    # معالجة الضغط على Enter أو زر الحفظ اليدوي (بدون إظهار أي رسائل)
+    # معالجة الضغط على Enter أو زر الحفظ
     if submitted or btn_save_manual:
         st.session_state.region_input_val = region_val
         st.session_state.prop_input_val = prop_val
 
         if region_val and not prop_val:
             st.session_state.focus_field = "property"
+            st.session_state.error_msg = None
             st.rerun()
 
         elif region_val and prop_val:
@@ -290,20 +291,27 @@ with col2:
             if not df.empty:
                 is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_val.lower()) & (df["رقم العقار"].str.strip() == prop_val)].shape[0] > 0
             
-            if not is_duplicate:
+            if is_duplicate:
+                st.session_state.error_msg = f"⚠️ العقار رقم [{prop_val}] مكرر ومسجل سابقاً في منطقة [{region_val}]!"
+            else:
                 new_row = pd.DataFrame([{"المنطقة": region_val, "رقم العقار": prop_val}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
                 
                 sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                 upload_to_github(st.session_state.local_db)
-                
-            # تفريغ خانة رقم العقار مباشرة والتجهيز للإدخال القادم
+                st.session_state.error_msg = None
+
+            # تفريغ خانة رقم العقار والتركيز عليها فوراً
             st.session_state.prop_input_val = ""
             st.session_state.focus_field = "property"
             st.rerun()
 
-    # 🎯 سكربت التوجيه التلقائي مع تنظيف الحقل فوراً
+    # عرض رسالة التكرار عند حدوثه
+    if st.session_state.error_msg:
+        st.error(st.session_state.error_msg)
+
+    # 🎯 سكربت التوجيه التلقائي مع تنظيف حقل الرقم
     if st.session_state.focus_field == "property":
         js_focus = """
         <script>
