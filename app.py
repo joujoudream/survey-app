@@ -235,7 +235,7 @@ with col2:
 
     df = st.session_state.local_db
 
-    # 📝 نموذج الإدخال مع تفعيل مفتاح Enter للتنفيذ
+    # 📝 نموذج الإدخال
     with st.form("entry_form", clear_on_submit=True):
         input_col1, input_col2 = st.columns(2)
         with input_col1:
@@ -243,13 +243,16 @@ with col2:
         with input_col2:
             property_number = st.text_input("🔢 رقم العقار الجديد", value="", placeholder="ادخل رقم العقار الحالي....", key="property_field_main").strip()
 
+        # إبقاء زر الحفظ بداخل النموذج ليعمل مفتاح Enter تلقائياً
         btn_save = st.form_submit_button("🚀 حفظ العقار والتحقق من التكرار (Enter)", use_container_width=True)
 
-    # 📥 زر تنزيل البيانات مفصل تماماً عن النموذج
-    action_btn_col1, action_btn_col2 = st.columns(2)
-    with action_btn_col1:
-        pass
-    with action_btn_col2:
+    # 📥 الأزرار متجانسة ومتجاورة جنباً إلى جنب
+    btn_row_col1, btn_row_col2 = st.columns(2)
+    with btn_row_col1:
+        # زر إضافي للضغط بالماوس في السطر المجاور
+        btn_save_manual = st.button("🚀 حفظ العقار والتحقق من التكرار", key="manual_save_btn", use_container_width=True)
+
+    with btn_row_col2:
         if not df.empty:
             sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
             csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
@@ -265,7 +268,7 @@ with col2:
             st.button("📥 تنزيل شيت البيانات الحالي (فارغ)", disabled=True, use_container_width=True)
 
     # معالجة الضغط على Enter أو زر الحفظ
-    if btn_save:
+    if btn_save or btn_save_manual:
         if region_input and property_number:
             is_duplicate = False
             if not df.empty:
