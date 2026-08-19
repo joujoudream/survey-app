@@ -306,11 +306,14 @@ with col2:
         st.session_state.notification_msg = None
         st.session_state.notification_type = None
 
+        # الحالة 1: تم الضغط على Enter من خانة المنطقة (المنطقة مليئة والعقار فارغ)
         if region_val and not prop_val:
             st.session_state.region_input_val = region_val
-            st.session_state.focus_field = "property"
+            st.session_state.prop_input_val = ""  # تفريغ خانة العقار القديمة
+            st.session_state.focus_field = "property"  # التوجه لخانة رقم العقار
             st.rerun()
 
+        # الحالة 2: تم الضغط على Enter من خانة العقار (إدخال كلتا الخانتين)
         elif region_val and prop_val:
             is_duplicate = False
             if not df.empty:
@@ -330,7 +333,7 @@ with col2:
                 st.session_state.notification_msg = f"✅ تم حفظ العقار [{prop_val}] بنجاح في منطقة [{region_val}]!"
                 st.session_state.notification_type = "success"
 
-            # 🎯 التعديل المطلوبة: الاحتفاظ باسم المنطقة وتفريغ العقار وإرجاع المؤشر للمنطقة
+            # تثبيت اسم المنطقة، تفريغ العقار، وإرجاع المؤشر مَظَلّلاً لاسم المنطقة
             st.session_state.region_input_val = region_val
             st.session_state.prop_input_val = ""
             st.session_state.focus_field = "region"
@@ -343,15 +346,15 @@ with col2:
         elif st.session_state.notification_type == "success":
             st.success(st.session_state.notification_msg)
 
-    # 🎯 سكربت التوجيه التلقائي مع تظليل النص في اسم المنطقة
+    # 🎯 سكربت التوجيه التلقائي مع التركيز وتحديد النص
     if st.session_state.focus_field == "property":
         js_focus = """
         <script>
             setTimeout(function() {
                 var inputs = window.parent.document.querySelectorAll('input[type="text"]');
                 if (inputs.length >= 2) {
-                    inputs[1].value = '';
                     inputs[1].focus();
+                    inputs[1].select();
                 }
             }, 50);
         </script>
