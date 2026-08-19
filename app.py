@@ -74,7 +74,7 @@ def load_any_local_file():
         except: pass
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيقات المعدلة
+# 🎨 التنسيقات المعدلة للتحكم بالمسافات
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -101,6 +101,12 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 }
 .sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
+
+/* إلغاء المسافات بين الأعمدة في نموذج الإدخال */
+div[data-testid="column"] {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+}
 
 /* إخفاء زر Submit الخاص بالنموذج */
 div[data-testid="stFormSubmitButton"] button {
@@ -246,9 +252,9 @@ with col2:
 
     df = st.session_state.local_db
 
-    # 📝 نموذج الإدخال
+    # 📝 نموذج الإدخال (تم تقريب الحقول بضغط الأبعاد إلى 50%-50% مع تقليل المسافة بين الحقول)
     with st.form("entry_form"):
-        input_col1, input_col2 = st.columns(2)
+        input_col1, input_col2 = st.columns([1, 1], gap="small")
         with input_col1:
             region_val = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.region_input_val, placeholder="النبطية، صور، صيدا...", key="form_region").strip()
         with input_col2:
@@ -257,7 +263,7 @@ with col2:
         submitted = st.form_submit_button("Submit")
 
     # 📥 الأزرار متجاورة
-    btn_row_col1, btn_row_col2 = st.columns(2)
+    btn_row_col1, btn_row_col2 = st.columns([1, 1], gap="small")
     with btn_row_col1:
         btn_save_manual = st.button("🚀 حفظ العقار والتحقق من التكرار", key="manual_save_btn", use_container_width=True)
 
@@ -302,7 +308,6 @@ with col2:
                 upload_to_github(st.session_state.local_db)
                 st.session_state.error_msg = None
 
-            # تفريغ خانة رقم العقار والتركيز عليها فوراً
             st.session_state.prop_input_val = ""
             st.session_state.focus_field = "property"
             st.rerun()
@@ -311,7 +316,7 @@ with col2:
     if st.session_state.error_msg:
         st.error(st.session_state.error_msg)
 
-    # 🎯 سكربت التوجيه التلقائي مع تنظيف حقل الرقم
+    # 🎯 سكربت التوجيه التلقائي
     if st.session_state.focus_field == "property":
         js_focus = """
         <script>
@@ -339,7 +344,7 @@ with col2:
         st.components.v1.html(js_focus, height=0)
 
     # 📊 العدادات المباشرة
-    stat_col1, stat_col2 = st.columns(2)
+    stat_col1, stat_col2 = st.columns([1, 1], gap="small")
     
     current_reg = st.session_state.region_input_val
     region_count = 0
@@ -410,7 +415,7 @@ with col2:
         if not matched_records.empty:
             st.write(f"📋 تم العثور على {len(matched_records)} نتيجة:")
             for idx, row in matched_records.iterrows():
-                c_info, c_edit, c_del = st.columns([3.5, 1, 1])
+                c_info, c_edit, c_del = st.columns([3.5, 1, 1], gap="small")
                 with c_info:
                     st.markdown(f"<div class='result-card'>📍 المنطقة: {row['المنطقة']} | 🔢 العقار: {row['رقم العقار']}</div>", unsafe_allow_html=True)
                 with c_edit:
@@ -440,7 +445,7 @@ with col2:
             mod_region = st.text_input("اسم المنطقة الجغرافية", value=prop.get('المنطقة', ''), key="mod_reg_val")
             mod_number = st.text_input("رقم العقار الجديد", value=prop.get('رقم العقار', ''), key="mod_num_val")
             
-            col_save, col_cancel = st.columns(2)
+            col_save, col_cancel = st.columns([1, 1], gap="small")
             with col_save:
                 if st.button("💾 حفظ التعديلات الآن", use_container_width=True, key="save_edit_now"):
                     st.session_state.local_db.at[idx, 'المنطقة'] = mod_region
@@ -464,7 +469,7 @@ with col2:
             st.subheader("🗑️ تأكيد الحذف")
             st.error(f"هل أنت تأكد من حذف العقار رقم [{prop.get('رقم العقار')}] من منطقة [{prop.get('المنطقة')}]؟")
             
-            col_confirm, col_cancel = st.columns(2)
+            col_confirm, col_cancel = st.columns([1, 1], gap="small")
             with col_confirm:
                 if st.button("🔥 نعم، قم بالحذف النهائي", use_container_width=True, key="confirm_del_now"):
                     st.session_state.local_db.drop(index=idx, inplace=True)
