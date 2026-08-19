@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import requests
@@ -102,7 +103,7 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 .sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
 
-/* إخفاء زر Submit للنموذج لجعل Enter يعمل بانسيابية */
+/* إخفاء زر Submit الخاص بالنموذج */
 div[data-testid="stFormSubmitButton"] button {
     opacity: 0 !important;
     height: 1px !important;
@@ -211,7 +212,6 @@ if "region_input_val" not in st.session_state: st.session_state.region_input_val
 if "prop_input_val" not in st.session_state: st.session_state.prop_input_val = ""
 if "focus_field" not in st.session_state: st.session_state.focus_field = "region"
 if "search_val" not in st.session_state: st.session_state.search_val = ""
-if "msg" not in st.session_state: st.session_state.msg = None
 
 if 'selected_property' not in st.session_state: st.session_state.selected_property = None
 if 'edit_mode' not in st.session_state: st.session_state.edit_mode = False
@@ -246,7 +246,7 @@ with col2:
 
     df = st.session_state.local_db
 
-    # 📝 نموذج الإدخال السريع الذكي
+    # 📝 نموذج الإدخال
     with st.form("entry_form"):
         input_col1, input_col2 = st.columns(2)
         with input_col1:
@@ -254,7 +254,6 @@ with col2:
         with input_col2:
             prop_val = st.text_input("🔢 رقم العقار الجديد", value=st.session_state.prop_input_val, placeholder="ادخل رقم العقار الحالي....", key="form_prop").strip()
 
-        # زر مخفي للاستجابة لزر Enter
         submitted = st.form_submit_button("Submit")
 
     # 📥 الأزرار متجاورة
@@ -277,25 +276,21 @@ with col2:
         else:
             st.button("📥 تنزيل شيت البيانات الحالي (فارغ)", disabled=True, use_container_width=True)
 
-    # معالجة الضغط على Enter أو زر الحفظ اليدوي
+    # معالجة الضغط على Enter أو زر الحفظ اليدوي (بدون إظهار أي رسائل)
     if submitted or btn_save_manual:
         st.session_state.region_input_val = region_val
         st.session_state.prop_input_val = prop_val
 
-        # حالة 1: تم إدخال المنطقة فقط والضغط على Enter -> الانتقال إلى رقم العقار
         if region_val and not prop_val:
             st.session_state.focus_field = "property"
             st.rerun()
 
-        # حالة 2: تم إدخال رقم العقار والمنطقة -> الحفظ ثم مسح رقم العقار والتركيز عليه فوراً
         elif region_val and prop_val:
             is_duplicate = False
             if not df.empty:
                 is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_val.lower()) & (df["رقم العقار"].str.strip() == prop_val)].shape[0] > 0
             
-            if is_duplicate: 
-                st.session_state.msg = ("error", f"❌ إلغاء: العقار رقم [{prop_val}] مسجل سابقاً في منطقة [{region_val}]!")
-            else:
+            if not is_duplicate:
                 new_row = pd.DataFrame([{"المنطقة": region_val, "رقم العقار": prop_val}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
                 
@@ -303,30 +298,22 @@ with col2:
                 sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                 upload_to_github(st.session_state.local_db)
                 
-                st.session_state.msg = ("success", f"✅ تم حفظ العقار [{prop_val}] بنجاح في منطقة [{region_val}]!")
-                
-                # تفريغ رقم العقار والإبقاء على اسم المنطقة
-                st.session_state.prop_input_val = ""
-                st.session_state.focus_field = "property"
-                st.rerun()
+            # تفريغ خانة رقم العقار مباشرة والتجهيز للإدخال القادم
+            st.session_state.prop_input_val = ""
+            st.session_state.focus_field = "property"
+            st.rerun()
 
-    # عرض الرسائل التوضيحية
-    if st.session_state.msg:
-        msg_type, msg_text = st.session_state.msg
-        if msg_type == "error": st.error(msg_text)
-        elif msg_type == "success": st.success(msg_text)
-        st.session_state.msg = None
-
-    # 🎯 سكربت التوجيه التلقائي (Auto Focus)
+    # 🎯 سكربت التوجيه التلقائي مع تنظيف الحقل فوراً
     if st.session_state.focus_field == "property":
         js_focus = """
         <script>
             setTimeout(function() {
                 var inputs = window.parent.document.querySelectorAll('input[type="text"]');
                 if (inputs.length >= 2) {
+                    inputs[1].value = '';
                     inputs[1].focus();
                 }
-            }, 100);
+            }, 50);
         </script>
         """
         st.components.v1.html(js_focus, height=0)
@@ -338,7 +325,7 @@ with col2:
                 if (inputs.length >= 1) {
                     inputs[0].focus();
                 }
-            }, 100);
+            }, 50);
         </script>
         """
         st.components.v1.html(js_focus, height=0)
@@ -455,7 +442,6 @@ with col2:
                     sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                     upload_to_github(st.session_state.local_db)
                     
-                    st.success("✅ تم تعديل البيانات بنجاح!")
                     st.session_state.selected_property = None
                     st.session_state.edit_mode = False
                     st.rerun()
@@ -480,7 +466,6 @@ with col2:
                     sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                     upload_to_github(st.session_state.local_db)
                     
-                    st.success("🗑️ تم حذف العقار بنجاح!")
                     st.session_state.selected_property = None
                     st.rerun()
                     
