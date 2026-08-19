@@ -102,9 +102,13 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 .sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
 
-/* إخفاء زر Submit الخاص بالنموذج */
-div[data-testid="stFormSubmitButton"] {
-    display: none !important;
+/* إخفاء زر Submit للنموذج لجعل Enter يعمل بانسيابية */
+div[data-testid="stFormSubmitButton"] button {
+    opacity: 0 !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
 }
 
 div[data-testid="stForm"] {
@@ -203,9 +207,11 @@ if "local_db" not in st.session_state or st.session_state.local_db is None:
 if not isinstance(st.session_state.local_db, pd.DataFrame) or "المنطقة" not in st.session_state.local_db.columns or "رقم العقار" not in st.session_state.local_db.columns:
     st.session_state.local_db = pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-if "last_region" not in st.session_state: st.session_state.last_region = ""
+if "region_input_val" not in st.session_state: st.session_state.region_input_val = ""
+if "prop_input_val" not in st.session_state: st.session_state.prop_input_val = ""
 if "focus_field" not in st.session_state: st.session_state.focus_field = "region"
 if "search_val" not in st.session_state: st.session_state.search_val = ""
+if "msg" not in st.session_state: st.session_state.msg = None
 
 if 'selected_property' not in st.session_state: st.session_state.selected_property = None
 if 'edit_mode' not in st.session_state: st.session_state.edit_mode = False
@@ -240,15 +246,16 @@ with col2:
 
     df = st.session_state.local_db
 
-    # 📝 نموذج الإدخال مع تفريغ تلقائي للمستندات
-    with st.form("entry_form", clear_on_submit=True):
+    # 📝 نموذج الإدخال السريع الذكي
+    with st.form("entry_form"):
         input_col1, input_col2 = st.columns(2)
         with input_col1:
-            region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field_main").strip()
+            region_val = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.region_input_val, placeholder="النبطية، صور، صيدا...", key="form_region").strip()
         with input_col2:
-            property_number = st.text_input("🔢 رقم العقار الجديد", value="", placeholder="ادخل رقم العقار الحالي....", key="property_field_main").strip()
+            prop_val = st.text_input("🔢 رقم العقار الجديد", value=st.session_state.prop_input_val, placeholder="ادخل رقم العقار الحالي....", key="form_prop").strip()
 
-        btn_save_hidden = st.form_submit_button("حفظ_مخفي")
+        # زر مخفي للاستجابة لزر Enter
+        submitted = st.form_submit_button("Submit")
 
     # 📥 الأزرار متجاورة
     btn_row_col1, btn_row_col2 = st.columns(2)
@@ -270,37 +277,45 @@ with col2:
         else:
             st.button("📥 تنزيل شيت البيانات الحالي (فارغ)", disabled=True, use_container_width=True)
 
-    # معالجة الضغط على Enter أو زر الحفظ
-    if btn_save_hidden or btn_save_manual:
-        # حالة 1: تم إدخال المنطقة فقط والضغط على Enter -> التوجه إلى رقم العقار
-        if region_input and not property_number:
-            st.session_state.last_region = region_input
+    # معالجة الضغط على Enter أو زر الحفظ اليدوي
+    if submitted or btn_save_manual:
+        st.session_state.region_input_val = region_val
+        st.session_state.prop_input_val = prop_val
+
+        # حالة 1: تم إدخال المنطقة فقط والضغط على Enter -> الانتقال إلى رقم العقار
+        if region_val and not prop_val:
             st.session_state.focus_field = "property"
             st.rerun()
 
-        # حالة 2: تم إدخال رقم العقار والمنطقة -> الحفظ ثم مسح رقم العقار والجهوزية لإدخال جديد
-        elif region_input and property_number:
+        # حالة 2: تم إدخال رقم العقار والمنطقة -> الحفظ ثم مسح رقم العقار والتركيز عليه فوراً
+        elif region_val and prop_val:
             is_duplicate = False
             if not df.empty:
-                is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
+                is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_val.lower()) & (df["رقم العقار"].str.strip() == prop_val)].shape[0] > 0
             
             if is_duplicate: 
-                st.error(f"❌ إلغاء: العقار رقم [{property_number}] مسجل سابقاً في منطقة [{region_input}]!")
+                st.session_state.msg = ("error", f"❌ إلغاء: العقار رقم [{prop_val}] مسجل سابقاً في منطقة [{region_val}]!")
             else:
-                new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
+                new_row = pd.DataFrame([{"المنطقة": region_val, "رقم العقار": prop_val}])
                 st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
                 
                 sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
                 sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
                 upload_to_github(st.session_state.local_db)
-                st.success(f"✅ تم حفظ العقار [{property_number}] بنجاح في منطقة [{region_input}]!")
                 
-                # إبقاء اسم المنطقة وتفريغ رقم العقار للبدء بالحقن التالي فوراً
-                st.session_state.last_region = region_input
+                st.session_state.msg = ("success", f"✅ تم حفظ العقار [{prop_val}] بنجاح في منطقة [{region_val}]!")
+                
+                # تفريغ رقم العقار والإبقاء على اسم المنطقة
+                st.session_state.prop_input_val = ""
                 st.session_state.focus_field = "property"
                 st.rerun()
-        else:
-            st.warning("⚠️ يرجى إدخال اسم المنطقة ورقم العقار قبل الحفظ.")
+
+    # عرض الرسائل التوضيحية
+    if st.session_state.msg:
+        msg_type, msg_text = st.session_state.msg
+        if msg_type == "error": st.error(msg_text)
+        elif msg_type == "success": st.success(msg_text)
+        st.session_state.msg = None
 
     # 🎯 سكربت التوجيه التلقائي (Auto Focus)
     if st.session_state.focus_field == "property":
@@ -310,9 +325,8 @@ with col2:
                 var inputs = window.parent.document.querySelectorAll('input[type="text"]');
                 if (inputs.length >= 2) {
                     inputs[1].focus();
-                    inputs[1].value = '';
                 }
-            }, 150);
+            }, 100);
         </script>
         """
         st.components.v1.html(js_focus, height=0)
@@ -324,7 +338,7 @@ with col2:
                 if (inputs.length >= 1) {
                     inputs[0].focus();
                 }
-            }, 150);
+            }, 100);
         </script>
         """
         st.components.v1.html(js_focus, height=0)
@@ -332,11 +346,12 @@ with col2:
     # 📊 العدادات المباشرة
     stat_col1, stat_col2 = st.columns(2)
     
+    current_reg = st.session_state.region_input_val
     region_count = 0
-    if region_input and not df.empty:
-        region_count = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()].shape[0]
+    if current_reg and not df.empty:
+        region_count = df[df["المنطقة"].str.strip().str.lower() == current_reg.lower()].shape[0]
 
-    # 🔵 العداد الأزرق الإجمالي على اليمين
+    # 🔵 العداد الأزرق الإجمالي
     with stat_col1:
         total_count = len(df) if not df.empty else 0
         st.markdown(
@@ -349,10 +364,10 @@ with col2:
             unsafe_allow_html=True
         )
 
-    # 🔴 العداد الأحمر الخاص بالمنطقة على اليسار
+    # 🔴 العداد الأحمر للمنطقة
     with stat_col2:
         st.markdown(
-            f"<div class='red-region-metric'>🔸 عدد عقارات منطقة ({region_input if region_input else '...'}) <br> [{region_count}]</div>", 
+            f"<div class='red-region-metric'>🔸 عدد عقارات منطقة ({current_reg if current_reg else '...'}) <br> [{region_count}]</div>", 
             unsafe_allow_html=True
         )
 
