@@ -102,7 +102,7 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 .sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
 
-/* إزالة حدود النموذج الشفاف */
+/* إلغاء حواف وتنسيق stForm */
 div[data-testid="stForm"] {
     border: none !important;
     padding: 0px !important;
@@ -132,7 +132,7 @@ div.stButton > button:hover, div.stDownloadButton > button:hover, div[data-testi
     background-color: #DC2626 !important; 
 }
 
-/* العداد الأزرق الكبيرة */
+/* العداد الأزرق الكبير */
 .blue-total-metric {
     background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
     padding: 15px !important;
@@ -212,7 +212,7 @@ with col2:
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
 
-    # 📂 قسم تحميل ملف إكسل / CSV لأول مرة عند فتح التطبيق
+    # 📂 رفع ملف قديم عند البداية
     with st.expander("📁 رفع ملف Excel أو CSV قديم للبدء منه (اختياري)", expanded=False):
         uploaded_file = st.file_uploader("قم بسحب وإفلات ملف البيانات هنا أو اختر الملف من جهازك:", type=["csv", "xlsx", "xls"])
         if uploaded_file is not None:
@@ -235,7 +235,7 @@ with col2:
 
     df = st.session_state.local_db
 
-    # 📝 نموذج الإدخال السريع عبر Enter
+    # 📝 نموذج الإدخال مع تفعيل مفتاح Enter للتنفيذ
     with st.form("entry_form", clear_on_submit=True):
         input_col1, input_col2 = st.columns(2)
         with input_col1:
@@ -243,27 +243,26 @@ with col2:
         with input_col2:
             property_number = st.text_input("🔢 رقم العقار الجديد", value="", placeholder="ادخل رقم العقار الحالي....", key="property_field_main").strip()
 
-        action_col1, action_col2 = st.columns(2)
-        with action_col1:
-            btn_save = st.form_submit_button("🚀 حفظ العقار والتحقق من التكرار (Enter)")
-        with action_col2:
-            # تم تعيين الحاوية البرمجية لزر التنزيل ليعمل خارج Form لتفادي التعارض
-            pass
+        btn_save = st.form_submit_button("🚀 حفظ العقار والتحقق من التكرار (Enter)", use_container_width=True)
 
-    # زر تنزيل البيانات الشيت الحالي بجانب الحفظ
-    if not df.empty:
-        sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-        csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
-        action_col2.download_button(
-            label="📥 تنزيل شيت البيانات الحالي (Excel/CSV)",
-            data=csv_data,
-            file_name="KhatibAlami_Midan_Data.csv",
-            mime="text/csv",
-            key="download_btn_csv_direct",
-            use_container_width=True
-        )
-    else:
-        action_col2.button("📥 تنزيل شيت البيانات الحالي (فارغ)", disabled=True, use_container_width=True)
+    # 📥 زر تنزيل البيانات مفصل تماماً عن النموذج
+    action_btn_col1, action_btn_col2 = st.columns(2)
+    with action_btn_col1:
+        pass
+    with action_btn_col2:
+        if not df.empty:
+            sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
+            csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
+            st.download_button(
+                label="📥 تنزيل شيت البيانات الحالي (Excel/CSV)",
+                data=csv_data,
+                file_name="KhatibAlami_Midan_Data.csv",
+                mime="text/csv",
+                key="download_btn_csv_direct",
+                use_container_width=True
+            )
+        else:
+            st.button("📥 تنزيل شيت البيانات الحالي (فارغ)", disabled=True, use_container_width=True)
 
     # معالجة الضغط على Enter أو زر الحفظ
     if btn_save:
