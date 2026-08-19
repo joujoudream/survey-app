@@ -74,7 +74,7 @@ def load_any_local_file():
         except: pass
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيقات المعدلة لتكبير العناوين والخطوط
+# 🎨 التنسيقات
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=400;700;900&display=swap');
@@ -87,7 +87,7 @@ html, body, [class*='css'], [data-testid='stAppViewContainer'] {
 header[data-testid='stHeader'] { background: transparent !important; display: none !important; }
 .block-container { padding-top: 1rem !important; padding-bottom: 1rem !important; }
 
-/* كروت الترويسة الرئيسية - خطوط أكبر واوضح */
+/* كروت الترويسة الرئيسية */
 .header-card { 
     background-color: #EBF8FF !important; padding: 22px 15px !important; border-radius: 14px !important; 
     box-shadow: 0 6px 14px rgba(30, 58, 138, 0.1) !important; margin-bottom: 4px !important; text-align: center !important; border: 2px solid #BEE3F8 !important; 
@@ -110,7 +110,6 @@ label[data-testid="stWidgetLabel"] p {
     color: #1E3A8A !important;
 }
 
-/* إلغاء المسافات بين العناصر والأعمدة */
 div[data-testid="column"] {
     padding-left: 3px !important;
     padding-right: 3px !important;
@@ -143,7 +142,7 @@ div[data-testid="stTextInput"] input {
     height: 50px !important;
 }
 
-/* الأزرار خط عريض وأكبر */
+/* الأزرار */
 div.stButton > button, div.stDownloadButton > button {
     background-color: #EF4444 !important;
     color: #FFFFFF !important;
@@ -250,7 +249,7 @@ with col2:
 
     df = st.session_state.local_db
 
-    # 📂 رفع ملف قديم - يظهر فقط أول مرة إذا كانت قاعدة البيانات فارغة تماماً
+    # 📂 رفع ملف قديم
     if df.empty:
         with st.expander("📁 رفع ملف Excel أو CSV قديم للبدء منه (يظهر لأول مرة فقط)", expanded=True):
             uploaded_file = st.file_uploader("قم بسحب وإفلات ملف البيانات هنا أو اختر الملف من جهازك:", type=["csv", "xlsx", "xls"])
@@ -331,7 +330,8 @@ with col2:
                 st.session_state.notification_msg = f"✅ تم حفظ العقار [{prop_val}] بنجاح في منطقة [{region_val}]!"
                 st.session_state.notification_type = "success"
 
-            st.session_state.region_input_val = ""
+            # 🎯 التعديل المطلوبة: الاحتفاظ باسم المنطقة وتفريغ العقار وإرجاع المؤشر للمنطقة
+            st.session_state.region_input_val = region_val
             st.session_state.prop_input_val = ""
             st.session_state.focus_field = "region"
             st.rerun()
@@ -343,7 +343,7 @@ with col2:
         elif st.session_state.notification_type == "success":
             st.success(st.session_state.notification_msg)
 
-    # 🎯 سكربت التوجيه التلقائي
+    # 🎯 سكربت التوجيه التلقائي مع تظليل النص في اسم المنطقة
     if st.session_state.focus_field == "property":
         js_focus = """
         <script>
@@ -363,15 +363,15 @@ with col2:
             setTimeout(function() {
                 var inputs = window.parent.document.querySelectorAll('input[type="text"]');
                 if (inputs.length >= 1) {
-                    inputs[0].value = '';
                     inputs[0].focus();
+                    inputs[0].select();
                 }
             }, 50);
         </script>
         """
         st.components.v1.html(js_focus, height=0)
 
-    # 📊 العدادات المباشرة ملاصقة للأزرار مباشرة
+    # 📊 العدادات المباشرة
     stat_col1, stat_col2 = st.columns([1, 1], gap="small")
     
     current_reg = st.session_state.region_input_val
