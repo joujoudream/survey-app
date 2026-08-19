@@ -74,10 +74,10 @@ def load_any_local_file():
         except: pass
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيقات
+# 🎨 التنسيقات المعدلة لتكبير العناوين والخطوط
 ultimate_css = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=400;700;900&display=swap');
 html, body, [class*='css'], [data-testid='stAppViewContainer'] { 
     font-family: 'Tajawal', sans-serif !important; 
     direction: rtl !important; 
@@ -87,20 +87,28 @@ html, body, [class*='css'], [data-testid='stAppViewContainer'] {
 header[data-testid='stHeader'] { background: transparent !important; display: none !important; }
 .block-container { padding-top: 1rem !important; padding-bottom: 1rem !important; }
 
-/* كروت الترويسة */
+/* كروت الترويسة الرئيسية - خطوط أكبر واوضح */
 .header-card { 
-    background-color: #EBF8FF !important; padding: 15px 12px !important; border-radius: 12px !important; 
-    box-shadow: 0 6px 12px rgba(30, 58, 138, 0.08) !important; margin-bottom: 2px !important; text-align: center !important; border: 1px solid #BEE3F8 !important; 
+    background-color: #EBF8FF !important; padding: 22px 15px !important; border-radius: 14px !important; 
+    box-shadow: 0 6px 14px rgba(30, 58, 138, 0.1) !important; margin-bottom: 4px !important; text-align: center !important; border: 2px solid #BEE3F8 !important; 
 }
-.company-header { color: #1E3A8A !important; font-family: 'Arial', sans-serif !important; font-size: 26px !important; font-weight: bold !important; }
-.company-subtitle { color: #2D3748 !important; font-size: 14px !important; font-weight: 500 !important; margin-top: 2px !important; }
+.company-header { color: #1E3A8A !important; font-family: 'Arial', sans-serif !important; font-size: 34px !important; font-weight: 900 !important; letter-spacing: 0.5px; }
+.company-subtitle { color: #2D3748 !important; font-size: 18px !important; font-weight: 700 !important; margin-top: 4px !important; }
 
+/* بطاقة التوقيع */
 .main-signature-card { 
-    background-color: #ffffff !important; padding: 10px 14px !important; border-radius: 10px !important; text-align: center !important; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04) !important; margin: 6px auto 10px auto !important; border: 1px solid #e2e8f0 !important; max-width: 550px !important; 
+    background-color: #ffffff !important; padding: 12px 18px !important; border-radius: 12px !important; text-align: center !important; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05) !important; margin: 8px auto 12px auto !important; border: 1.5px solid #cbd5e0 !important; max-width: 600px !important; 
 }
-.sig-title { color: #4A5568 !important; font-size: 12px; font-weight: bold; }
-.sig-name { color: #E53E3E !important; font-size: 17px; font-weight: 700; margin-top: 1px; }
+.sig-title { color: #4A5568 !important; font-size: 16px !important; font-weight: 700 !important; }
+.sig-name { color: #E53E3E !important; font-size: 22px !important; font-weight: 900 !important; margin-top: 2px; }
+
+/* عناوين الحقول والمدخلات */
+label[data-testid="stWidgetLabel"] p {
+    font-size: 19px !important;
+    font-weight: 900 !important;
+    color: #1E3A8A !important;
+}
 
 /* إلغاء المسافات بين العناصر والأعمدة */
 div[data-testid="column"] {
@@ -129,21 +137,21 @@ div[data-testid="stForm"] {
 
 /* مربعات النصوص */
 div[data-testid="stTextInput"] input {
-    font-size: 17px !important;
-    font-weight: bold !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
     color: #1E3A8A !important;
-    height: 46px !important;
+    height: 50px !important;
 }
 
-/* الأزرار */
+/* الأزرار خط عريض وأكبر */
 div.stButton > button, div.stDownloadButton > button {
     background-color: #EF4444 !important;
     color: #FFFFFF !important;
     border: 1px solid #DC2626 !important;
-    font-weight: 700 !important;
-    font-size: 15px !important;
+    font-weight: 900 !important;
+    font-size: 17px !important;
     border-radius: 8px !important;
-    height: 46px !important;
+    height: 50px !important;
     width: 100% !important;
     margin-bottom: 2px !important;
 }
@@ -155,29 +163,29 @@ div.stButton > button:hover, div.stDownloadButton > button:hover {
 .blue-total-metric {
     background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
     padding: 10px !important;
-    border-radius: 10px !important;
+    border-radius: 12px !important;
     text-align: center !important;
-    height: 100px !important;
+    height: 110px !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
     align-items: center !important;
     box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25) !important;
 }
-.blue-total-title { font-size: 12px !important; font-weight: bold !important; color: #ffffff !important; }
-.blue-total-value { font-size: 32px !important; font-weight: 900 !important; color: #ffffff !important; }
+.blue-total-title { font-size: 15px !important; font-weight: 900 !important; color: #ffffff !important; letter-spacing: 0.5px; }
+.blue-total-value { font-size: 38px !important; font-weight: 900 !important; color: #ffffff !important; }
 
 /* العداد الأحمر للمنطقة */
 .red-region-metric {
     background-color: #EF4444 !important;
     color: #ffffff !important;
-    border-radius: 10px !important;
-    height: 100px !important;
+    border-radius: 12px !important;
+    height: 110px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-size: 15px !important;
-    font-weight: bold !important;
+    font-size: 18px !important;
+    font-weight: 900 !important;
     text-align: center !important;
     box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2) !important;
 }
@@ -185,10 +193,15 @@ div.stButton > button:hover, div.stDownloadButton > button:hover {
 /* صندوق الطباعة */
 .print-section-box {
     background-color: #ffffff !important;
-    padding: 15px !important;
-    border-radius: 10px !important;
+    padding: 18px !important;
+    border-radius: 12px !important;
     border: 1px solid #cbd5e0 !important;
-    margin-top: 10px !important;
+    margin-top: 12px !important;
+}
+.print-section-box h3 {
+    font-size: 24px !important;
+    font-weight: 900 !important;
+    color: #1E3A8A !important;
 }
 
 /* بطاقات البحث */
@@ -197,11 +210,11 @@ div.stButton > button:hover, div.stDownloadButton > button:hover {
     padding: 8px 12px !important;
     border-radius: 8px !important;
     color: #1E3A8A !important;
-    font-weight: bold !important;
-    font-size: 15px !important;
+    font-weight: 900 !important;
+    font-size: 17px !important;
     text-align: right !important;
     border: 1px solid #BEE3F8 !important;
-    height: 44px !important;
+    height: 48px !important;
     display: flex !important;
     align-items: center !important;
 }
