@@ -306,14 +306,14 @@ with col2:
         st.session_state.notification_msg = None
         st.session_state.notification_type = None
 
-        # الحالة 1: تم الضغط على Enter من خانة المنطقة (المنطقة مليئة والعقار فارغ)
+        # 🔹 الحالة 1: الضغط على Enter بعد إدخال اسم المنطقة فقط
         if region_val and not prop_val:
             st.session_state.region_input_val = region_val
-            st.session_state.prop_input_val = ""  # تفريغ خانة العقار القديمة
-            st.session_state.focus_field = "property"  # التوجه لخانة رقم العقار
+            st.session_state.prop_input_val = ""
+            st.session_state.focus_field = "property"
             st.rerun()
 
-        # الحالة 2: تم الضغط على Enter من خانة العقار (إدخال كلتا الخانتين)
+        # 🔹 الحالة 2: الضغط على Enter بعد إدخال رقم العقار (تتم المعالجة والتوجه للمنطقة مباشرة)
         elif region_val and prop_val:
             is_duplicate = False
             if not df.empty:
@@ -333,7 +333,7 @@ with col2:
                 st.session_state.notification_msg = f"✅ تم حفظ العقار [{prop_val}] بنجاح في منطقة [{region_val}]!"
                 st.session_state.notification_type = "success"
 
-            # تثبيت اسم المنطقة، تفريغ العقار، وإرجاع المؤشر مَظَلّلاً لاسم المنطقة
+            # 🎯 تجهيز الحالة: الاحتفاظ باسم المنطقة، تفريغ العقار، والتوجيه التلقائي للمنطقة
             st.session_state.region_input_val = region_val
             st.session_state.prop_input_val = ""
             st.session_state.focus_field = "region"
@@ -346,7 +346,7 @@ with col2:
         elif st.session_state.notification_type == "success":
             st.success(st.session_state.notification_msg)
 
-    # 🎯 سكربت التوجيه التلقائي مع التركيز وتحديد النص
+    # 🎯 سكربت التوجيه والتركيز (JavaScript)
     if st.session_state.focus_field == "property":
         js_focus = """
         <script>
