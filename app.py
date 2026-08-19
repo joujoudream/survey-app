@@ -240,15 +240,14 @@ with col2:
 
     df = st.session_state.local_db
 
-    # 📝 نموذج الإدخال السريع الذكي
-    with st.form("entry_form", clear_on_submit=False):
+    # 📝 نموذج الإدخال مع تفريغ تلقائي للمستندات
+    with st.form("entry_form", clear_on_submit=True):
         input_col1, input_col2 = st.columns(2)
         with input_col1:
             region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field_main").strip()
         with input_col2:
             property_number = st.text_input("🔢 رقم العقار الجديد", value="", placeholder="ادخل رقم العقار الحالي....", key="property_field_main").strip()
 
-        # زر مخفي لتأمين الحفظ عند الضغط على Enter
         btn_save_hidden = st.form_submit_button("حفظ_مخفي")
 
     # 📥 الأزرار متجاورة
@@ -279,7 +278,7 @@ with col2:
             st.session_state.focus_field = "property"
             st.rerun()
 
-        # حالة 2: تم إدخال رقم العقار والمنطقة والضغط على Enter -> الحفظ والتشييك ثم التوجه لمنطقة جديدة
+        # حالة 2: تم إدخال رقم العقار والمنطقة -> الحفظ ثم مسح رقم العقار والجهوزية لإدخال جديد
         elif region_input and property_number:
             is_duplicate = False
             if not df.empty:
@@ -296,12 +295,12 @@ with col2:
                 upload_to_github(st.session_state.local_db)
                 st.success(f"✅ تم حفظ العقار [{property_number}] بنجاح في منطقة [{region_input}]!")
                 
-                # تصفير الحقوق للبدء من منطقة جديدة
-                st.session_state.last_region = ""
-                st.session_state.focus_field = "region"
+                # إبقاء اسم المنطقة وتفريغ رقم العقار للبدء بالحقن التالي فوراً
+                st.session_state.last_region = region_input
+                st.session_state.focus_field = "property"
                 st.rerun()
         else:
-            st.warning("⚠️ يرجى إدخال اسم المنطقة قبل الانتقال للخطوة التالية.")
+            st.warning("⚠️ يرجى إدخال اسم المنطقة ورقم العقار قبل الحفظ.")
 
     # 🎯 سكربت التوجيه التلقائي (Auto Focus)
     if st.session_state.focus_field == "property":
@@ -311,6 +310,7 @@ with col2:
                 var inputs = window.parent.document.querySelectorAll('input[type="text"]');
                 if (inputs.length >= 2) {
                     inputs[1].focus();
+                    inputs[1].value = '';
                 }
             }, 150);
         </script>
