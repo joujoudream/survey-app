@@ -74,7 +74,7 @@ def load_any_local_file():
         except: pass
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيقات المعدلة لإلغاء المسافات العمودية
+# 🎨 التنسيقات
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=300;500;700&display=swap');
@@ -235,28 +235,29 @@ with col2:
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
 
-    # 📂 رفع ملف قديم عند البداية
-    with st.expander("📁 رفع ملف Excel أو CSV قديم للبدء منه (اختياري)", expanded=False):
-        uploaded_file = st.file_uploader("قم بسحب وإفلات ملف البيانات هنا أو اختر الملف من جهازك:", type=["csv", "xlsx", "xls"])
-        if uploaded_file is not None:
-            try:
-                if uploaded_file.name.endswith('.csv'):
-                    df_up = pd.read_csv(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
-                else:
-                    df_up = pd.read_excel(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
-                
-                if "المنطقة" in df_up.columns and "رقم العقار" in df_up.columns:
-                    st.session_state.local_db = df_up[["المنطقة", "رقم العقار"]].dropna()
-                    st.session_state.local_db.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
-                    upload_to_github(st.session_state.local_db)
-                    st.success("✅ تم تحميل الملف بنجاح ودمجه في النظام!")
-                    st.rerun()
-                else:
-                    st.error("❌ الملف لا يحتوي على الأعمدة المطلوبة: ('المنطقة' و 'رقم العقار')")
-            except Exception as e:
-                st.error(f"❌ حدث خطأ أثناء قراءة الملف: {e}")
-
     df = st.session_state.local_db
+
+    # 📂 رفع ملف قديم - يظهر فقط أول مرة إذا كانت قاعدة البيانات فارغة تماماً
+    if df.empty:
+        with st.expander("📁 رفع ملف Excel أو CSV قديم للبدء منه (يظهر لأول مرة فقط)", expanded=True):
+            uploaded_file = st.file_uploader("قم بسحب وإفلات ملف البيانات هنا أو اختر الملف من جهازك:", type=["csv", "xlsx", "xls"])
+            if uploaded_file is not None:
+                try:
+                    if uploaded_file.name.endswith('.csv'):
+                        df_up = pd.read_csv(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
+                    else:
+                        df_up = pd.read_excel(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
+                    
+                    if "المنطقة" in df_up.columns and "رقم العقار" in df_up.columns:
+                        st.session_state.local_db = df_up[["المنطقة", "رقم العقار"]].dropna()
+                        st.session_state.local_db.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
+                        upload_to_github(st.session_state.local_db)
+                        st.success("✅ تم تحميل الملف بنجاح ودمجه في النظام!")
+                        st.rerun()
+                    else:
+                        st.error("❌ الملف لا يحتوي على الأعمدة المطلوبة: ('المنطقة' و 'رقم العقار')")
+                except Exception as e:
+                    st.error(f"❌ حدث خطأ أثناء قراءة الملف: {e}")
 
     # 📝 نموذج الإدخال
     with st.form("entry_form"):
@@ -290,7 +291,6 @@ with col2:
 
     # معالجة الضغط على Enter أو زر الحفظ
     if submitted or btn_save_manual:
-        # مسح الإشعارات السابقة عند إعادة إدخال جديدة فوراً
         st.session_state.notification_msg = None
         st.session_state.notification_type = None
 
@@ -318,13 +318,12 @@ with col2:
                 st.session_state.notification_msg = f"✅ تم حفظ العقار [{prop_val}] بنجاح في منطقة [{region_val}]!"
                 st.session_state.notification_type = "success"
 
-            # تفريغ الإدخالات بالكامل والتوجه تلقائياً لاسم منطقة جديدة عند الضغط القادم
             st.session_state.region_input_val = ""
             st.session_state.prop_input_val = ""
             st.session_state.focus_field = "region"
             st.rerun()
 
-    # عرض الرسالة فقط عند وجودها
+    # عرض الرسالة عند التكرار أو الحفظ
     if st.session_state.notification_msg:
         if st.session_state.notification_type == "error":
             st.error(st.session_state.notification_msg)
