@@ -102,6 +102,13 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 .sig-title { color: #4A5568 !important; font-size: 13px; font-weight: bold; }
 .sig-name { color: #E53E3E !important; font-size: 18px; font-weight: 700; margin-top: 2px; }
 
+/* إزالة حدود النموذج الشفاف */
+div[data-testid="stForm"] {
+    border: none !important;
+    padding: 0px !important;
+    background: transparent !important;
+}
+
 /* تنسيق مربعات النصوص */
 div[data-testid="stTextInput"] input {
     font-size: 18px !important;
@@ -111,7 +118,7 @@ div[data-testid="stTextInput"] input {
 }
 
 /* الأزرار */
-div.stButton > button, div.stDownloadButton > button {
+div.stButton > button, div.stDownloadButton > button, div[data-testid="stFormSubmitButton"] > button {
     background-color: #EF4444 !important;
     color: #FFFFFF !important;
     border: 1px solid #DC2626 !important;
@@ -119,8 +126,11 @@ div.stButton > button, div.stDownloadButton > button {
     font-size: 15px !important;
     border-radius: 8px !important;
     height: 48px !important;
+    width: 100% !important;
 }
-div.stButton > button:hover, div.stDownloadButton > button:hover { background-color: #DC2626 !important; }
+div.stButton > button:hover, div.stDownloadButton > button:hover, div[data-testid="stFormSubmitButton"] > button:hover { 
+    background-color: #DC2626 !important; 
+}
 
 /* العداد الأزرق الكبيرة */
 .blue-total-metric {
@@ -159,7 +169,7 @@ div.stButton > button:hover, div.stDownloadButton > button:hover { background-co
     padding: 18px !important;
     border-radius: 12px !important;
     border: 1px solid #cbd5e0 !important;
-    margin-top: 25px !important;
+    margin-top: 20px !important;
 }
 
 /* بطاقات البحث */
@@ -190,7 +200,6 @@ if not isinstance(st.session_state.local_db, pd.DataFrame) or "المنطقة" n
     st.session_state.local_db = pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
 if "last_region" not in st.session_state: st.session_state.last_region = ""
-if "clear_trigger" not in st.session_state: st.session_state.clear_trigger = False
 if "search_val" not in st.session_state: st.session_state.search_val = ""
 
 if 'selected_property' not in st.session_state: st.session_state.selected_property = None
@@ -203,7 +212,7 @@ with col2:
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
 
-    # 📂 1. قسم تحميل ملف إكسل / CSV لأول مرة عند فتح التطبيق
+    # 📂 قسم تحميل ملف إكسل / CSV لأول مرة عند فتح التطبيق
     with st.expander("📁 رفع ملف Excel أو CSV قديم للبدء منه (اختياري)", expanded=False):
         uploaded_file = st.file_uploader("قم بسحب وإفلات ملف البيانات هنا أو اختر الملف من جهازك:", type=["csv", "xlsx", "xls"])
         if uploaded_file is not None:
@@ -225,44 +234,67 @@ with col2:
                 st.error(f"❌ حدث خطأ أثناء قراءة الملف: {e}")
 
     df = st.session_state.local_db
-    
-    # 📋 حقول الإدخال الأساسية
-    input_col1, input_col2 = st.columns(2)
-    with input_col1:
-        region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field_main").strip()
-    with input_col2:
-        prop_val = "" if st.session_state.clear_trigger else ""
-        property_number = st.text_input("🔢 رقم العقار الجديد", value=prop_val, placeholder="ادخل رقم العقار الحالي....", key="property_field_main").strip()
-    
-    st.session_state.clear_trigger = False
 
-    # 🚀 أزرار الحفظ والتنزيل اليدوي تحت الحقول مباشرة
-    action_col1, action_col2 = st.columns(2)
-    with action_col1:
-        btn_save = st.button("🚀 حفظ العقار والتحقق من التكرار", key="save_btn_main", use_container_width=True)
-    with action_col2:
-        if not df.empty:
-            sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-            csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
-            st.download_button(
-                label="📥 تنزيل شيت البيانات الحالي (Excel/CSV)",
-                data=csv_data,
-                file_name="KhatibAlami_Midan_Data.csv",
-                mime="text/csv",
-                key="download_btn_csv_direct",
-                use_container_width=True
-            )
+    # 📝 نموذج الإدخال السريع عبر Enter
+    with st.form("entry_form", clear_on_submit=True):
+        input_col1, input_col2 = st.columns(2)
+        with input_col1:
+            region_input = st.text_input("📍 اسم المنطقة الجغرافية", value=st.session_state.last_region, placeholder="النبطية، صور، صيدا...", key="region_field_main").strip()
+        with input_col2:
+            property_number = st.text_input("🔢 رقم العقار الجديد", value="", placeholder="ادخل رقم العقار الحالي....", key="property_field_main").strip()
+
+        action_col1, action_col2 = st.columns(2)
+        with action_col1:
+            btn_save = st.form_submit_button("🚀 حفظ العقار والتحقق من التكرار (Enter)")
+        with action_col2:
+            # تم تعيين الحاوية البرمجية لزر التنزيل ليعمل خارج Form لتفادي التعارض
+            pass
+
+    # زر تنزيل البيانات الشيت الحالي بجانب الحفظ
+    if not df.empty:
+        sorted_df = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
+        csv_data = sorted_df.to_csv(index=False).encode('utf-8-sig')
+        action_col2.download_button(
+            label="📥 تنزيل شيت البيانات الحالي (Excel/CSV)",
+            data=csv_data,
+            file_name="KhatibAlami_Midan_Data.csv",
+            mime="text/csv",
+            key="download_btn_csv_direct",
+            use_container_width=True
+        )
+    else:
+        action_col2.button("📥 تنزيل شيت البيانات الحالي (فارغ)", disabled=True, use_container_width=True)
+
+    # معالجة الضغط على Enter أو زر الحفظ
+    if btn_save:
+        if region_input and property_number:
+            is_duplicate = False
+            if not df.empty:
+                is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
+            
+            if is_duplicate: 
+                st.error(f"❌ إلغاء: العقار رقم [{property_number}] مسجل سابقاً في منطقة [{region_input}]!")
+            else:
+                new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
+                st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
+                st.session_state.last_region = region_input
+                
+                sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
+                sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
+                upload_to_github(st.session_state.local_db)
+                st.success(f"✅ تم حفظ العقار [{property_number}] بنجاح في منطقة [{region_input}]!")
+                st.rerun()
         else:
-            st.button("📥 تنزيل شيت البيانات الحالي (فارغ)", disabled=True, use_container_width=True)
+            st.warning("⚠️ يرجى إدخال كل من اسم المنطقة ورقم العقار قبل الحفظ.")
 
-    # 📊 العدادات الهامة (تم تبديل الأماكن: الأزرق على اليمين والأحمر على اليسار)
+    # 📊 العدادات المباشرة
     stat_col1, stat_col2 = st.columns(2)
     
     region_count = 0
     if region_input and not df.empty:
         region_count = df[df["المنطقة"].str.strip().str.lower() == region_input.lower()].shape[0]
 
-    # 🔵 العداد الأزرق الإجمالي (تم نقله إلى اليمين)
+    # 🔵 العداد الأزرق الإجمالي على اليمين
     with stat_col1:
         total_count = len(df) if not df.empty else 0
         st.markdown(
@@ -275,32 +307,12 @@ with col2:
             unsafe_allow_html=True
         )
 
-    # 🔴 العداد الأحمر الخاص بالمنطقة (تم نقله إلى اليسار)
+    # 🔴 العداد الأحمر الخاص بالمنطقة على اليسار
     with stat_col2:
         st.markdown(
             f"<div class='red-region-metric'>🔸 عدد عقارات منطقة ({region_input if region_input else '...'}) <br> [{region_count}]</div>", 
             unsafe_allow_html=True
         )
-
-    # تنفيذ عملية الحفظ
-    if btn_save:
-        if region_input and property_number:
-            is_duplicate = False
-            if not df.empty:
-                is_duplicate = df[(df["المنطقة"].str.strip().str.lower() == region_input.lower()) & (df["رقم العقار"].str.strip() == property_number)].shape[0] > 0
-            
-            if is_duplicate: 
-                st.error("❌ إلغاء: هذا العقار مسجل سابقاً في هذه المنطقة!")
-            else:
-                new_row = pd.DataFrame([{"المنطقة": region_input, "رقم العقار": property_number}])
-                st.session_state.local_db = pd.concat([st.session_state.local_db, new_row], ignore_index=True)
-                st.session_state.last_region = region_input
-                st.session_state.clear_trigger = True
-                
-                sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-                sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
-                upload_to_github(st.session_state.local_db)
-                st.rerun()
 
     # 🖨️ مركز فرز وطباعة تقارير المناطق
     st.markdown("<div class='print-section-box'>", unsafe_allow_html=True)
