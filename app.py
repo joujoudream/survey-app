@@ -142,7 +142,7 @@ div[data-testid="stTextInput"] input {
     height: 50px !important;
 }
 
-/* الأزرار الحمراء */
+/* الأزرار الحمراء العادية */
 div.stButton > button, div.stDownloadButton > button {
     background-color: #EF4444 !important;
     color: #FFFFFF !important;
@@ -158,24 +158,22 @@ div.stButton > button:hover, div.stDownloadButton > button:hover {
     background-color: #DC2626 !important; 
 }
 
-/* 🔵 الزر الأزرق التفاعلي */
-div.stButton > button[key="blue_total_btn"] {
-    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+/* 🔵 إجبار الزر الأزرق على الاحتفاظ باللون الأزرق بالشكل الدقيق */
+div[data-testid="stButton"] > button:has(div:contains("TOTAL PROPERTY COUNT IN FILE")) {
+    background: #2563EB !important;
     color: #ffffff !important;
     border-radius: 12px !important;
     height: 110px !important;
-    border: none !important;
+    border: 1px solid #1D4ED8 !important;
     box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3) !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
     font-size: 22px !important;
     font-weight: 900 !important;
-    line-height: 1.3 !important;
+    white-space: pre-wrap !important;
 }
-div.stButton > button[key="blue_total_btn"]:hover {
-    background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%) !important;
+
+div[data-testid="stButton"] > button:has(div:contains("TOTAL PROPERTY COUNT IN FILE")):hover {
+    background: #1D4ED8 !important;
+    border-color: #1E40AF !important;
 }
 
 /* العداد الأحمر للمنطقة */
@@ -378,10 +376,10 @@ with col2:
     if current_reg and not df.empty:
         region_count = df[df["المنطقة"].str.strip().str.lower() == current_reg.lower()].shape[0]
 
-    # 🔵 الزر الأزرق التفاعلي
+    # 🔵 الزر الأزرق التفاعلي (محدد بصورة استثنائية ليبقى أزرق)
     with stat_col1:
         total_count = len(df) if not df.empty else 0
-        if st.button(f"📱 TOTAL PROPERTY COUNT IN FILE\n\n{total_count}", key="blue_total_btn", use_container_width=True):
+        if st.button(f"📱 TOTAL PROPERTY COUNT IN FILE\n{total_count}", key="blue_total_btn", use_container_width=True):
             st.session_state.show_full_table = not st.session_state.show_full_table
             st.rerun()
 
@@ -392,7 +390,7 @@ with col2:
             unsafe_allow_html=True
         )
 
-    # 📋 عرض الجدول الكامل عند الضغط على الزر الأزرق
+    # 📋 عرض الكشف الكامل عند النقر على الزر الأزرق
     if st.session_state.show_full_table:
         st.markdown("---")
         st.subheader("📋 كشف البيانات الكاملة المسجلة بالنظام")
