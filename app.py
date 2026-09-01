@@ -142,7 +142,7 @@ div[data-testid="stTextInput"] input {
     height: 50px !important;
 }
 
-/* الأزرار الحمراء التقيادية */
+/* الأزرار الحمراء */
 div.stButton > button, div.stDownloadButton > button {
     background-color: #EF4444 !important;
     color: #FFFFFF !important;
@@ -158,26 +158,26 @@ div.stButton > button:hover, div.stDownloadButton > button:hover {
     background-color: #DC2626 !important; 
 }
 
-/* 🔵 استثناء وتثبيت لون وارتفاع العداد الأزرق التفاعلي بقوة */
-button[key="blue_metric_btn"] {
+/* 🔵 تصميم العداد الأزرق التفاعلي المباشر (HTML) */
+.blue-interactive-card {
     background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
     color: #ffffff !important;
     border-radius: 12px !important;
     height: 110px !important;
-    min-height: 110px !important;
-    font-size: 20px !important;
-    font-weight: 900 !important;
-    border: none !important;
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25) !important;
-    white-space: pre-wrap !important;
     display: flex !important;
+    flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3) !important;
+    cursor: pointer !important;
+    transition: transform 0.1s ease, background 0.2s ease !important;
 }
-button[key="blue_metric_btn"]:hover {
+.blue-interactive-card:hover {
     background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%) !important;
-    color: #ffffff !important;
+    transform: scale(1.01);
 }
+.blue-card-title { font-size: 18px !important; font-weight: 900 !important; color: #ffffff !important; margin-bottom: 2px; }
+.blue-card-value { font-size: 38px !important; font-weight: 900 !important; color: #ffffff !important; line-height: 1.1; }
 
 /* العداد الأزرق عند التكبير */
 .blue-total-fullwidth {
@@ -263,7 +263,7 @@ with col2:
 
     df = st.session_state.local_db
 
-    # 🔵 وضع تكبير السجل
+    # 🔵 وضع تكبير السجل عند الضغط على الكارت الأزرق
     if st.session_state.show_full_blue_view:
         total_count = len(df) if not df.empty else 0
         st.markdown(
@@ -417,10 +417,23 @@ with col2:
         if current_reg and not df.empty:
             region_count = df[df["المنطقة"].str.strip().str.lower() == current_reg.lower()].shape[0]
 
-        # 🔵 العداد الأزرق التفاعلي
+        # 🔵 العداد الأزرق التفاعلي المباشر بواسطة HTML زر أنيق
         with stat_col1:
             total_count = len(df) if not df.empty else 0
-            if st.button(f"📱 TOTAL PROPERTY COUNT IN FILE\n\n{total_count}", key="blue_metric_btn", use_container_width=True):
+            
+            # عرض بطاقات الإحصاء الأزرق
+            st.markdown(
+                f"""
+                <div class='blue-interactive-card' id='blue_total_card_btn'>
+                    <div class='blue-card-title'>📱 TOTAL PROPERTY COUNT IN FILE</div>
+                    <div class='blue-card-value'>{total_count}</div>
+                </div>
+                """, 
+                unsafe_allow_html=True
+            )
+            
+            # زر إضافي شفاف خلف الكارت لتفعيل حدث الضغط مع Streamlit
+            if st.button("🔍 فتح عرض السجل الكامل", key="trigger_blue_view", use_container_width=True):
                 st.session_state.show_full_blue_view = True
                 st.rerun()
 
