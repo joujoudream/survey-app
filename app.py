@@ -41,7 +41,7 @@ def upload_to_github(dataframe):
     except:
         return False
 
-# دالة تحميل البيانات تلقائياً
+# دالة تحميل البيانات
 def load_any_local_file():
     local_files = glob.glob("*.csv") + glob.glob("*.xlsx") + glob.glob("*.xls") + glob.glob("*.CSV") + glob.glob("*.XLSX")
     for f_path in local_files:
@@ -67,14 +67,14 @@ def load_any_local_file():
             res = requests.get(url, headers=headers)
             if res.status_code == 200:
                 file_data = res.json()
-                csv_bytes = base64.b64decode(file_data["content"])
+                csv_bytes = base64.b64encode(file_data["content"])
                 df_git = pd.read_csv(io.BytesIO(csv_bytes), encoding='utf-8-sig', dtype={"المنطقة": str, "رقم العقار": str})
                 if "المنطقة" in df_git.columns and "رقم العقار" in df_git.columns:
                     return df_git[["المنطقة", "رقم العقار"]]
         except: pass
     return pd.DataFrame(columns=["المنطقة", "رقم العقار"])
 
-# 🎨 التنسيقات
+# 🎨 CSS المحسّن لعزل الأزرار وتصليح الألوان والأنماط
 ultimate_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght=400;700;900&display=swap');
@@ -87,15 +87,14 @@ html, body, [class*='css'], [data-testid='stAppViewContainer'] {
 header[data-testid='stHeader'] { background: transparent !important; display: none !important; }
 .block-container { padding-top: 1rem !important; padding-bottom: 1rem !important; }
 
-/* كروت الترويسة الرئيسية */
+/* الترويسة */
 .header-card { 
     background-color: #EBF8FF !important; padding: 22px 15px !important; border-radius: 14px !important; 
     box-shadow: 0 6px 14px rgba(30, 58, 138, 0.1) !important; margin-bottom: 4px !important; text-align: center !important; border: 2px solid #BEE3F8 !important; 
 }
-.company-header { color: #1E3A8A !important; font-family: 'Arial', sans-serif !important; font-size: 34px !important; font-weight: 900 !important; letter-spacing: 0.5px; }
+.company-header { color: #1E3A8A !important; font-family: 'Arial', sans-serif !important; font-size: 34px !important; font-weight: 900 !important; }
 .company-subtitle { color: #2D3748 !important; font-size: 18px !important; font-weight: 700 !important; margin-top: 4px !important; }
 
-/* بطاقة التوقيع */
 .main-signature-card { 
     background-color: #ffffff !important; padding: 12px 18px !important; border-radius: 12px !important; text-align: center !important; 
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05) !important; margin: 8px auto 12px auto !important; border: 1.5px solid #cbd5e0 !important; max-width: 600px !important; 
@@ -103,47 +102,18 @@ header[data-testid='stHeader'] { background: transparent !important; display: no
 .sig-title { color: #4A5568 !important; font-size: 16px !important; font-weight: 700 !important; }
 .sig-name { color: #E53E3E !important; font-size: 22px !important; font-weight: 900 !important; margin-top: 2px; }
 
-/* عناوين الحقول والمدخلات */
-label[data-testid="stWidgetLabel"] p {
-    font-size: 19px !important;
-    font-weight: 900 !important;
-    color: #1E3A8A !important;
-}
+/* مدخلات النصوص */
+label[data-testid="stWidgetLabel"] p { font-size: 19px !important; font-weight: 900 !important; color: #1E3A8A !important; }
+div[data-testid="column"] { padding-left: 3px !important; padding-right: 3px !important; }
+div[data-testid="stVerticalBlock"] { gap: 0.2rem !important; }
 
-div[data-testid="column"] {
-    padding-left: 3px !important;
-    padding-right: 3px !important;
-}
+div[data-testid="stFormSubmitButton"] button { opacity: 0 !important; height: 1px !important; padding: 0 !important; margin: 0 !important; border: none !important; }
+div[data-testid="stForm"] { border: none !important; padding: 0px !important; background: transparent !important; }
+div[data-testid="stTextInput"] input { font-size: 20px !important; font-weight: 700 !important; color: #1E3A8A !important; height: 50px !important; }
 
-div[data-testid="stVerticalBlock"] {
-    gap: 0.2rem !important;
-}
-
-/* إخفاء زر Submit */
-div[data-testid="stFormSubmitButton"] button {
-    opacity: 0 !important;
-    height: 1px !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: none !important;
-}
-
-div[data-testid="stForm"] {
-    border: none !important;
-    padding: 0px !important;
-    background: transparent !important;
-}
-
-/* مربعات النصوص */
-div[data-testid="stTextInput"] input {
-    font-size: 20px !important;
-    font-weight: 700 !important;
-    color: #1E3A8A !important;
-    height: 50px !important;
-}
-
-/* الأزرار الحمراء العادية */
-div.stButton > button, div.stDownloadButton > button {
+/* 🟥 زر حفظ العقار الرئيسي (أحمر) */
+div[data-testid="stButton"] > button:has(p:contains("حفظ العقار والتحقق من التكرار")),
+div[data-testid="stButton"] > button:has(div:contains("حفظ العقار والتحقق من التكرار")) {
     background-color: #EF4444 !important;
     color: #FFFFFF !important;
     border: 1px solid #DC2626 !important;
@@ -151,32 +121,33 @@ div.stButton > button, div.stDownloadButton > button {
     font-size: 17px !important;
     border-radius: 8px !important;
     height: 50px !important;
-    width: 100% !important;
-    margin-bottom: 2px !important;
-}
-div.stButton > button:hover, div.stDownloadButton > button:hover { 
-    background-color: #DC2626 !important; 
 }
 
-/* 🔵 إجبار الزر الأزرق على الاحتفاظ باللون الأزرق بالشكل الدقيق */
-div[data-testid="stButton"] > button:has(div:contains("TOTAL PROPERTY COUNT IN FILE")) {
+/* 📥 زر تنزيل شيت البيانات (رمادي موحد أو أحمر خفيف) */
+div[data-testid="stDownloadButton"] > button {
+    background-color: #E2E8F0 !important;
+    color: #1E293B !important;
+    border: 1px solid #CBD5E1 !important;
+    font-weight: 800 !important;
+    font-size: 16px !important;
+    border-radius: 8px !important;
+    height: 50px !important;
+}
+
+/* 🔵 الزر الأزرق الكبير لإجمالي العقارات */
+div[data-testid="stButton"] > button:has(p:contains("TOTAL PROPERTY COUNT")),
+div[data-testid="stButton"] > button:has(div:contains("TOTAL PROPERTY COUNT")) {
     background: #2563EB !important;
     color: #ffffff !important;
     border-radius: 12px !important;
     height: 110px !important;
     border: 1px solid #1D4ED8 !important;
     box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3) !important;
-    font-size: 22px !important;
+    font-size: 20px !important;
     font-weight: 900 !important;
-    white-space: pre-wrap !important;
 }
 
-div[data-testid="stButton"] > button:has(div:contains("TOTAL PROPERTY COUNT IN FILE")):hover {
-    background: #1D4ED8 !important;
-    border-color: #1E40AF !important;
-}
-
-/* العداد الأحمر للمنطقة */
+/* 🔴 العداد الأحمر الخاص بالمنطقة */
 .red-region-metric {
     background-color: #EF4444 !important;
     color: #ffffff !important;
@@ -191,6 +162,17 @@ div[data-testid="stButton"] > button:has(div:contains("TOTAL PROPERTY COUNT IN F
     box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2) !important;
 }
 
+/* 🖨️ زر تصدير التقرير للطباعة */
+div[data-testid="stDownloadButton"] > button:has(p:contains("تصدير وتحميل كشف")),
+div[data-testid="stDownloadButton"] > button:has(div:contains("تصدير وتحميل كشف")) {
+    background-color: #059669 !important;
+    color: #ffffff !important;
+    border: 1px solid #047857 !important;
+    font-weight: 900 !important;
+    font-size: 17px !important;
+    height: 50px !important;
+}
+
 /* صندوق الطباعة */
 .print-section-box {
     background-color: #ffffff !important;
@@ -200,7 +182,6 @@ div[data-testid="stButton"] > button:has(div:contains("TOTAL PROPERTY COUNT IN F
     margin-top: 12px !important;
 }
 
-/* بطاقات البحث */
 .result-card {
     background-color: #DCE7F6 !important;
     padding: 8px 12px !important;
@@ -240,35 +221,13 @@ if 'selected_index' not in st.session_state: st.session_state.selected_index = N
 if 'should_scroll' not in st.session_state: st.session_state.should_scroll = False
 if "show_full_table" not in st.session_state: st.session_state.show_full_table = False
 
-# 🏛️ الترويسة الثابتة
+# 🏛️ الترويسة
 col1, col2, col3 = st.columns([0.5, 11, 0.5])
 with col2:
     st.markdown("<div class='header-card'><div class='company-header'>Khatib & Alami Company</div><div class='company-subtitle'>War Damage Assessment 2006</div></div>", unsafe_allow_html=True)
     st.markdown("<div class='main-signature-card'><div class='sig-title'>Printing & Archiving</div><div class='sig-name'>S,Walid Mrad</div></div>", unsafe_allow_html=True)
 
     df = st.session_state.local_db
-
-    # 📂 رفع ملف قديم (في حال عدم وجود بيانات)
-    if df.empty:
-        with st.expander("📁 رفع ملف Excel أو CSV قديم للبدء منه (يظهر لأول مرة فقط)", expanded=True):
-            uploaded_file = st.file_uploader("قم بسحب وإفلات ملف البيانات هنا أو اختر الملف من جهازك:", type=["csv", "xlsx", "xls"])
-            if uploaded_file is not None:
-                try:
-                    if uploaded_file.name.endswith('.csv'):
-                        df_up = pd.read_csv(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
-                    else:
-                        df_up = pd.read_excel(uploaded_file, dtype={"المنطقة": str, "رقم العقار": str})
-                    
-                    if "المنطقة" in df_up.columns and "رقم العقار" in df_up.columns:
-                        st.session_state.local_db = df_up[["المنطقة", "رقم العقار"]].dropna()
-                        st.session_state.local_db.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
-                        upload_to_github(st.session_state.local_db)
-                        st.success("✅ تم تحميل الملف بنجاح ودمجه في النظام!")
-                        st.rerun()
-                    else:
-                        st.error("❌ الملف لا يحتوي على الأعمدة المطلوبة: ('المنطقة' و 'رقم العقار')")
-                except Exception as e:
-                    st.error(f"❌ حدث خطأ أثناء قراءة الملف: {e}")
 
     # 📝 نموذج الإدخال
     with st.form("entry_form"):
@@ -337,19 +296,16 @@ with col2:
 
             st.rerun()
 
-    # عرض الإشعار عند التكرار
     if st.session_state.notification_msg and st.session_state.notification_type == "error":
         st.error(st.session_state.notification_msg)
 
-    # 🎯 سكربت التوجيه والتركيز
+    # 🎯 التركيز التلقائي
     if st.session_state.focus_field == "property":
         js_focus = """
         <script>
             setTimeout(function() {
                 var inputs = window.parent.document.querySelectorAll('input[type="text"]');
-                if (inputs.length >= 2) {
-                    inputs[1].focus();
-                }
+                if (inputs.length >= 2) { inputs[1].focus(); }
             }, 50);
         </script>
         """
@@ -359,10 +315,7 @@ with col2:
         <script>
             setTimeout(function() {
                 var inputs = window.parent.document.querySelectorAll('input[type="text"]');
-                if (inputs.length >= 1) {
-                    inputs[0].focus();
-                    inputs[0].select();
-                }
+                if (inputs.length >= 1) { inputs[0].focus(); inputs[0].select(); }
             }, 50);
         </script>
         """
@@ -376,31 +329,26 @@ with col2:
     if current_reg and not df.empty:
         region_count = df[df["المنطقة"].str.strip().str.lower() == current_reg.lower()].shape[0]
 
-    # 🔵 الزر الأزرق التفاعلي (محدد بصورة استثنائية ليبقى أزرق)
     with stat_col1:
         total_count = len(df) if not df.empty else 0
         if st.button(f"📱 TOTAL PROPERTY COUNT IN FILE\n{total_count}", key="blue_total_btn", use_container_width=True):
             st.session_state.show_full_table = not st.session_state.show_full_table
             st.rerun()
 
-    # 🔴 العداد الأحمر للمنطقة
     with stat_col2:
         st.markdown(
             f"<div class='red-region-metric'>🔸 عدد عقارات منطقة ({current_reg if current_reg else '...'}) <br> [{region_count}]</div>", 
             unsafe_allow_html=True
         )
 
-    # 📋 عرض الكشف الكامل عند النقر على الزر الأزرق
     if st.session_state.show_full_table:
         st.markdown("---")
         st.subheader("📋 كشف البيانات الكاملة المسجلة بالنظام")
         if not df.empty:
             sorted_table = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
             st.dataframe(sorted_table, use_container_width=True, height=350)
-        else:
-            st.info("ℹ️ لا توجد بيانات مسجلة بالنظام حتى الآن.")
 
-    # 🖨️ مركز فرز وطباعة تقارير المناطق
+    # 🖨️ مركز الطباعة
     st.markdown("<div class='print-section-box'>", unsafe_allow_html=True)
     st.subheader("🖨️ مركز فرز وطباعة تقارير المناطق")
     
@@ -421,112 +369,4 @@ with col2:
                 key="final_print_trigger_btn",
                 use_container_width=True
             )
-    else:
-        st.info("ℹ️ لا توجد مناطق مسجلة بعد في السجل لتصدير تقاريرها.")
     st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown("---")
-
-    # 🔍 محرك البحث السريع
-    search_query = st.text_input(
-        label="🔍 اكتب اسم المنطقة أو رقم العقار للبحث السريع والتعديل أو الحذف...",
-        value=st.session_state.search_val,
-        key="search_input_field"
-    ).strip()
-    st.session_state.search_val = search_query
-
-    if search_query and not st.session_state.local_db.empty:
-        matched_records = st.session_state.local_db[
-            st.session_state.local_db["المنطقة"].astype(str).str.contains(search_query, case=False, na=False) | 
-            st.session_state.local_db["رقم العقار"].astype(str).str.contains(search_query, case=False, na=False)
-        ]
-        
-        if not matched_records.empty:
-            st.write(f"📋 تم العثور على {len(matched_records)} نتيجة:")
-            for idx, row in matched_records.iterrows():
-                c_info, c_edit, c_del = st.columns([3.5, 1, 1], gap="small")
-                with c_info:
-                    st.markdown(f"<div class='result-card'>📍 المنطقة: {row['المنطقة']} | 🔢 العقار: {row['رقم العقار']}</div>", unsafe_allow_html=True)
-                with c_edit:
-                    if st.button("✏️ تعديل", key=f"edit_btn_{idx}", use_container_width=True):
-                        st.session_state.selected_property = row.to_dict()
-                        st.session_state.selected_index = idx
-                        st.session_state.edit_mode = True
-                        st.session_state.should_scroll = True
-                        st.rerun()
-                with c_del:
-                    if st.button("🗑️ حذف", key=f"del_btn_{idx}", use_container_width=True):
-                        st.session_state.selected_property = row.to_dict()
-                        st.session_state.selected_index = idx
-                        st.session_state.edit_mode = False
-                        st.session_state.should_scroll = True
-                        st.rerun()
-
-    # ⚙️ لوحة التعديل أو الحذف
-    if st.session_state.selected_property is not None:
-        st.markdown("<div id='scroll_target'></div>", unsafe_allow_html=True)
-        prop = st.session_state.selected_property
-        idx = st.session_state.selected_index
-        
-        st.markdown("---")
-        if st.session_state.edit_mode:
-            st.subheader("✏️ تعديل بيانات العقار")
-            mod_region = st.text_input("اسم المنطقة الجغرافية", value=prop.get('المنطقة', ''), key="mod_reg_val")
-            mod_number = st.text_input("رقم العقار الجديد", value=prop.get('رقم العقار', ''), key="mod_num_val")
-            
-            col_save, col_cancel = st.columns([1, 1], gap="small")
-            with col_save:
-                if st.button("💾 حفظ التعديلات الآن", use_container_width=True, key="save_edit_now"):
-                    st.session_state.local_db.at[idx, 'المنطقة'] = mod_region
-                    st.session_state.local_db.at[idx, 'رقم العقار'] = mod_number
-                    
-                    sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-                    sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
-                    upload_to_github(st.session_state.local_db)
-                    
-                    st.session_state.selected_property = None
-                    st.session_state.edit_mode = False
-                    st.rerun()
-                    
-            with col_cancel:
-                if st.button("❌ إلغاء", use_container_width=True, key="cancel_edit_now"):
-                    st.session_state.selected_property = None
-                    st.session_state.edit_mode = False
-                    st.rerun()
-
-        else:
-            st.subheader("🗑️ تأكيد الحذف")
-            st.error(f"هل أنت تأكد من حذف العقار رقم [{prop.get('رقم العقار')}] من منطقة [{prop.get('المنطقة')}]؟")
-            
-            col_confirm, col_cancel = st.columns([1, 1], gap="small")
-            with col_confirm:
-                if st.button("🔥 نعم، قم بالحذف النهائي", use_container_width=True, key="confirm_del_now"):
-                    st.session_state.local_db.drop(index=idx, inplace=True)
-                    st.session_state.local_db.reset_index(drop=True, inplace=True)
-                    
-                    sorted_df = st.session_state.local_db.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
-                    sorted_df.to_csv(OUTPUT_FILENAME, index=False, encoding='utf-8-sig')
-                    upload_to_github(st.session_state.local_db)
-                    
-                    st.session_state.selected_property = None
-                    st.rerun()
-                    
-            with col_cancel:
-                if st.button("❌ إلغاء", use_container_width=True, key="cancel_del_now"):
-                    st.session_state.selected_property = None
-                    st.rerun()
-
-    # 📜 التمرير السلس
-    if st.session_state.should_scroll:
-        st.session_state.should_scroll = False
-        js_code = """
-        <script>
-            setTimeout(function() {
-                var element = window.parent.document.getElementById('scroll_target');
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }, 200);
-        </script>
-        """
-        st.components.v1.html(js_code, height=0)
