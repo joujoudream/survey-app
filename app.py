@@ -158,20 +158,25 @@ div.stButton > button:hover, div.stDownloadButton > button:hover {
     background-color: #DC2626 !important; 
 }
 
-/* 🔵 تصميم العداد الأزرق التفاعلي (عرض إحصائي فقط بدون فتح الجدول) */
-.blue-interactive-card {
+/* 🔵 الزر الأزرق التفاعلي */
+div.stButton > button[key="blue_total_btn"] {
     background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
     color: #ffffff !important;
     border-radius: 12px !important;
     height: 110px !important;
+    border: none !important;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3) !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3) !important;
+    font-size: 22px !important;
+    font-weight: 900 !important;
+    line-height: 1.3 !important;
 }
-.blue-card-title { font-size: 18px !important; font-weight: 900 !important; color: #ffffff !important; margin-bottom: 2px; }
-.blue-card-value { font-size: 38px !important; font-weight: 900 !important; color: #ffffff !important; line-height: 1.1; }
+div.stButton > button[key="blue_total_btn"]:hover {
+    background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%) !important;
+}
 
 /* العداد الأحمر للمنطقة */
 .red-region-metric {
@@ -235,6 +240,7 @@ if 'selected_property' not in st.session_state: st.session_state.selected_proper
 if 'edit_mode' not in st.session_state: st.session_state.edit_mode = False
 if 'selected_index' not in st.session_state: st.session_state.selected_index = None
 if 'should_scroll' not in st.session_state: st.session_state.should_scroll = False
+if "show_full_table" not in st.session_state: st.session_state.show_full_table = False
 
 # 🏛️ الترويسة الثابتة
 col1, col2, col3 = st.columns([0.5, 11, 0.5])
@@ -337,7 +343,7 @@ with col2:
     if st.session_state.notification_msg and st.session_state.notification_type == "error":
         st.error(st.session_state.notification_msg)
 
-    # 🎯 سكربت التوجيه والتركيز وتحديد النص (JavaScript)
+    # 🎯 سكربت التوجيه والتركيز
     if st.session_state.focus_field == "property":
         js_focus = """
         <script>
@@ -364,7 +370,7 @@ with col2:
         """
         st.components.v1.html(js_focus, height=0)
 
-    # 📊 العدادات المباشرة
+    # 📊 العدادات
     stat_col1, stat_col2 = st.columns([1, 1], gap="small")
     
     current_reg = st.session_state.region_input_val
@@ -372,18 +378,12 @@ with col2:
     if current_reg and not df.empty:
         region_count = df[df["المنطقة"].str.strip().str.lower() == current_reg.lower()].shape[0]
 
-    # 🔵 العداد الأزرق
+    # 🔵 الزر الأزرق التفاعلي
     with stat_col1:
         total_count = len(df) if not df.empty else 0
-        st.markdown(
-            f"""
-            <div class='blue-interactive-card'>
-                <div class='blue-card-title'>📱 TOTAL PROPERTY COUNT IN FILE</div>
-                <div class='blue-card-value'>{total_count}</div>
-            </div>
-            """, 
-            unsafe_allow_html=True
-        )
+        if st.button(f"📱 TOTAL PROPERTY COUNT IN FILE\n\n{total_count}", key="blue_total_btn", use_container_width=True):
+            st.session_state.show_full_table = not st.session_state.show_full_table
+            st.rerun()
 
     # 🔴 العداد الأحمر للمنطقة
     with stat_col2:
@@ -391,6 +391,16 @@ with col2:
             f"<div class='red-region-metric'>🔸 عدد عقارات منطقة ({current_reg if current_reg else '...'}) <br> [{region_count}]</div>", 
             unsafe_allow_html=True
         )
+
+    # 📋 عرض الجدول الكامل عند الضغط على الزر الأزرق
+    if st.session_state.show_full_table:
+        st.markdown("---")
+        st.subheader("📋 كشف البيانات الكاملة المسجلة بالنظام")
+        if not df.empty:
+            sorted_table = df.sort_values(by=["المنطقة", "رقم العقار"]).reset_index(drop=True)
+            st.dataframe(sorted_table, use_container_width=True, height=350)
+        else:
+            st.info("ℹ️ لا توجد بيانات مسجلة بالنظام حتى الآن.")
 
     # 🖨️ مركز فرز وطباعة تقارير المناطق
     st.markdown("<div class='print-section-box'>", unsafe_allow_html=True)
@@ -419,7 +429,7 @@ with col2:
 
     st.markdown("---")
 
-    # 🔍 محرك البحث السريع والتعديل والحذف
+    # 🔍 محرك البحث السريع
     search_query = st.text_input(
         label="🔍 اكتب اسم المنطقة أو رقم العقار للبحث السريع والتعديل أو الحذف...",
         value=st.session_state.search_val,
@@ -454,7 +464,7 @@ with col2:
                         st.session_state.should_scroll = True
                         st.rerun()
 
-    # ⚙️ لوحة التعديل أو الحذف المباشرة
+    # ⚙️ لوحة التعديل أو الحذف
     if st.session_state.selected_property is not None:
         st.markdown("<div id='scroll_target'></div>", unsafe_allow_html=True)
         prop = st.session_state.selected_property
