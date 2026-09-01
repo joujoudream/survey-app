@@ -158,7 +158,28 @@ div.stButton > button:hover, div.stDownloadButton > button:hover {
     background-color: #DC2626 !important; 
 }
 
-/* العداد الأزرق عند الضغط والتكبير */
+/* 🔵 استثناء وتثبيت لون وارتفاع العداد الأزرق التفاعلي بقوة */
+button[key="blue_metric_btn"] {
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+    color: #ffffff !important;
+    border-radius: 12px !important;
+    height: 110px !important;
+    min-height: 110px !important;
+    font-size: 20px !important;
+    font-weight: 900 !important;
+    border: none !important;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25) !important;
+    white-space: pre-wrap !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+button[key="blue_metric_btn"]:hover {
+    background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%) !important;
+    color: #ffffff !important;
+}
+
+/* العداد الأزرق عند التكبير */
 .blue-total-fullwidth {
     background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
     padding: 20px !important;
@@ -169,19 +190,6 @@ div.stButton > button:hover, div.stDownloadButton > button:hover {
 }
 .blue-total-fullwidth-title { font-size: 22px !important; font-weight: 900 !important; color: #ffffff !important; }
 .blue-total-fullwidth-value { font-size: 60px !important; font-weight: 900 !important; color: #ffffff !important; }
-
-/* العداد الأزرق التفاعلي الصغير */
-div[data-testid="stElementContainer"]:has(button[key="blue_metric_btn"]) button {
-    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
-    color: #ffffff !important;
-    border-radius: 12px !important;
-    height: 110px !important;
-    font-size: 20px !important;
-    font-weight: 900 !important;
-    border: none !important;
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25) !important;
-    line-height: 1.3 !important;
-}
 
 /* العداد الأحمر للمنطقة */
 .red-region-metric {
@@ -255,7 +263,7 @@ with col2:
 
     df = st.session_state.local_db
 
-    # 🔵 إذا كان الخيار كبس العداد الأزرق للتكبير ومسح الواجهة
+    # 🔵 وضع تكبير السجل
     if st.session_state.show_full_blue_view:
         total_count = len(df) if not df.empty else 0
         st.markdown(
@@ -268,7 +276,6 @@ with col2:
             unsafe_allow_html=True
         )
         
-        # زر العودة للواجهة الرئيسية
         if st.button("🔙 العودة إلى واجهة الإدخال والعمل الرئيسية", key="back_from_full_blue", use_container_width=True):
             st.session_state.show_full_blue_view = False
             st.rerun()
@@ -410,10 +417,10 @@ with col2:
         if current_reg and not df.empty:
             region_count = df[df["المنطقة"].str.strip().str.lower() == current_reg.lower()].shape[0]
 
-        # 🔵 العداد الأزرق كزر تفاعلي
+        # 🔵 العداد الأزرق التفاعلي
         with stat_col1:
             total_count = len(df) if not df.empty else 0
-            if st.button(f"📱 TOTAL PROPERTY COUNT IN FILE\n{total_count}", key="blue_metric_btn", use_container_width=True):
+            if st.button(f"📱 TOTAL PROPERTY COUNT IN FILE\n\n{total_count}", key="blue_metric_btn", use_container_width=True):
                 st.session_state.show_full_blue_view = True
                 st.rerun()
 
